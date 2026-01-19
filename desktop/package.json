@@ -18,6 +18,7 @@
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
+    "@electron/notarize": "^3.1.1",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
@@ -41,10 +42,14 @@
         "to": "backend"
       }
     ],
+    "afterSign": "./notarize.js",
     "mac": {
       "target": "dmg",
-      "sign": false,
-      "identity": null
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "gatekeeperAssess": false,
+      "identity": "PLR CONSEIL"
     },
     "win": {
       "target": "nsis"

@@ -2,8 +2,6 @@
 package:windows:
   stage: package
   image: electronuserland/builder:wine-mono
-  tags:
-    - linux
 
   needs:
     - job: build
