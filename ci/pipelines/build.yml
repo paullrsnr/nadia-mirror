@@ -8,8 +8,11 @@ build:backend:windows:
   stage: build
   image: cdrx/pyinstaller-windows:python3
 
+  variables:
+    GIT_STRATEGY: fetch
+
   script:
-    - |
+    - bash -lc '
       set -e
       echo "=== Building Windows backend ==="
 
@@ -25,6 +28,7 @@ build:backend:windows:
       mv dist/nadia-backend.exe dist/current/
 
       echo "=== Windows backend build finished ==="
+      '
 
   artifacts:
     expire_in: 1 day
