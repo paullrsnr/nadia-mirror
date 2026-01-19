@@ -60,6 +60,7 @@
           ]
         }
       ],
+      "signAndEditExecutable": false,
       "verifyUpdateCodeSignature": false
     }
   }

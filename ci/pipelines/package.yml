@@ -10,7 +10,6 @@ package:windows:
   variables:
     ELECTRON_CACHE: "$CI_PROJECT_DIR/.cache/electron"
     ELECTRON_BUILDER_CACHE: "$CI_PROJECT_DIR/.cache/electron-builder"
-    ELECTRON_BUILDER_DISABLE_RCEDit: "true"
 
   script:
     - cd desktop
@@ -43,6 +42,7 @@ package:macos:
     - export APPLE_API_KEY_ID="385MGD36L7" # a deplacer dans les variables CI
     - export APPLE_API_ISSUER="22737eef-efcb-4e85-bb6c-c958f5c44d75"
     - export APPLE_API_KEY_PATH="$HOME/.apple/385MGD36L7.p8"
+    - export APPLE_API_KEY="$(cat $HOME/.apple/385MGD36L7.p8)"
     - cd desktop
     - npm install
     - npm run pack
