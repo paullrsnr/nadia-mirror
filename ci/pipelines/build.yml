@@ -1,7 +1,7 @@
 # A déplacer dans scripts pour mettre au propre plus tard
 build:
   stage: build
-  image: node:18-bullseye
+  image: node:22-bullseye
 
   before_script:
     - node --version
