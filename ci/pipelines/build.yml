@@ -6,34 +6,29 @@ stages:
 ############################
 build:backend:windows:
   stage: build
-  image: cdrx/pyinstaller-windows:python3
-
-  variables:
-    GIT_STRATEGY: fetch
+  image:
+    name: cdrx/pyinstaller-windows:python3
+    entrypoint: [""]
 
   script:
-    - bash -lc '
-      set -e
-      echo "=== Building Windows backend ==="
+    - echo "=== Building Windows backend ==="
+    - cd backend
 
-      cd backend
+    - python --version
+    - pip --version
 
-      python --version
-      pip --version
+    - pip install -r requirements.txt
+    - pyinstaller nadia-backend.spec
 
-      pip install -r requirements.txt
-      pyinstaller nadia-backend.spec
+    - mkdir -p dist/current
+    - mv dist/nadia-backend.exe dist/current/
 
-      mkdir -p dist/current
-      mv dist/nadia-backend.exe dist/current/
-
-      echo "=== Windows backend build finished ==="
-      '
+    - echo "=== Windows backend build finished ==="
 
   artifacts:
     expire_in: 1 day
     paths:
-      - backend/dist/current/
+      - backend/dist/current/nadia-backend.exe
 
 ############################
 # BACKEND MACOS
