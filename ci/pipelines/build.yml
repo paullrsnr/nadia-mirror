@@ -13,7 +13,7 @@ build:
 
   script:
     - cd desktop
-    - npm ci
+    - npm install
     - npm run build
     - cd ..
 

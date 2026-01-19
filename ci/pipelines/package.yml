@@ -13,7 +13,7 @@ package:windows:
 
   script:
     - cd desktop
-    - npm ci
+    - npm install
     - npm run pack
 
   artifacts:
@@ -37,7 +37,7 @@ package:macos:
 
   script:
     - cd desktop
-    - npm ci
+    - npm install
     - npm run pack
 
   artifacts:
