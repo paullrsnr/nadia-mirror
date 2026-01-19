@@ -6,29 +6,19 @@ stages:
 ############################
 build:backend:windows:
   stage: build
-  image:
-    name: cdrx/pyinstaller-windows:python3
-    entrypoint: [""]
+  image: cdrx/pyinstaller-windows:python3
 
   script:
-    - echo "=== Building Windows backend ==="
     - cd backend
-
-    - python --version
-    - pip --version
-
     - pip install -r requirements.txt
     - pyinstaller nadia-backend.spec
-
-    - mkdir -p dist/current
-    - mv dist/nadia-backend.exe dist/current/
-
-    - echo "=== Windows backend build finished ==="
+    - mkdir -p dist/win
+    - mv dist/nadia-backend.exe dist/win/
 
   artifacts:
     expire_in: 1 day
     paths:
-      - backend/dist/current/nadia-backend.exe
+      - backend/dist/win/nadia-backend.exe
 
 ############################
 # BACKEND MACOS
@@ -45,16 +35,16 @@ build:backend:macos:
     - pip install -r requirements.txt
     - pip install pyinstaller
     - pyinstaller nadia-backend.spec
-    - mkdir -p dist/current
-    - mv dist/nadia-backend dist/current/
+    - mkdir -p dist/mac
+    - mv dist/nadia-backend dist/mac/
 
   artifacts:
     expire_in: 1 day
     paths:
-      - backend/dist/current
+      - backend/dist/mac/nadia-backend
 
 ############################
-# DESKTOP (FRONT + MAIN)
+# DESKTOP (Electron build only, no packaging)
 ############################
 build:desktop:
   stage: build

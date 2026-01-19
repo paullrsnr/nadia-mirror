@@ -11,7 +11,10 @@
     "build:renderer": "vite build",
     "build:main": "tsc -p tsconfig.main.json",
     "start": "electron .",
-    "pack": "electron-builder"
+    "pack:mac": "electron-builder --mac",
+    "pack:win": "electron-builder --win",
+    "pack": "electron-builder",
+    "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
     "react": "^19.2.3",
@@ -38,8 +41,20 @@
     ],
     "extraResources": [
       {
-        "from": "../backend/dist/current",
-        "to": "backend"
+        "from": "../backend/dist/win",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ],
+        "platform": "win32"
+      },
+      {
+        "from": "../backend/dist/mac",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ],
+        "platform": "darwin"
       }
     ],
     "mac": {
