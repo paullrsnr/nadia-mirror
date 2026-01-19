@@ -1,0 +1,53 @@
+{
+  "name": "nadia",
+  "version": "0.1.0",
+  "main": "dist/main/index.js",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm:dev:renderer\" \"npm:dev:main\"",
+    "dev:renderer": "vite",
+    "dev:main": "npm run build:main && wait-on tcp:5173 && electron .",
+    "build": "npm run build:renderer && npm run build:main",
+    "build:renderer": "vite build",
+    "build:main": "tsc -p tsconfig.main.json",
+    "start": "electron .",
+    "pack": "npm run build && electron-builder"
+  },
+  "dependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "concurrently": "^9.2.1",
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.plrconseil.nadia",
+    "productName": "NadIA",
+    "files": [
+      "dist/main/**/*",
+      "dist/renderer/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../backend/dist",
+        "to": "backend"
+      }
+    ],
+    "mac": {
+      "target": "dmg",
+      "sign": false,
+      "identity": null
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+}

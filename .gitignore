@@ -1,0 +1,10 @@
+# desktop
+desktop/node_modules
+desktop/dist
+desktop/package-lock.json
+
+# backend
+backend/__pycache__/
+backend/.venv/
+backend/dist
+backend/build

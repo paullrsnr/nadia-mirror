@@ -1,0 +1,11 @@
+stages:
+  # - lint
+  # - test
+  - build
+  - package
+
+include:
+  # - local: ci/pipelines/lint.yml plus tard
+  # - local: ci/pipelines/test.yml
+  - local: ci/pipelines/build.yml
+  - local: ci/pipelines/package.yml

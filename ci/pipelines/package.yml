@@ -1,0 +1,47 @@
+# A ranger dans scripts pour mettre au propre plus tard
+package:windows:
+  stage: package
+  image: electronuserland/builder:wine
+
+  needs:
+    - job: build
+      artifacts: true
+
+  before_script:
+    - node --version
+    - npm --version
+
+  script:
+    - cd desktop
+    - npm ci
+    - npm run pack
+
+  artifacts:
+    name: "nadia-windows"
+    expire_in: 7 days
+    paths:
+      - desktop/dist/*.exe
+
+package:macos:
+  stage: package
+  tags:
+    - shell
+
+  needs:
+    - job: build
+      artifacts: true
+
+  before_script:
+    - node --version
+    - npm --version
+
+  script:
+    - cd desktop
+    - npm ci
+    - npm run pack
+
+  artifacts:
+    name: "nadia-macos"
+    expire_in: 7 days
+    paths:
+      - desktop/dist/*.dmg

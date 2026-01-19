@@ -1,0 +1,31 @@
+# A déplacer dans des scripts pour mettre au propre plus tard
+build:
+  stage: build
+  image: node:18-bullseye
+
+  before_script:
+    - node --version
+    - npm --version
+    - python3 --version
+    - python3 -m pip install --upgrade pip
+
+  script:
+    - cd desktop
+    - npm ci
+    - npm run build
+    - cd ..
+
+    - cd backend
+    - python3 -m venv .venv
+    - . .venv/bin/activate
+    - python3 -m pip install -r requirements.txt
+    - python3 -m pip install pyinstaller
+
+    - pyinstaller nadia-backend.spec
+
+  artifacts:
+    name: "build-artifacts"
+    expire_in: 1 day
+    paths:
+      - desktop/dist/
+      - backend/dist/nadia-backend
