@@ -1,8 +1,9 @@
 # A ranger dans scripts pour mettre au propre plus tard
-
 package:windows:
   stage: package
   image: electronuserland/builder:wine-mono
+  tags:
+    - linux
 
   needs:
     - job: build
@@ -19,14 +20,14 @@ package:windows:
   script:
     - cd desktop
     - npm install --ignore-scripts
-    - npm run pack
+    - npx electron-builder --win --x64
 
   artifacts:
     name: "nadia-windows"
     expire_in: 7 days
     paths:
-      - "desktop/dist/*.exe"
-      - "desktop/dist/*.msi"
+      - desktop/dist/*.exe
+      - desktop/dist/*.nsis.exe
 
 package:macos:
   stage: package
