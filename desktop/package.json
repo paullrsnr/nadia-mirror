@@ -11,7 +11,7 @@
     "build:renderer": "vite build",
     "build:main": "tsc -p tsconfig.main.json",
     "start": "electron .",
-    "pack": "npm run build && electron-builder"
+    "pack": "electron-builder"
   },
   "dependencies": {
     "react": "^19.2.3",

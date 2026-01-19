@@ -7,13 +7,19 @@ package:windows:
     - job: build
       artifacts: true
 
+  variables:
+    ELECTRON_CACHE: "$CI_PROJECT_DIR/.cache/electron"
+    ELECTRON_BUILDER_CACHE: "$CI_PROJECT_DIR/.cache/electron-builder"
+
   before_script:
     - node --version
     - npm --version
 
   script:
     - cd desktop
-    - npm install
+
+    - npm install --ignore-scripts
+
     - npm run pack
 
   artifacts:
@@ -21,6 +27,7 @@ package:windows:
     expire_in: 7 days
     paths:
       - desktop/dist/*.exe
+      - desktop/dist/*.msi
 
 package:macos:
   stage: package
@@ -32,6 +39,9 @@ package:macos:
       artifacts: true
 
   before_script:
+    - export NVM_DIR="$HOME/.nvm" # un peu dommage de pas pouvoir le faire direct sur la machine
+    - [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+    - nvm use 22
     - node --version
     - npm --version
 
