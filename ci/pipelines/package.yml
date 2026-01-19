@@ -1,7 +1,8 @@
 # A ranger dans scripts pour mettre au propre plus tard
+
 package:windows:
   stage: package
-  image: electronuserland/builder:wine
+  image: electronuserland/builder:wine-mono
 
   needs:
     - job: build
@@ -17,9 +18,7 @@ package:windows:
 
   script:
     - cd desktop
-
     - npm install --ignore-scripts
-
     - npm run pack
 
   artifacts:
@@ -39,8 +38,8 @@ package:macos:
       artifacts: true
 
   before_script:
-    - export NVM_DIR="$HOME/.nvm" # un peu dommage de pas pouvoir le faire direct sur la machine
-    - [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+    - 'export NVM_DIR="$HOME/.nvm"'
+    - '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"'
     - nvm use 22
     - node --version
     - npm --version
