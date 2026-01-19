@@ -42,19 +42,11 @@
     "extraResources": [
       {
         "from": "../backend/dist/win",
-        "to": "backend",
-        "filter": [
-          "**/*"
-        ],
-        "platform": "win32"
+        "to": "backend"
       },
       {
         "from": "../backend/dist/mac",
-        "to": "backend",
-        "filter": [
-          "**/*"
-        ],
-        "platform": "darwin"
+        "to": "backend"
       }
     ],
     "mac": {

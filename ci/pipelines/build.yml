@@ -6,7 +6,9 @@ stages:
 ############################
 build:backend:windows:
   stage: build
-  image: cdrx/pyinstaller-windows:python3
+  image:
+    name: cdrx/pyinstaller-windows:python3
+    entrypoint: [""] # ⬅️ CRITIQUE : désactive l’entrypoint cassé
 
   script:
     - cd backend
