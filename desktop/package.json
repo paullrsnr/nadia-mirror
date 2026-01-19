@@ -42,7 +42,6 @@
         "to": "backend"
       }
     ],
-    "afterSign": "./notarize.js",
     "mac": {
       "target": "dmg",
       "hardenedRuntime": true,
