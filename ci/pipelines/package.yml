@@ -26,8 +26,8 @@ package:windows:
     name: "nadia-windows"
     expire_in: 7 days
     paths:
-      - desktop/dist/*.exe
-      - desktop/dist/*.msi
+      - "desktop/dist/*.exe"
+      - "desktop/dist/*.msi"
 
 package:macos:
   stage: package
@@ -54,4 +54,4 @@ package:macos:
     name: "nadia-macos"
     expire_in: 7 days
     paths:
-      - desktop/dist/*.dmg
+      - "desktop/dist/*.dmg"
