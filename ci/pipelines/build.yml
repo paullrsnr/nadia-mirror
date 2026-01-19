@@ -9,16 +9,27 @@ build:backend:windows:
   image: cdrx/pyinstaller-windows:python3
 
   script:
-    - cd backend
-    - pip install -r requirements.txt
-    - pyinstaller nadia-backend.spec
-    - mkdir -p dist/current
-    - mv dist/nadia-backend.exe dist/current/
+    - |
+      set -e
+      echo "=== Building Windows backend ==="
+
+      cd backend
+
+      python --version
+      pip --version
+
+      pip install -r requirements.txt
+      pyinstaller nadia-backend.spec
+
+      mkdir -p dist/current
+      mv dist/nadia-backend.exe dist/current/
+
+      echo "=== Windows backend build finished ==="
 
   artifacts:
     expire_in: 1 day
     paths:
-      - backend/dist/current
+      - backend/dist/current/
 
 ############################
 # BACKEND MACOS
