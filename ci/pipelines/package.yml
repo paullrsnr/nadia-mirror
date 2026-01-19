@@ -1,11 +1,16 @@
-# A ranger dans scripts pour mettre au propre plus tard
+stages:
+  - package
+
+############################
+# PACKAGE WINDOWS
+############################
 package:windows:
   stage: package
   image: electronuserland/builder:wine-mono
 
   needs:
-    - job: build
-      artifacts: true
+    - build:desktop
+    - build:backend:windows
 
   variables:
     ELECTRON_CACHE: "$CI_PROJECT_DIR/.cache/electron"
@@ -22,27 +27,29 @@ package:windows:
     paths:
       - desktop/dist/*.exe
 
+############################
+# PACKAGE MACOS
+############################
 package:macos:
   stage: package
   tags:
     - shell
 
   needs:
-    - job: build
-      artifacts: true
+    - build:desktop
+    - build:backend:macos
 
   before_script:
-    - 'export NVM_DIR="$HOME/.nvm"'
+    - export NVM_DIR="$HOME/.nvm"
     - '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"'
     - nvm use 22
     - node --version
     - npm --version
 
   script:
-    - export APPLE_API_KEY_ID="385MGD36L7" # a deplacer dans les variables CI
+    - export APPLE_API_KEY_ID="385MGD36L7"
     - export APPLE_API_ISSUER="22737eef-efcb-4e85-bb6c-c958f5c44d75"
     - export APPLE_API_KEY_PATH="$HOME/.apple/385MGD36L7.p8"
-    - export APPLE_API_KEY="$HOME/.apple/385MGD36L7.p8"
     - cd desktop
     - npm install
     - npm run pack
@@ -51,4 +58,4 @@ package:macos:
     name: "nadia-macos"
     expire_in: 7 days
     paths:
-      - "desktop/dist/*.dmg"
+      - desktop/dist/*.dmg

@@ -1,39 +1,40 @@
 import { spawn } from "child_process";
-import path from "path";
-import { app } from "electron";
+import * as path from "path";
+import fs from "fs";
 
-export function launchBackend() {
-  if (!app.isPackaged) {
-    const backendDir = path.join(__dirname, "../../../backend");
-    const pythonPath = path.join(backendDir, ".venv", "bin", "python3");
+function launchBackend() {
+  const bin =
+    process.platform === "win32" ? "nadia-backend.exe" : "nadia-backend";
 
-    const backendProcess = spawn(
-      pythonPath,
-      ["-m", "uvicorn", "api.main:app", "--reload", "--port", "3333"],
-      {
-        cwd: backendDir,
-        stdio: "inherit",
-      }
-    );
+  const backendPath = path.join(process.resourcesPath, "backend", bin);
 
-    backendProcess.on("error", (err) => {
-      console.error("DEV backend failed:", err);
-    });
-
+  if (!fs.existsSync(backendPath)) {
+    console.error("Backend introuvable:", backendPath);
     return;
   }
 
-  const backendBinaryPath = path.join(
-    process.resourcesPath,
-    "backend",
-    "nadia-backend"
-  );
+  if (process.platform !== "win32") {
+    try {
+      fs.chmodSync(backendPath, 0o755);
+    } catch (e: Error | any) {
+      console.warn("chmod backend failed:", e.message);
+    }
+  }
 
-  const backendProcess = spawn(backendBinaryPath, [], {
+  const child = spawn(backendPath, [], {
     stdio: "inherit",
+    cwd: path.dirname(backendPath),
+    env: {
+      ...process.env,
+    },
   });
 
-  backendProcess.on("error", (err) => {
-    console.error("PROD backend failed:", err);
+  child.on("error", (err: Error) => {
+    console.error("Erreur lancement backend:", err);
+  });
+
+  child.on("exit", (code: number) => {
+    console.log("Backend exited with code", code);
   });
 }
+export { launchBackend };

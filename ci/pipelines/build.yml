@@ -1,32 +1,61 @@
-# A déplacer dans scripts pour mettre au propre plus tard
-build:
+stages:
+  - build
+
+############################
+# BACKEND WINDOWS
+############################
+build:backend:windows:
+  stage: build
+  image: cdrx/pyinstaller-windows:python3
+
+  script:
+    - cd backend
+    - pip install -r requirements.txt
+    - pyinstaller nadia-backend.spec
+    - mkdir -p dist/current
+    - mv dist/nadia-backend.exe dist/current/
+
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - backend/dist/current
+
+############################
+# BACKEND MACOS
+############################
+build:backend:macos:
+  stage: build
+  tags:
+    - shell
+
+  script:
+    - cd backend
+    - python3 -m venv .venv
+    - . .venv/bin/activate
+    - pip install -r requirements.txt
+    - pip install pyinstaller
+    - pyinstaller nadia-backend.spec
+    - mkdir -p dist/current
+    - mv dist/nadia-backend dist/current/
+
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - backend/dist/current
+
+############################
+# DESKTOP (FRONT + MAIN)
+############################
+build:desktop:
   stage: build
   image: node:22-bullseye
-
-  before_script:
-    - node --version
-    - npm --version
-    - python3 --version
-    - apt-get update
-    - apt-get install -y python3-pip python3-venv
-    - python3 -m pip --version
 
   script:
     - cd desktop
     - npm install
     - npm run build
-    - cd ..
-
-    - cd backend
-    - python3 -m venv .venv
-    - . .venv/bin/activate
-    - python3 -m pip install -r requirements.txt
-    - python3 -m pip install pyinstaller
-    - pyinstaller nadia-backend.spec
 
   artifacts:
-    name: "build-artifacts"
     expire_in: 1 day
     paths:
-      - desktop/dist/
-      - backend/dist/nadia-backend
+      - desktop/dist
