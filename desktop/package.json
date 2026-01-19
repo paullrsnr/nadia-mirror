@@ -60,7 +60,6 @@
           ]
         }
       ],
-      "sign": false,
       "verifyUpdateCodeSignature": false
     }
   }
