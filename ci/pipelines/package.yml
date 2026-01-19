@@ -18,14 +18,13 @@ package:windows:
   script:
     - cd desktop
     - npm install --ignore-scripts
-    - npx electron-builder --win --x64
+    - npx electron-builder --win --x64 --publish=never
 
   artifacts:
     name: "nadia-windows"
     expire_in: 7 days
     paths:
       - desktop/dist/*.exe
-      - desktop/dist/*.nsis.exe
 
 package:macos:
   stage: package
@@ -44,6 +43,7 @@ package:macos:
     - npm --version
 
   script:
+    - source ~/.zshrc
     - cd desktop
     - npm install
     - npm run pack
