@@ -1,0 +1,58 @@
+name: Package Windows
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      # 1️⃣ Checkout
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 2️⃣ Python (backend)
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3️⃣ Node (Electron)
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: desktop/package-lock.json
+
+      # 4️⃣ Build backend Windows (PyInstaller)
+      - name: Build backend (Windows)
+        shell: powershell
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+          pyinstaller nadia-backend.spec
+
+          New-Item -ItemType Directory -Force dist\win
+          Move-Item dist\nadia-backend.exe dist\win\nadia-backend.exe
+
+      # 5️⃣ Build Electron (Windows)
+      - name: Build Electron app
+        shell: powershell
+        run: |
+          cd desktop
+          npm install
+          npm run build
+          npm run pack:win
+
+      # 6️⃣ Upload installer
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: nadia-windows
+          path: desktop/dist/*.exe
