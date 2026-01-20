@@ -8,19 +8,27 @@ build:backend:windows:
   stage: build
   image:
     name: cdrx/pyinstaller-windows:python3
-    entrypoint: [""] # ⬅️ CRITIQUE : désactive l’entrypoint cassé
+    entrypoint: [""]
 
   script:
+    - echo "=== Building Windows backend ==="
     - cd backend
+
+    - python --version
+    - pip --version
+
     - pip install -r requirements.txt
     - pyinstaller nadia-backend.spec
-    - mkdir -p dist/win
-    - mv dist/nadia-backend.exe dist/win/
+
+    - mkdir -p dist/current
+    - mv dist/nadia-backend.exe dist/current/
+
+    - echo "=== Windows backend build finished ==="
 
   artifacts:
     expire_in: 1 day
     paths:
-      - backend/dist/win/nadia-backend.exe
+      - backend/dist/current/nadia-backend.exe
 
 ############################
 # BACKEND MACOS
@@ -37,16 +45,16 @@ build:backend:macos:
     - pip install -r requirements.txt
     - pip install pyinstaller
     - pyinstaller nadia-backend.spec
-    - mkdir -p dist/mac
-    - mv dist/nadia-backend dist/mac/
+    - mkdir -p dist/current
+    - mv dist/nadia-backend dist/current/
 
   artifacts:
     expire_in: 1 day
     paths:
-      - backend/dist/mac/nadia-backend
+      - backend/dist/current
 
 ############################
-# DESKTOP (Electron build only, no packaging)
+# DESKTOP (FRONT + MAIN)
 ############################
 build:desktop:
   stage: build
