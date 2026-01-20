@@ -14,19 +14,17 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2️⃣ Python (backend)
+      # 2️⃣ Setup Python (backend)
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # 3️⃣ Node (Electron)
+      # 3️⃣ Setup Node (Electron)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "npm"
-          cache-dependency-path: desktop/package-lock.json
 
       # 4️⃣ Build backend Windows (PyInstaller)
       - name: Build backend (Windows)
@@ -41,7 +39,7 @@ jobs:
           New-Item -ItemType Directory -Force dist\win
           Move-Item dist\nadia-backend.exe dist\win\nadia-backend.exe
 
-      # 5️⃣ Build Electron (Windows)
+      # 5️⃣ Build Electron app (Windows)
       - name: Build Electron app
         shell: powershell
         run: |
