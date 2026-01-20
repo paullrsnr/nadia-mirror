@@ -10,14 +10,7 @@ build:backend:macos:
     - shell
 
   script:
-    - cd backend
-    - python3 -m venv .venv
-    - . .venv/bin/activate
-    - pip install -r requirements.txt
-    - pip install pyinstaller
-    - pyinstaller nadia-backend.spec
-    - mkdir -p dist/mac
-    - mv dist/nadia-backend dist/mac/
+    - scripts/build/backendMacOs.sh
 
   artifacts:
     expire_in: 1 day
@@ -32,9 +25,7 @@ build:desktop:
   image: node:22-bullseye
 
   script:
-    - cd desktop
-    - npm install
-    - npm run build
+    - scripts/build/desktop.sh
 
   artifacts:
     expire_in: 1 day
