@@ -48,6 +48,10 @@
       {
         "from": "../backend/dist/mac",
         "to": "backend"
+      },
+      {
+        "from": "../backend/dist/win",
+        "to": "backend"
       }
     ],
     "mac": {
