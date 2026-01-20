@@ -1,0 +1,53 @@
+stages:
+  - package
+
+############################
+# PACKAGE WINDOWS
+############################
+package:windows:
+  stage: package
+  needs:
+    - build:desktop
+  script:
+    - echo "📦 Packaging Windows installer sur github"
+    - echo "lien github actions https://github.com/paullrsnr/nadia-mirror/actions"
+
+  artifacts:
+    name: "nadia-windows"
+    expire_in: 7 days
+    paths:
+      - desktop/dist/*.exe
+
+############################
+# PACKAGE MACOS
+############################
+package:macos:
+  stage: package
+  tags:
+    - shell
+
+  needs:
+    - build:desktop
+    - build:backend:macos
+
+  before_script:
+    - export NVM_DIR="$HOME/.nvm"
+    - '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"'
+    - nvm use 22
+    - node --version
+    - npm --version
+
+  script:
+    - export APPLE_API_KEY_ID="385MGD36L7"
+    - export APPLE_API_ISSUER="22737eef-efcb-4e85-bb6c-c958f5c44d75"
+    - export APPLE_API_KEY_PATH="$HOME/.apple/385MGD36L7.p8"
+    - export APPLE_API_KEY="$HOME/.apple/385MGD36L7.p8"
+    - cd desktop
+    - npm install
+    - npm run pack:mac
+
+  artifacts:
+    name: "nadia-macos"
+    expire_in: 7 days
+    paths:
+      - desktop/dist/*.dmg
