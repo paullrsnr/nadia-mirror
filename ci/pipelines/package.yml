@@ -6,11 +6,14 @@ stages:
 ############################
 package:windows:
   stage: package
+  image: electronuserland/builder:wine-mono
   needs:
     - build:desktop
+    - download:backend-binary:windows
   script:
-    - echo "📦 Packaging Windows installer sur github"
-    - echo "lien github actions https://github.com/paullrsnr/nadia-mirror/actions"
+    - cd desktop
+    - npm install --ignore-scripts
+    - npm run pack:win
 
   artifacts:
     name: "nadia-windows"
