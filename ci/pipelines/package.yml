@@ -9,7 +9,7 @@ package:windows:
   image: electronuserland/builder:wine-mono
   needs:
     - build:desktop
-    - build:backend:windows
+    - download:backend-binary:windows
   script:
     - cd desktop
     - npm install --ignore-scripts

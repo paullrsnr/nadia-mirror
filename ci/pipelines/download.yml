@@ -1,4 +1,4 @@
-build:backend:windows:
+download:backend-binary:windows:
   stage: download
   image: alpine:3.20
 
