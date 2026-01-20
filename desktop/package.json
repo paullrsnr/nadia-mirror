@@ -11,6 +11,8 @@
     "build:renderer": "vite build",
     "build:main": "tsc -p tsconfig.main.json",
     "start": "electron .",
+    "pack:win": "electron-builder --win",
+    "pack:mac": "electron-builder --mac",
     "pack": "electron-builder"
   },
   "dependencies": {
@@ -19,10 +21,6 @@
   },
   "devDependencies": {
     "@electron/notarize": "^3.1.1",
-    "@types/react": "^19.2.8",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.2",
-    "concurrently": "^9.2.1",
     "electron": "^40.0.0",
     "electron-builder": "^26.4.0",
     "typescript": "^5.9.3",
@@ -38,7 +36,11 @@
     ],
     "extraResources": [
       {
-        "from": "../backend/dist/current",
+        "from": "../backend/dist/win",
+        "to": "backend"
+      },
+      {
+        "from": "../backend/dist/mac",
         "to": "backend"
       }
     ],
@@ -51,16 +53,7 @@
       "identity": "PLR CONSEIL"
     },
     "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "signAndEditExecutable": false,
-      "verifyUpdateCodeSignature": false
+      "target": "nsis"
     }
   }
 }

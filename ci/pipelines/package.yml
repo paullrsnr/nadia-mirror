@@ -7,19 +7,13 @@ stages:
 package:windows:
   stage: package
   image: electronuserland/builder:wine-mono
-
   needs:
     - build:desktop
     - build:backend:windows
-
-  variables:
-    ELECTRON_CACHE: "$CI_PROJECT_DIR/.cache/electron"
-    ELECTRON_BUILDER_CACHE: "$CI_PROJECT_DIR/.cache/electron-builder"
-
   script:
     - cd desktop
     - npm install --ignore-scripts
-    - npm run pack
+    - npm run pack:win
 
   artifacts:
     name: "nadia-windows"
@@ -53,7 +47,7 @@ package:macos:
     - export APPLE_API_KEY="$HOME/.apple/385MGD36L7.p8"
     - cd desktop
     - npm install
-    - npm run pack
+    - npm run pack:mac
 
   artifacts:
     name: "nadia-macos"
