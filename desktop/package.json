@@ -1,8 +1,12 @@
 {
   "name": "nadia",
   "version": "0.1.0",
-  "main": "dist/main/index.js",
   "private": true,
+  "main": "dist/main/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paullrsnr/nadia-mirror.git"
+  },
   "scripts": {
     "dev": "concurrently \"npm:dev:renderer\" \"npm:dev:main\"",
     "dev:renderer": "vite",
@@ -13,27 +17,29 @@
     "start": "electron .",
     "pack:win": "electron-builder --win --publish=never",
     "pack:mac": "electron-builder --mac --publish=never",
-    "pack": "electron-builder"
+    "pack": "electron-builder --publish=never"
   },
   "dependencies": {
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
-    "@electron/notarize": "^3.1.1",
     "electron": "^40.0.0",
     "electron-builder": "^26.4.0",
+    "@electron/notarize": "^3.1.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "wait-on": "^9.0.3",
+    "@vitejs/plugin-react": "^5.1.2",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.2",
-    "concurrently": "^9.2.1"
+    "concurrently": "^9.2.1",
+    "wait-on": "^9.0.3"
   },
   "build": {
     "appId": "com.plrconseil.nadia",
     "productName": "NadIA",
+    "publish": null,
+    "generateUpdatesFilesForAllChannels": false,
     "files": [
       "dist/main/**/*",
       "dist/renderer/**/*"
