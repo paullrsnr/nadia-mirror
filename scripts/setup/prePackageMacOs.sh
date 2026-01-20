@@ -2,7 +2,7 @@
 set -e
 
 echo "Apple notarization setup for macOS packaging"
-export APPLE_API_KEY_ID="385MGD36L7"
-export APPLE_API_ISSUER="22737eef-efcb-4e85-bb6c-c958f5c44d75"
-export APPLE_API_KEY_PATH="$HOME/.apple/385MGD36L7.p8"
-export APPLE_API_KEY="$HOME/.apple/385MGD36L7.p8"
+export APPLE_API_KEY_ID="${APPLE_API_KEY_ID}"
+export APPLE_API_ISSUER="${APPLE_API_ISSUER}"
+export APPLE_API_KEY_PATH="$HOME/.apple/${APPLE_API_KEY_ID}.p8"
+export APPLE_API_KEY="$HOME/.apple/${APPLE_API_KEY_ID}.p8"
