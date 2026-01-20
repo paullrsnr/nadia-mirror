@@ -1,0 +1,42 @@
+stages:
+  - build
+
+############################
+# BACKEND MACOS
+############################
+build:backend:macos:
+  stage: build
+  tags:
+    - shell
+
+  script:
+    - cd backend
+    - python3 -m venv .venv
+    - . .venv/bin/activate
+    - pip install -r requirements.txt
+    - pip install pyinstaller
+    - pyinstaller nadia-backend.spec
+    - mkdir -p dist/mac
+    - mv dist/nadia-backend dist/mac/
+
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - backend/dist/mac/nadia-backend
+
+############################
+# DESKTOP (Electron build only, no packaging)
+############################
+build:desktop:
+  stage: build
+  image: node:22-bullseye
+
+  script:
+    - cd desktop
+    - npm install
+    - npm run build
+
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - desktop/dist
