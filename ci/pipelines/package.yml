@@ -23,9 +23,6 @@ package:macos:
     - build:desktop
     - build:backend:macos
 
-  before_script:
-    - scripts/setup/prePackageMacOs.sh
-
   script:
     - scripts/package/macos.sh
 
