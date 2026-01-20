@@ -1,12 +1,30 @@
-import { spawn } from "child_process";
-import * as path from "path";
-import fs from "fs";
+import { spawn } from "node:child_process";
+import path from "node:path";
+import { app } from "electron";
+import { platform } from "node:os";
 
-function launchBackend() {
-  const bin =
-    process.platform === "win32" ? "nadia-backend.exe" : "nadia-backend";
+export function launchBackend() {
+  if (!app.isPackaged) {
+    const backendDir = path.join(__dirname, "../../../backend");
+    const projectRoot = path.join(__dirname, "../../..");
+    const isWindows = platform() === "win32";
+    const pythonPath = isWindows
+      ? path.join(backendDir, ".venv", "Scripts", "python.exe")
+      : path.join(backendDir, ".venv", "bin", "python3");
 
-  const backendPath = path.join(process.resourcesPath, "backend", bin);
+    // Lancer depuis le répertoire parent pour que les imports backend.* fonctionnent
+    const backendProcess = spawn(
+      pythonPath,
+      ["-m", "uvicorn", "backend.api.main:app", "--reload", "--port", "3333"],
+      {
+        cwd: projectRoot,
+        stdio: "inherit",
+      }
+    );
+
+    backendProcess.on("error", (err) => {
+      console.error("DEV backend failed:", err);
+    });
 
   if (!fs.existsSync(backendPath)) {
     console.error("Backend introuvable:", backendPath);

@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.api.routers import auth_router, emails_router
+
 app = FastAPI(title="Nadia API")
 
-# Pour plus tard, quand on aura des routes à inclure
-# app.include_router(auth_router.router, prefix="/auth")
-# app.include_router(emails_router.router, prefix="/emails")
-# app.include_router(llm_router.router, prefix="/llm")
+# Inclure les routers
+app.include_router(auth_router.router, prefix="/auth", tags=["auth"])
+app.include_router(emails_router.router, tags=["emails"])
 
 app.add_middleware(
     CORSMiddleware,
