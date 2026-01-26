@@ -1,10 +1,12 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
+import fs from "node:fs";
 import { app } from "electron";
 import { platform } from "node:os";
 
 export function launchBackend() {
   if (!app.isPackaged) {
+    // Mode développement
     const backendDir = path.join(__dirname, "../../../backend");
     const projectRoot = path.join(__dirname, "../../..");
     const isWindows = platform() === "win32";
@@ -26,6 +28,19 @@ export function launchBackend() {
       console.error("DEV backend failed:", err);
     });
 
+    return;
+  }
+
+  // Mode production
+  const isWindows = platform() === "win32";
+  const backendBinaryName = isWindows ? "nadia-backend.exe" : "nadia-backend";
+  const resourcesPath = process.resourcesPath || app.getAppPath();
+  const backendPath = path.join(
+    resourcesPath,
+    "backend",
+    backendBinaryName
+  );
+
   if (!fs.existsSync(backendPath)) {
     console.error("Backend introuvable:", backendPath);
     return;
@@ -34,8 +49,9 @@ export function launchBackend() {
   if (process.platform !== "win32") {
     try {
       fs.chmodSync(backendPath, 0o755);
-    } catch (e: Error | any) {
-      console.warn("chmod backend failed:", e.message);
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Unknown error");
+      console.warn("chmod backend failed:", error.message);
     }
   }
 
@@ -55,4 +71,3 @@ export function launchBackend() {
     console.log("Backend exited with code", code);
   });
 }
-export { launchBackend };
