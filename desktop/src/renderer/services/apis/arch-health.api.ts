@@ -1,12 +1,8 @@
-const API_BASE_URL = "http://127.0.0.1:3333"; // A BOUGER PLUS TARD
+import { API_BASE_URL } from "./config";
 
-export async function getHello(): Promise<string> {
-  const response = await fetch(`${API_BASE_URL}/hello`);
-
-  if (!response.ok) {
-    throw new Error("API error");
-  }
-
-  const data = await response.json();
-  return data.message;
+export async function checkHealth(): Promise<boolean> {
+  const response = await fetch(`${API_BASE_URL}/health`);
+  return response.ok;
 }
+
+// getHello - À implémenter

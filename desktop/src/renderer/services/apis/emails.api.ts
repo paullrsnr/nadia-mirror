@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://127.0.0.1:3333";
+import { API_BASE_URL } from "./config";
 
 export interface Email {
   id: string;
@@ -20,14 +20,7 @@ export interface Email {
   snippet?: string;
 }
 
-export interface EmailThread {
-  thread_id: string;
-  subject: string;
-  emails: Email[];
-  participants: Array<{ name: string | null; email: string }>;
-  last_message_date: string;
-  unread_count: number;
-}
+// EmailThread - À implémenter
 
 export interface EmailListResponse {
   emails: Email[];
@@ -56,43 +49,11 @@ export async function getEmails(
   return response.json();
 }
 
-export async function getEmail(emailId: string): Promise<Email> {
-  const response = await fetch(`${API_BASE_URL}/emails/${emailId}`);
+// getEmail - À implémenter
 
-  if (!response.ok) {
-    throw new Error("Erreur lors de la récupération de l'email");
-  }
+// getThreads - À implémenter
 
-  return response.json();
-}
-
-export async function getThreads(
-  maxResults: number = 50,
-  query?: string
-): Promise<EmailThread[]> {
-  const params = new URLSearchParams({
-    max_results: maxResults.toString(),
-  });
-  if (query) params.append("query", query);
-
-  const response = await fetch(`${API_BASE_URL}/threads?${params}`);
-
-  if (!response.ok) {
-    throw new Error("Erreur lors de la récupération des threads");
-  }
-
-  return response.json();
-}
-
-export async function getThread(threadId: string): Promise<EmailThread> {
-  const response = await fetch(`${API_BASE_URL}/threads/${threadId}`);
-
-  if (!response.ok) {
-    throw new Error("Erreur lors de la récupération du thread");
-  }
-
-  return response.json();
-}
+// getThread - À implémenter
 
 export async function archiveEmail(emailId: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/emails/${emailId}/archive`, {
@@ -104,20 +65,20 @@ export async function archiveEmail(emailId: string): Promise<void> {
   }
 }
 
-export async function markAsRead(emailId: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/emails/${emailId}/read`, {
-    method: "POST",
-  });
+// markAsRead - À implémenter
 
-  if (!response.ok) {
-    throw new Error("Erreur lors du marquage comme lu");
-  }
+export interface SyncResponse {
+  status: "success" | "error";
+  synced?: number;
+  saved?: number;
+  timestamp?: string;
+  message?: string;
 }
 
 export async function syncEmails(
   maxResults: number = 100,
   force: boolean = false
-): Promise<any> {
+): Promise<SyncResponse> {
   const params = new URLSearchParams({
     max_results: maxResults.toString(),
     force: force.toString(),

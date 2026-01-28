@@ -2,9 +2,13 @@ fastapi
 uvicorn[standard]
 pydantic
 pydantic-settings
+python-dotenv
 pyinstaller
 google-auth
 google-auth-oauthlib
 google-auth-httplib2
 google-api-python-client
 cryptography
+pylint
+pytest
+httpx

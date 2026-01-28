@@ -20,7 +20,9 @@ export function launchBackend() {
       ["-m", "uvicorn", "backend.api.main:app", "--reload", "--port", "3333"],
       {
         cwd: projectRoot,
-        stdio: "inherit",
+        stdio: "ignore",
+        windowsHide: true,
+        detached: false,
       }
     );
 
@@ -56,7 +58,9 @@ export function launchBackend() {
   }
 
   const child = spawn(backendPath, [], {
-    stdio: "inherit",
+    stdio: "ignore",
+    windowsHide: true,
+    detached: false,
     cwd: path.dirname(backendPath),
     env: {
       ...process.env,

@@ -1,28 +1,36 @@
-from pydantic import BaseModel
-from typing import Optional
+"""Schémas Pydantic pour l'API."""
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel
 
 
 class AuthUrlResponse(BaseModel):
+    """Réponse contenant l'URL d'authentification OAuth."""
+
     auth_url: str
 
 
-class AuthCallbackRequest(BaseModel):
-    code: str
-    state: Optional[str] = None
+# AuthCallbackRequest - À implémenter
 
 
 class AuthStatusResponse(BaseModel):
+    """Réponse contenant le statut d'authentification."""
+
     is_authenticated: bool
     email: Optional[str] = None
 
 
 class EmailAddress(BaseModel):
+    """Représentation d'une adresse email."""
+
     name: Optional[str] = None
     email: str
 
 
 class EmailAttachment(BaseModel):
+    """Représentation d'une pièce jointe."""
+
     filename: str
     mime_type: str
     size: int
@@ -30,6 +38,8 @@ class EmailAttachment(BaseModel):
 
 
 class Email(BaseModel):
+    """Représentation d'un email."""
+
     id: str
     thread_id: str
     subject: str
@@ -46,6 +56,8 @@ class Email(BaseModel):
 
 
 class EmailThread(BaseModel):
+    """Représentation d'un fil de discussion email."""
+
     thread_id: str
     subject: str
     emails: list[Email]
@@ -55,6 +67,8 @@ class EmailThread(BaseModel):
 
 
 class EmailListResponse(BaseModel):
+    """Réponse contenant une liste d'emails paginée."""
+
     emails: list[Email]
     total: int
     page: int

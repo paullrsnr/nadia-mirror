@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { getAuthUrl, getAuthStatus, logout, AuthStatus } from "../services/apis/auth.api";
+import React, { useState, useEffect } from "react";
+import { getAuthUrl, getAuthStatus, logout, AuthStatus, ApiError } from "../services/apis/auth.api";
 
 export default function Settings() {
   const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
@@ -47,8 +47,9 @@ export default function Settings() {
         clearInterval(interval);
         setLoading(false);
       }, 300000);
-    } catch (err: any) {
-      const errorMessage = err?.response?.data?.detail || err?.message || "Erreur lors de la connexion à Gmail";
+    } catch (err) {
+      const apiError = err as ApiError;
+      const errorMessage = apiError?.response?.data?.detail || apiError?.message || "Erreur lors de la connexion à Gmail";
       setError(errorMessage);
       setLoading(false);
     }

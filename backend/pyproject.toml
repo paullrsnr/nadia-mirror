@@ -12,3 +12,9 @@ dependencies = [
   "uvicorn[standard]>=0.40",
   "pydantic>=2.12.5"
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test*.py", "test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

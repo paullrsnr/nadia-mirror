@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://127.0.0.1:3333";
+import { API_BASE_URL } from "./config";
 
 export interface AuthStatus {
   is_authenticated: boolean;
@@ -9,13 +9,19 @@ export interface AuthUrl {
   auth_url: string;
 }
 
+export interface ApiError extends Error {
+  response?: {
+    data: { detail?: string };
+  };
+}
+
 export async function getAuthUrl(): Promise<string> {
   const response = await fetch(`${API_BASE_URL}/auth/url`);
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const error = new Error(errorData.detail || "Erreur lors de la récupération de l'URL d'authentification");
-    (error as any).response = { data: errorData };
+    const error: ApiError = new Error(errorData.detail || "Erreur lors de la récupération de l'URL d'authentification");
+    error.response = { data: errorData };
     throw error;
   }
 
@@ -34,20 +40,7 @@ export async function getAuthStatus(): Promise<AuthStatus> {
   return data;
 }
 
-export async function authCallback(code: string, state?: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/auth/callback`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ code, state }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || "Erreur lors de l'authentification");
-  }
-}
+// authCallback - À implémenter
 
 export async function logout(): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/auth/logout`, {

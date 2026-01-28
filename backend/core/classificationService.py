@@ -1,1 +1,2 @@
-# Service de classification - Non utilisé actuellement
+# pylint: disable=invalid-name
+# Service de classification - À implémenter

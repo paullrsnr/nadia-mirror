@@ -1,3 +1,4 @@
+"""Point d'entrée principal de l'API FastAPI."""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,10 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/health")
 def health():
+    """Endpoint de vérification de santé de l'API."""
     return {"status": "ok"}
-
-@app.get("/hello")
-def hello():
-    return {"message": "hello"}
