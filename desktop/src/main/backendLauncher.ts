@@ -20,9 +20,7 @@ export function launchBackend() {
       ["-m", "uvicorn", "backend.api.main:app", "--reload", "--port", "3333"],
       {
         cwd: projectRoot,
-        stdio: "ignore",
-        windowsHide: true,
-        detached: false,
+        stdio: "inherit",
       }
     );
 

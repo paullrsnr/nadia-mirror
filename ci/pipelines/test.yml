@@ -22,26 +22,3 @@ test:backend:
         - backend/**/*
 
   coverage: '/TOTAL.*\s+(\d+%)$/'
-
-############################
-# DESKTOP TYPESCRIPT (Jest/Vitest)
-############################
-# test:desktop:
-#   stage: test
-#   image: node:22-bullseye
-#
-#   before_script:
-#     - cd desktop
-#     - npm ci
-#
-#   script:
-#     - cd desktop
-#     - npm run test
-#
-#   rules:
-#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#       changes:
-#         - desktop/**/*
-#     - if: '$CI_PIPELINE_SOURCE == "push"'
-#       changes:
-#         - desktop/**/*

@@ -37,17 +37,6 @@ app.whenReady().then(async () => {
   createWindow();
 });
 
-let isQuitting = false;
-
-app.on("before-quit", async (event) => {
-  if (isQuitting) return;
-  
-  event.preventDefault();
-  isQuitting = true;
-  await logoutBeforeQuit();
-  app.exit();
-});
-
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });

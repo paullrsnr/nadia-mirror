@@ -1,85 +1,66 @@
+"""Routeur emails : délègue aux services, ne fait que le routing."""
 from fastapi import APIRouter, HTTPException, Query
-from typing import Optional
-from backend.adapters.gmailAdapter import GmailAdapter
-from backend.core.mailboxService import MailboxService
+
 from backend.api.schemas import EmailListResponse
-from backend.api.routers.auth_router import get_credentials
+from backend.api.dependencies import get_email_provider
+from backend.core.services.emailsService import EmailsService
+from backend.core.mailboxService import MailboxService
 
-router = APIRouter()
-mailbox_service = MailboxService()
-
-
-def get_email_provider():
-    """Récupère le provider d'email (Gmail)"""
-    credentials = get_credentials()
-    if not credentials:
-        raise HTTPException(status_code=401, detail="Non authentifié")
-
-    return GmailAdapter()
+router = APIRouter(prefix="/emails")
 
 
-@router.get("/emails", response_model=EmailListResponse)
+@router.get("/", response_model=EmailListResponse)
 async def get_emails(
     max_results: int = Query(default=50, ge=1, le=500),
-    query: Optional[str] = Query(default=None),
-    page_token: Optional[str] = Query(default=None),
+    page: int = Query(default=1, ge=1),
 ):
-    """Récupère une liste d'emails"""
+    """Récupère la liste d'emails depuis le stockage local (SQLite).
+
+    Les emails affichés sont ceux déjà synchronisés ; pas d'appel Gmail ici.
+    """
     try:
         provider = get_email_provider()
-        emails, _ = provider.get_emails(
+        result = MailboxService(provider).get_stored_emails(
             max_results=max_results,
-            query=query,
-            page_token=page_token,
+            page=page,
         )
-
-        return EmailListResponse(
-            emails=emails,
-            total=len(emails),
-            page=1,
-            page_size=max_results,
-        )
+        return result
     except ValueError as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        raise HTTPException(status_code=401, detail=str(e)) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-# GET /emails/{email_id} - À implémenter
-
-# GET /threads - À implémenter
-
-# GET /threads/{thread_id} - À implémenter
-
-
-@router.post("/emails/{email_id}/archive")
+@router.post("/{email_id}/archive")
 async def archive_email(email_id: str):
-    """Archive un email"""
+    """Archive un email."""
     try:
         provider = get_email_provider()
-        success = provider.archive_email(email_id)
+        success = EmailsService(provider).archive_email(email_id)
         return (
             {"status": "success", "email_id": email_id}
             if success
             else {"status": "error"}
         )
     except ValueError as e:
-        raise HTTPException(status_code=401, detail=str(e))
+        raise HTTPException(status_code=401, detail=str(e)) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-# POST /emails/{email_id}/read - À implémenter
-
-
-@router.post("/emails/sync")
+@router.post("/sync")
 async def sync_emails(
     max_results: int = Query(default=100, ge=1, le=500),
-    force: bool = Query(default=False),
 ):
-    """Synchronise les emails depuis Gmail vers le stockage local"""
+    """Synchronise les derniers non lus vers le stockage local.
+
+    Le backend gère le délai (pas de sync si dernière sync < SYNC_MIN_INTERVAL_MINUTES).
+    """
     try:
-        result = mailbox_service.sync_emails(max_results=max_results, force=force)
+        provider = get_email_provider()
+        result = MailboxService(provider).sync_emails(max_results=max_results)
         return result
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e)) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e)) from e

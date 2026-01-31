@@ -6,12 +6,12 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-from backend.config.settings import settings
+from backend.config.settings import storage_settings
 
 
 def get_encryption_key() -> bytes:
     """Génère ou récupère la clé de chiffrement basée sur l'utilisateur système."""
-    key_file = settings.DATA_DIR / ".encryption_key"
+    key_file = storage_settings.DATA_DIR / ".encryption_key"
 
     if key_file.exists():
         with open(key_file, "rb") as f:
@@ -32,7 +32,7 @@ def get_encryption_key() -> bytes:
     key = base64.urlsafe_b64encode(kdf.derive(username.encode()))
 
     # Sauvegarder la clé
-    settings.DATA_DIR.mkdir(parents=True, exist_ok=True)
+    storage_settings.DATA_DIR.mkdir(parents=True, exist_ok=True)
     with open(key_file, "wb") as f:
         f.write(key)
 

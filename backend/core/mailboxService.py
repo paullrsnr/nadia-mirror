@@ -1,48 +1,70 @@
 # pylint: disable=invalid-name,too-few-public-methods
-"""Service de gestion de la boîte mail."""
+"""Service de gestion de la boîte mail : récupération paginée + persistance SQLite."""
 import logging
 from datetime import datetime, timedelta
-from typing import Optional
 
-from backend.adapters.gmailAdapter import GmailAdapter
+from backend.config.settings import storage_settings
+from backend.core.models.email import EmailListResult
+from backend.ports.emailProvider import EmailProvider
 from backend.adapters.sqliteStorage import SqliteStorage
 
 logger = logging.getLogger(__name__)
 
 
 class MailboxService:
-    """Service pour gérer la synchronisation et le stockage des emails."""
+    """Récupère les derniers emails (non lus / récents) du provider et les stocke en SQLite.
 
-    def __init__(self):
-        self.storage = SqliteStorage()
+    - Liste emails : lecture depuis SQLite (ce qui existe déjà).
+    - Sync : Gmail (non lus uniquement) → SQLite. Délai entre deux syncs géré par le backend.
+    """
 
-    def sync_emails(
-        self,
-        max_results: int = 100,
-        query: Optional[str] = None,
-        force: bool = False,
-    ) -> dict:
-        """Synchronise les emails depuis Gmail vers le stockage local."""
+    def __init__(self, email_provider: EmailProvider):
+        self._provider = email_provider
+        self._storage = SqliteStorage()
+
+    def get_stored_emails(
+        self, max_results: int = 50, page: int = 1
+    ) -> EmailListResult:
+        """Retourne les emails déjà présents en SQLite (paginés). Pas d'appel Gmail."""
+        offset = (page - 1) * max_results
+        emails, total = self._storage.get_emails(max_results=max_results, offset=offset)
+        return EmailListResult(
+            emails=emails,
+            total=total,
+            page=page,
+            page_size=max_results,
+        )
+
+    def sync_emails(self, max_results: int = 100) -> dict:
+        """Synchronise les derniers emails (non lus, paginés) vers le stockage local.
+
+        Ne fait rien si la dernière sync a eu lieu il y a moins de SYNC_MIN_INTERVAL_MINUTES.
+        Sinon : fetch Gmail (is:unread + récents), sauvegarde en SQLite, met à jour last_sync.
+        """
         try:
-            adapter = GmailAdapter()
+            last_sync = self._storage.get_last_sync_time()
+            min_interval = timedelta(minutes=storage_settings.SYNC_MIN_INTERVAL_MINUTES)
+            if last_sync and (datetime.now() - last_sync) < min_interval:
+                return {
+                    "status": "skipped",
+                    "message": "Déjà à jour",
+                    "last_sync": last_sync.isoformat(),
+                }
 
-            # Si force=False, ne synchroniser que les nouveaux emails
-            if not force:
-                last_sync = self.storage.get_last_sync_time()
-                if last_sync:
-                    # Synchroniser seulement les emails des 7 derniers jours
-                    query = f"after:{(datetime.now() - timedelta(days=7)).strftime('%Y/%m/%d')}"
+            # Derniers non lus (Gmail), limités aux 7 derniers jours pour limiter le flux
+            after_date = (datetime.now() - timedelta(days=7)).strftime("%Y/%m/%d")
+            query = f"is:unread after:{after_date}"
+            emails, _ = self._provider.get_emails(
+                max_results=max_results,
+                query=query,
+            )
 
-            emails, _ = adapter.get_emails(max_results=max_results, query=query)
-
-            # Sauvegarder les emails dans le stockage local
             saved_count = 0
             for email in emails:
-                if self.storage.save_email(email):
+                if self._storage.save_email(email):
                     saved_count += 1
 
-            # Mettre à jour le timestamp de dernière synchronisation
-            self.storage.update_last_sync_time()
+            self._storage.update_last_sync_time()
 
             return {
                 "status": "success",

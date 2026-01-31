@@ -4,7 +4,7 @@ import base64
 from email.utils import parseaddr
 from typing import Optional, Tuple
 
-from backend.api.schemas import EmailAddress
+from backend.core.models.email import EmailAddress
 from backend.utils.textCleaner import html_to_text
 
 

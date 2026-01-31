@@ -9,7 +9,7 @@ from unittest.mock import patch, MagicMock
 
 from backend.utils.textCleaner import html_to_text
 from backend.utils.emailParser import parse_email_address, extract_email_body
-from backend.api.schemas import Email, EmailAddress
+from backend.core.models.email import Email, EmailAddress
 
 
 class TestTextCleaner(unittest.TestCase):
@@ -140,10 +140,10 @@ class TestSqliteStorage(unittest.TestCase):
         """Supprime le répertoire temporaire."""
         shutil.rmtree(self.temp_dir)
 
-    @patch("backend.adapters.sqliteStorage.settings")
-    def test_storage_init_creates_database(self, mock_settings):
+    @patch("backend.adapters.sqliteStorage.storage_settings")
+    def test_storage_init_creates_database(self, mock_storage_settings):
         """Test que l'initialisation crée la base de données."""
-        mock_settings.DATA_DIR = self.temp_path
+        mock_storage_settings.DATA_DIR = self.temp_path
 
         from backend.adapters.sqliteStorage import SqliteStorage
 
@@ -151,10 +151,10 @@ class TestSqliteStorage(unittest.TestCase):
 
         self.assertTrue(storage.db_path.exists())
 
-    @patch("backend.adapters.sqliteStorage.settings")
-    def test_save_and_get_sync_time(self, mock_settings):
+    @patch("backend.adapters.sqliteStorage.storage_settings")
+    def test_save_and_get_sync_time(self, mock_storage_settings):
         """Test sauvegarde et récupération du temps de sync."""
-        mock_settings.DATA_DIR = self.temp_path
+        mock_storage_settings.DATA_DIR = self.temp_path
 
         from backend.adapters.sqliteStorage import SqliteStorage
 
@@ -171,10 +171,10 @@ class TestSqliteStorage(unittest.TestCase):
         self.assertIsNotNone(sync_time)
         self.assertIsInstance(sync_time, datetime)
 
-    @patch("backend.adapters.sqliteStorage.settings")
-    def test_save_email(self, mock_settings):
+    @patch("backend.adapters.sqliteStorage.storage_settings")
+    def test_save_email(self, mock_storage_settings):
         """Test sauvegarde d'un email."""
-        mock_settings.DATA_DIR = self.temp_path
+        mock_storage_settings.DATA_DIR = self.temp_path
 
         from backend.adapters.sqliteStorage import SqliteStorage
 

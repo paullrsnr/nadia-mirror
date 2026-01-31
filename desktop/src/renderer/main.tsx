@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
+import "./styles/global.css";
 import Inbox from "./pages/Inbox";
 import Settings from "./pages/Settings";
+import AuthCallback from "./pages/AuthCallback";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<"inbox" | "settings">("inbox");
@@ -33,8 +35,11 @@ if (!rootElement) {
 }
 const root = ReactDOM.createRoot(rootElement);
 
+// Page de callback OAuth (redirection backend → frontend)
+const isAuthCallback = window.location.pathname === "/auth/callback";
+
 root.render(
   <React.StrictMode>
-    <App />
+    {isAuthCallback ? <AuthCallback /> : <App />}
   </React.StrictMode>
 );

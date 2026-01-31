@@ -1,11 +1,6 @@
- import React from "react";
-import { Email } from "../services/apis/emails.api";
-
-interface EmailCardProps {
-  email: Email;
-  onClick: () => void;
-  onArchive?: () => void;
-}
+import React from "react";
+import type { EmailCardProps } from "../models";
+import styles from "./EmailCard.module.css";
 
 export default function EmailCard({
   email,
@@ -21,61 +16,46 @@ export default function EmailCard({
     minute: "2-digit",
   });
 
+  const rootClass = isUnread
+    ? `${styles.root} ${styles["root--unread"]}`
+    : styles.root;
+
   return (
     <div
+      className={rootClass}
       onClick={onClick}
-      style={{
-        padding: 15,
-        borderBottom: "1px solid #eee",
-        cursor: "pointer",
-        backgroundColor: isUnread ? "#f0f7ff" : "white",
-        fontWeight: isUnread ? "bold" : "normal",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = "#f5f5f5";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = isUnread ? "#f0f7ff" : "white";
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontWeight: "bold", color: "#333" }}>{fromName}</span>
+      <div className={styles.row}>
+        <div className={styles.main}>
+          <div className={styles.meta}>
+            <span className="text-primary">{fromName}</span>
           </div>
-          <div style={{ marginTop: 5, color: "#666", fontSize: "14px" }}>
+          <div className={`text-secondary ${styles.subject}`}>
             {email.subject || "[Sans objet]"}
           </div>
           {email.snippet && (
-            <div
-              style={{
-                marginTop: 5,
-                color: "#888",
-                fontSize: "12px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <div className={`${styles.snippet} text-muted truncate`}>
               {email.snippet}
             </div>
           )}
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
-          <span style={{ fontSize: "12px", color: "#888" }}>{date}</span>
+        <div className={styles.aside}>
+          <span className="text-muted">{date}</span>
           {onArchive && (
             <button
+              type="button"
+              className="btn-secondary"
               onClick={(e) => {
                 e.stopPropagation();
                 onArchive();
-              }}
-              style={{
-                padding: "4px 8px",
-                fontSize: "11px",
-                border: "1px solid #ccc",
-                borderRadius: "3px",
-                cursor: "pointer",
-                backgroundColor: "white",
               }}
             >
               Archiver

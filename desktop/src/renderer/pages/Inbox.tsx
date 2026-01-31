@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import EmailCard from "../components/EmailCard";
 import { Email, getEmails, syncEmails, archiveEmail } from "../services/apis/emails.api";
 import { getAuthStatus } from "../services/apis/auth.api";
+import { colors, spacing, radius } from "../theme";
 
 export default function Inbox() {
   const [emails, setEmails] = useState<Email[]>([]);
@@ -45,8 +46,12 @@ export default function Inbox() {
     setSyncing(true);
     setError(null);
     try {
-      await syncEmails(100, false);
-      await loadEmails();
+      const result = await syncEmails(100);
+      if (result.status === "error") {
+        setError(result.message ?? "Erreur lors de la synchronisation");
+      } else {
+        await loadEmails();
+      }
     } catch (err) {
       setError("Erreur lors de la synchronisation");
     } finally {
@@ -72,7 +77,7 @@ export default function Inbox() {
 
   if (!isAuthenticated) {
     return (
-      <div style={{ padding: 20, textAlign: "center" }}>
+      <div style={{ padding: spacing.page, textAlign: "center" }}>
         <h1>📬 Nadia</h1>
         <p>Veuillez vous connecter à Gmail dans les paramètres.</p>
       </div>
@@ -82,18 +87,18 @@ export default function Inbox() {
   return (
     <div style={{ display: "flex", height: "100vh" }}>
       {/* Liste des emails */}
-      <div style={{ width: "40%", borderRight: "1px solid #ddd", overflowY: "auto" }}>
-        <div style={{ padding: 20, borderBottom: "1px solid #ddd", backgroundColor: "#f9f9f9" }}>
-          <h1 style={{ margin: 0, marginBottom: 10 }}>📬 Nadia</h1>
+      <div style={{ width: "40%", borderRight: `1px solid ${colors.borderStrong}`, overflowY: "auto" }}>
+        <div style={{ padding: spacing.page, borderBottom: `1px solid ${colors.borderStrong}`, backgroundColor: colors.backgroundMuted }}>
+          <h1 style={{ margin: 0, marginBottom: spacing.md }}>📬 Nadia</h1>
           <button
             onClick={handleSync}
             disabled={syncing}
             style={{
-              padding: "8px 16px",
-              backgroundColor: "#007bff",
-              color: "white",
+              padding: `${spacing.sm}px 16px`,
+              backgroundColor: colors.buttonPrimary,
+              color: colors.background,
               border: "none",
-              borderRadius: 3,
+              borderRadius: radius.sm,
               cursor: syncing ? "not-allowed" : "pointer",
             }}
           >
@@ -102,9 +107,9 @@ export default function Inbox() {
         </div>
 
         {loading ? (
-          <div style={{ padding: 20, textAlign: "center" }}>Chargement...</div>
+          <div style={{ padding: spacing.page, textAlign: "center" }}>Chargement...</div>
         ) : emails.length === 0 ? (
-          <div style={{ padding: 20, textAlign: "center", color: "#888" }}>
+          <div style={{ padding: spacing.page, textAlign: "center", color: colors.textMuted }}>
             Aucun email
           </div>
         ) : (
@@ -119,18 +124,18 @@ export default function Inbox() {
         )}
 
         {error && (
-          <div style={{ padding: 20, color: "red", textAlign: "center" }}>
+          <div style={{ padding: spacing.page, color: colors.error, textAlign: "center" }}>
             {error}
           </div>
         )}
       </div>
 
       {/* Détails de l'email */}
-      <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: spacing.page }}>
         {selectedEmail ? (
           <div>
             <h2>{selectedEmail.subject || "[Sans objet]"}</h2>
-            <div style={{ color: "#666", marginBottom: 10 }}>
+            <div style={{ color: colors.textSecondary, marginBottom: spacing.md }}>
               <div>
                 <strong>De:</strong> {selectedEmail.from_address.name || selectedEmail.from_address.email}
               </div>
@@ -139,12 +144,12 @@ export default function Inbox() {
                 {new Date(selectedEmail.date).toLocaleString("fr-FR")}
               </div>
             </div>
-            <div style={{ marginTop: 20, whiteSpace: "pre-wrap" }}>
+            <div style={{ marginTop: spacing.page, whiteSpace: "pre-wrap" }}>
               {selectedEmail.body_text}
             </div>
           </div>
         ) : (
-          <div style={{ textAlign: "center", color: "#888", marginTop: 50 }}>
+          <div style={{ textAlign: "center", color: colors.textMuted, marginTop: spacing.lg }}>
             Sélectionnez un email pour voir les détails
           </div>
         )}

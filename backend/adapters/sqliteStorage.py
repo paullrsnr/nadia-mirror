@@ -6,8 +6,12 @@ import sqlite3
 from datetime import datetime
 from typing import Optional
 
-from backend.api.schemas import Email
-from backend.config.settings import settings
+from backend.core.models.email import (
+    Email,
+    EmailAddress,
+    EmailAttachment,
+)
+from backend.config.settings import storage_settings
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +20,8 @@ class SqliteStorage:
     """Stockage local SQLite pour les emails."""
 
     def __init__(self):
-        settings.DATA_DIR.mkdir(parents=True, exist_ok=True)
-        self.db_path = settings.DATA_DIR / "emails.db"
+        storage_settings.DATA_DIR.mkdir(parents=True, exist_ok=True)
+        self.db_path = storage_settings.DATA_DIR / "emails.db"
         self._init_database()
 
     def _init_database(self):
@@ -122,9 +126,94 @@ class SqliteStorage:
         finally:
             conn.close()
 
-    # get_emails - À implémenter
-    # get_threads - À implémenter
-    # get_thread - À implémenter
+    def get_emails(
+        self, max_results: int = 50, offset: int = 0
+    ) -> tuple[list[Email], int]:
+        """Retourne les emails déjà présents en base (paginés) et le total."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT COUNT(*) FROM emails")
+            total = cursor.fetchone()[0]
+
+            cursor.execute(
+                """
+                SELECT id, thread_id, subject, from_name, from_email,
+                       to_addresses, cc_addresses, bcc_addresses,
+                       date, body_text, body_html, attachments, labels, snippet
+                FROM emails
+                ORDER BY date DESC
+                LIMIT ? OFFSET ?
+                """,
+                (max_results, offset),
+            )
+            rows = cursor.fetchall()
+        finally:
+            conn.close()
+
+        emails = [self._row_to_email(row) for row in rows]
+        return emails, total
+
+    def _row_to_email(self, row: tuple) -> Email:
+        """Construit un Email métier à partir d'une ligne SQLite."""
+        (
+            id_,
+            thread_id,
+            subject,
+            from_name,
+            from_email,
+            to_addresses_json,
+            cc_addresses_json,
+            bcc_addresses_json,
+            date_str,
+            body_text,
+            body_html,
+            attachments_json,
+            labels_json,
+            snippet,
+        ) = row
+
+        def parse_addresses(data: str) -> list[EmailAddress]:
+            if not data:
+                return []
+            items = json.loads(data)
+            return [
+                EmailAddress(email=a["email"], name=a.get("name"))
+                for a in items
+            ]
+
+        def parse_attachments(data: str) -> list[EmailAttachment]:
+            if not data:
+                return []
+            items = json.loads(data)
+            return [
+                EmailAttachment(
+                    filename=a["filename"],
+                    mime_type=a["mime_type"],
+                    size=a["size"],
+                    attachment_id=a["attachment_id"],
+                )
+                for a in items
+            ]
+
+        labels_list = json.loads(labels_json) if labels_json else []
+        date_obj = datetime.fromisoformat(date_str) if date_str else datetime.now()
+
+        return Email(
+            id=id_,
+            thread_id=thread_id,
+            subject=subject or "",
+            from_address=EmailAddress(email=from_email or "", name=from_name),
+            to_addresses=parse_addresses(to_addresses_json),
+            cc_addresses=parse_addresses(cc_addresses_json),
+            bcc_addresses=parse_addresses(bcc_addresses_json),
+            date=date_obj,
+            body_text=body_text or "",
+            body_html=body_html,
+            attachments=parse_attachments(attachments_json),
+            labels=labels_list,
+            snippet=snippet,
+        )
 
     def get_last_sync_time(self) -> Optional[datetime]:
         """Récupère le timestamp de la dernière synchronisation."""

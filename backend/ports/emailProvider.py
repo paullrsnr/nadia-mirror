@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from backend.api.schemas import Email
+from backend.core.models.email import Email
 
 
 class EmailProvider(ABC):
