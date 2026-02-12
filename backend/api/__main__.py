@@ -1,3 +1,4 @@
+"""Point d'entrée pour lancer le serveur API (uvicorn)."""
 import uvicorn
 
 if __name__ == "__main__":

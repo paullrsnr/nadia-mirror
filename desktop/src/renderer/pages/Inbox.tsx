@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import EmailCard from "../components/EmailCard";
 import { Email, getEmails, syncEmails, archiveEmail } from "../services/apis/emails.api";
-import { getAuthStatus } from "../services/apis/auth.api";
+import { getAuthStatus, type MailProvider } from "../services/apis/auth.api";
 import { colors, spacing, radius } from "../theme";
+
+const DEFAULT_INBOX_VIEW: MailProvider = "all";
 
 export default function Inbox() {
   const [emails, setEmails] = useState<Email[]>([]);
@@ -11,20 +13,20 @@ export default function Inbox() {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [inboxFilter, setInboxFilter] = useState<MailProvider>(DEFAULT_INBOX_VIEW);
 
   useEffect(() => {
-    checkAuthAndLoad();
-  }, []);
+    checkAuthAndLoadEmails();
+  }, [inboxFilter]);
 
-  async function checkAuthAndLoad() {
+  async function checkAuthAndLoadEmails() {
     try {
-      const authStatus = await getAuthStatus();
+      const authStatus = await getAuthStatus(inboxFilter);
       setIsAuthenticated(authStatus.is_authenticated);
-      
       if (authStatus.is_authenticated) {
         await loadEmails();
       }
-    } catch (err) {
+    } catch {
       setError("Erreur de connexion");
     }
   }
@@ -33,7 +35,7 @@ export default function Inbox() {
     setLoading(true);
     setError(null);
     try {
-      const response = await getEmails(50);
+      const response = await getEmails(50, inboxFilter);
       setEmails(response.emails);
     } catch (err) {
       setError("Erreur lors du chargement des emails");
@@ -46,7 +48,7 @@ export default function Inbox() {
     setSyncing(true);
     setError(null);
     try {
-      const result = await syncEmails(100);
+      const result = await syncEmails(100, inboxFilter);
       if (result.status === "error") {
         setError(result.message ?? "Erreur lors de la synchronisation");
       } else {
@@ -63,11 +65,13 @@ export default function Inbox() {
     setSelectedEmail(email);
   }
 
-  async function handleArchive(emailId: string) {
+  async function handleArchive(email: Email) {
+    const archiveProvider = inboxFilter === "all" ? (email.provider ?? "gmail") : inboxFilter;
+    if (archiveProvider === "all") return;
     try {
-      await archiveEmail(emailId);
-      setEmails(emails.filter((e) => e.id !== emailId));
-      if (selectedEmail?.id === emailId) {
+      await archiveEmail(email.id, archiveProvider);
+      setEmails(emails.filter((e) => e.id !== email.id));
+      if (selectedEmail?.id === email.id) {
         setSelectedEmail(null);
       }
     } catch (err) {
@@ -79,7 +83,7 @@ export default function Inbox() {
     return (
       <div style={{ padding: spacing.page, textAlign: "center" }}>
         <h1>📬 Nadia</h1>
-        <p>Veuillez vous connecter à Gmail dans les paramètres.</p>
+        <p>Veuillez vous connecter à votre boîte mail dans les paramètres.</p>
       </div>
     );
   }
@@ -90,6 +94,24 @@ export default function Inbox() {
       <div style={{ width: "40%", borderRight: `1px solid ${colors.borderStrong}`, overflowY: "auto" }}>
         <div style={{ padding: spacing.page, borderBottom: `1px solid ${colors.borderStrong}`, backgroundColor: colors.backgroundMuted }}>
           <h1 style={{ margin: 0, marginBottom: spacing.md }}>📬 Nadia</h1>
+          <div style={{ marginBottom: spacing.sm }}>
+            <label>
+              Boîte mail :
+              <select
+                value={inboxFilter}
+                onChange={(e) => {
+                  setSelectedEmail(null);
+                  setEmails([]);
+                  setInboxFilter(e.target.value as MailProvider);
+                }}
+                style={{ marginLeft: spacing.sm }}
+              >
+                <option value="all">Toutes les boîtes</option>
+                <option value="gmail">Gmail</option>
+                <option value="outlook">Outlook</option>
+              </select>
+            </label>
+          </div>
           <button
             onClick={handleSync}
             disabled={syncing}
@@ -118,7 +140,7 @@ export default function Inbox() {
               key={email.id}
               email={email}
               onClick={() => handleEmailClick(email)}
-              onArchive={() => handleArchive(email.id)}
+              onArchive={() => handleArchive(email)}
             />
           ))
         )}

@@ -1,101 +1,125 @@
-import React, { useState, useEffect } from "react";
-import { getAuthUrl, getAuthStatus, logout, AuthStatus, ApiError } from "../services/apis/auth.api";
+import { useState, useEffect, useCallback } from "react";
+import type { ApiError } from "../services/apis/auth.api";
+import AuthProviderCard from "../components/AuthProviderCard";
+import { colors, spacing } from "../theme";
+import {
+  getAllAuthStatuses,
+  getAuthStatus,
+  getAuthUrl,
+  logout,
+  CONNECTABLE_PROVIDERS,
+  type ConnectableProvider,
+  type AuthStateByProvider,
+} from "../services/auth";
+
+const PROVIDER_LABELS: Record<ConnectableProvider, string> = {
+  gmail: "Gmail",
+  outlook: "Outlook",
+};
+
+/** Intervalle de vérification après ouverture de la fenêtre OAuth (ms). */
+const POLL_INTERVAL_MS = 2000;
+/** Durée max du polling avant abandon (ms). */
+const POLL_TIMEOUT_MS = 300000;
 
 export default function Settings() {
-  const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [authByProvider, setAuthByProvider] = useState<AuthStateByProvider>({
+    gmail: null,
+    outlook: null,
+  });
+  const [loading, setLoading] = useState<Record<ConnectableProvider, boolean>>({
+    gmail: false,
+    outlook: false,
+  });
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    checkAuthStatus();
+  const refreshAllAuthStatuses = useCallback(async () => {
+    const state = await getAllAuthStatuses();
+    setAuthByProvider(state);
   }, []);
 
-  async function checkAuthStatus() {
+  useEffect(() => {
+    refreshAllAuthStatuses();
+  }, [refreshAllAuthStatuses]);
+
+  async function refreshAuthStatusForProvider(provider: ConnectableProvider) {
     try {
-      const status = await getAuthStatus();
-      setAuthStatus(status);
-    } catch (err) {
-      setError("Erreur lors de la vérification du statut");
+      const status = await getAuthStatus(provider);
+      setAuthByProvider((prev) => ({ ...prev, [provider]: status }));
+      return status;
+    } catch {
+      const fallback = { is_authenticated: false, email: null };
+      setAuthByProvider((prev) => ({ ...prev, [provider]: fallback }));
+      return fallback;
     }
   }
 
-  async function handleConnectGmail() {
-    setLoading(true);
+  async function handleConnect(provider: ConnectableProvider) {
+    setLoading((prev) => ({ ...prev, [provider]: true }));
     setError(null);
-
     try {
-      const authUrl = await getAuthUrl();
-      // Ouvrir la fenêtre d'authentification
+      const authUrl = await getAuthUrl(provider);
       window.open(authUrl, "_blank", "width=600,height=700");
-      
-      // Polling pour vérifier si l'authentification a réussi
+
       const interval = setInterval(async () => {
         try {
-          const status = await getAuthStatus();
-          if (status.is_authenticated) {
+          const status = await refreshAuthStatusForProvider(provider);
+          if (status?.is_authenticated) {
             clearInterval(interval);
-            setAuthStatus(status);
-            setLoading(false);
+            setLoading((prev) => ({ ...prev, [provider]: false }));
           }
-        } catch (err) {
-          // Continuer le polling
+        } catch {
+          // on ignore les erreurs et on réessaie au prochain tick
         }
-      }, 2000);
+      }, POLL_INTERVAL_MS);
 
-      // Arrêter le polling après 5 minutes
       setTimeout(() => {
         clearInterval(interval);
-        setLoading(false);
-      }, 300000);
+        setLoading((prev) => ({ ...prev, [provider]: false }));
+      }, POLL_TIMEOUT_MS);
     } catch (err) {
       const apiError = err as ApiError;
-      const errorMessage = apiError?.response?.data?.detail || apiError?.message || "Erreur lors de la connexion à Gmail";
+      const errorMessage =
+        apiError?.response?.data?.detail ||
+        apiError?.message ||
+        `Erreur lors de la connexion à ${PROVIDER_LABELS[provider]}`;
       setError(errorMessage);
-      setLoading(false);
+      setLoading((prev) => ({ ...prev, [provider]: false }));
     }
   }
 
-  async function handleDisconnect() {
-    setLoading(true);
+  async function handleDisconnect(provider: ConnectableProvider) {
+    setLoading((prev) => ({ ...prev, [provider]: true }));
     setError(null);
-
     try {
-      await logout();
-      setAuthStatus({ is_authenticated: false, email: null });
-    } catch (err) {
+      await logout(provider);
+      setAuthByProvider((prev) => ({ ...prev, [provider]: { is_authenticated: false, email: null } }));
+    } catch {
       setError("Erreur lors de la déconnexion");
     } finally {
-      setLoading(false);
+      setLoading((prev) => ({ ...prev, [provider]: false }));
     }
   }
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>⚙️ Paramètres</h1>
+      <h1>Paramètres</h1>
 
-      <div style={{ marginTop: 30 }}>
-        <h2>Connexion Gmail</h2>
+      {CONNECTABLE_PROVIDERS.map((provider) => (
+        <AuthProviderCard
+          key={provider}
+          provider={provider}
+          label={PROVIDER_LABELS[provider]}
+          status={authByProvider[provider]}
+          loading={loading[provider]}
+          onConnect={() => handleConnect(provider)}
+          onDisconnect={() => handleDisconnect(provider)}
+        />
+      ))}
 
-        {authStatus?.is_authenticated ? (
-          <div>
-            <p style={{ color: "green" }}>
-              ✓ Connecté {authStatus.email ? `(${authStatus.email})` : ""}
-            </p>
-            <button onClick={handleDisconnect} disabled={loading}>
-              {loading ? "Déconnexion..." : "Déconnecter"}
-            </button>
-          </div>
-        ) : (
-          <div>
-            <p>Non connecté</p>
-            <button onClick={handleConnectGmail} disabled={loading}>
-              {loading ? "Connexion..." : "Se connecter à Gmail"}
-            </button>
-          </div>
-        )}
-
-        {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
-      </div>
+      {error && (
+        <p style={{ color: colors.error, marginTop: spacing.page }}>{error}</p>
+      )}
     </div>
   );
 }

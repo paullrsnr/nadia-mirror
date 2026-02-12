@@ -5,14 +5,14 @@ from unittest.mock import MagicMock, patch
 from datetime import datetime
 
 from backend.core.mailboxService import MailboxService
-from backend.core.models.email import Email, EmailAddress
+from backend.core.models.email import Email, EmailAddress, EmailPage
 
 
 class TestMailboxService(unittest.TestCase):
     """Tests pour MailboxService."""
 
     @patch("backend.core.mailboxService.SqliteStorage")
-    def test_sync_emails_success(self, mock_storage):
+    def test_sync_emails_success(self, mock_storage: MagicMock) -> None:
         """Test synchronisation réussie."""
         mock_storage_instance = MagicMock()
         mock_storage.return_value = mock_storage_instance
@@ -29,10 +29,10 @@ class TestMailboxService(unittest.TestCase):
             date=datetime.now(),
             body_text="Contenu test",
         )
-        mock_provider.get_emails.return_value = ([test_email], None)
+        mock_provider.get_emails.return_value = EmailPage(emails=[test_email], next_page_token=None)
 
-        service = MailboxService(mock_provider)
-        result = service.sync_emails(max_results=10)
+        service = MailboxService()
+        result = service.sync_emails(mock_provider, "gmail", max_results=10)
 
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["synced"], 1)
@@ -40,21 +40,26 @@ class TestMailboxService(unittest.TestCase):
         mock_storage_instance.update_last_sync_time.assert_called_once()
 
     @patch("backend.core.mailboxService.SqliteStorage")
-    def test_sync_emails_with_error(self, mock_storage):
+    def test_sync_emails_with_error(self, mock_storage: MagicMock) -> None:
         """Test synchronisation avec erreur."""
-        mock_storage.return_value = MagicMock()
+        mock_storage_instance = MagicMock()
+        mock_storage_instance.get_last_sync_time.return_value = None
+        mock_storage.return_value = mock_storage_instance
+
         mock_provider = MagicMock()
         mock_provider.get_emails.side_effect = ValueError("Non authentifié")
 
-        service = MailboxService(mock_provider)
-        result = service.sync_emails()
+        service = MailboxService()
+        result = service.sync_emails(mock_provider, "gmail")
 
         self.assertEqual(result["status"], "error")
         self.assertIn("Non authentifié", result["message"])
 
     @patch("backend.core.mailboxService.storage_settings")
     @patch("backend.core.mailboxService.SqliteStorage")
-    def test_sync_emails_skipped_when_recent(self, mock_storage, mock_settings):
+    def test_sync_emails_skipped_when_recent(
+        self, mock_storage: MagicMock, mock_settings: MagicMock
+    ) -> None:
         """Test que la sync est ignorée si dernière sync trop récente."""
         mock_settings.SYNC_MIN_INTERVAL_MINUTES = 5
         mock_storage_instance = MagicMock()
@@ -62,9 +67,8 @@ class TestMailboxService(unittest.TestCase):
         mock_storage_instance.get_last_sync_time.return_value = datetime.now()
 
         mock_provider = MagicMock()
-
-        service = MailboxService(mock_provider)
-        result = service.sync_emails()
+        service = MailboxService()
+        result = service.sync_emails(mock_provider, "gmail")
 
         self.assertEqual(result["status"], "skipped")
         mock_provider.get_emails.assert_not_called()

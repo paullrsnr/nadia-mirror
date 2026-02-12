@@ -14,4 +14,6 @@ export interface Email {
   attachments: EmailAttachment[];
   labels: string[];
   snippet?: string;
+  /** Boîte d'origine (gmail | outlook) pour archivage en vue "Toutes les boîtes" */
+  provider?: string;
 }

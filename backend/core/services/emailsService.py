@@ -1,37 +1,23 @@
 # pylint: disable=invalid-name
-"""Use case : liste d'emails et archivage (délègue au port EmailProvider)."""
-from typing import Optional
-
-from backend.core.models.email import EmailListResult
+"""Use case : archivage d'un email (délègue à l'adapter Gmail ou Outlook)."""
 from backend.ports.emailProvider import EmailProvider
 
 
 class EmailsService:
-    """Service métier : récupération et archivage d'emails (use case)."""
+    """Archive un email via l'adapter du provider (Gmail ou Outlook)."""
 
-    def __init__(self, email_provider: EmailProvider):
-        self._provider = email_provider
-
-    def get_emails(
-        self,
-        max_results: int = 50,
-        query: Optional[str] = None,
-        page_token: Optional[str] = None,
-        page: int = 1,
-    ) -> EmailListResult:
-        """Récupère une liste paginée d'emails."""
-        emails, _ = self._provider.get_emails(
-            max_results=max_results,
-            query=query,
-            page_token=page_token,
-        )
-        return EmailListResult(
-            emails=emails,
-            total=len(emails),
-            page=page,
-            page_size=max_results,
-        )
+    def __init__(self, adapter: EmailProvider) -> None:
+        self._adapter = adapter
 
     def archive_email(self, email_id: str) -> bool:
-        """Archive un email."""
-        return self._provider.archive_email(email_id)
+        """Archive l'email et retourne True si succès."""
+        return self._adapter.archive_email(email_id)
+
+    def archive_email_response(self, email_id: str) -> dict:
+        """Archive l'email et retourne un dict prêt pour la réponse API."""
+        success = self.archive_email(email_id)
+        return (
+            {"status": "success", "email_id": email_id}
+            if success
+            else {"status": "error"}
+        )

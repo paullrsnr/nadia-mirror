@@ -12,8 +12,8 @@ class AuthUrl:
 
 
 @dataclass
-class AuthStatus:
-    """Représentation métier du statut d'authentification d'un utilisateur."""
+class AuthIdentity:
+    """Représentation métier de l'identité d'un utilisateur authentifié (ou non)."""
 
     is_authenticated: bool
     email: Optional[str] = None

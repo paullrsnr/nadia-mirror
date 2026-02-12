@@ -1,6 +1,6 @@
 import React from "react";
 import type { EmailCardProps } from "../models";
-import styles from "./EmailCard.module.css";
+import "./EmailCard.css";
 
 export default function EmailCard({
   email,
@@ -17,8 +17,8 @@ export default function EmailCard({
   });
 
   const rootClass = isUnread
-    ? `${styles.root} ${styles["root--unread"]}`
-    : styles.root;
+    ? `root root--unread`
+    : `root`;
 
   return (
     <div
@@ -33,21 +33,21 @@ export default function EmailCard({
         }
       }}
     >
-      <div className={styles.row}>
-        <div className={styles.main}>
-          <div className={styles.meta}>
+      <div className="row">
+        <div className="main">
+          <div className="meta">
             <span className="text-primary">{fromName}</span>
           </div>
-          <div className={`text-secondary ${styles.subject}`}>
+          <div className={`text-secondary subject`}>
             {email.subject || "[Sans objet]"}
           </div>
           {email.snippet && (
-            <div className={`${styles.snippet} text-muted truncate`}>
+            <div className={`snippet text-muted truncate`}>
               {email.snippet}
             </div>
           )}
         </div>
-        <div className={styles.aside}>
+        <div className="aside">
           <span className="text-muted">{date}</span>
           {onArchive && (
             <button

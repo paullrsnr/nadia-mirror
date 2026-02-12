@@ -1,30 +1,28 @@
 # pylint: disable=invalid-name
 """Adaptateur Gmail pour l'API Google."""
-from datetime import datetime
-from email.utils import parsedate_to_datetime
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from googleapiclient.discovery import build
 
 from backend.ports.emailProvider import EmailProvider
-from backend.core.models.email import Email, EmailAttachment
-from backend.core.services.credentialsService import get_credentials
-from backend.utils.emailParser import parse_email_address, extract_email_body
+from backend.core.models.email import Email, EmailPage
+from backend.core.services.credentialsService import get_gmail_credentials
+from backend.adapters.gmailMessageParser import parse_gmail_message
 
 
 class GmailAdapter(EmailProvider):
-    """Adaptateur pour l'API Gmail."""
+    """Adaptateur pour l'API Gmail. Utilise uniquement les credentials Gmail."""
 
     def __init__(self):
         self.gmail_api = None
         self._ensure_service()
 
-    def _ensure_service(self):
-        """Initialise le service Gmail si les credentials sont disponibles."""
-        credentials = get_credentials()
-        if credentials:
+    def _ensure_service(self) -> None:
+        """Initialise le client Gmail si les credentials Gmail sont disponibles."""
+        gmail_credentials = get_gmail_credentials()
+        if gmail_credentials:
             # pylint: disable=no-member
-            self.gmail_api = build("gmail", "v1", credentials=credentials)
+            self.gmail_api = build("gmail", "v1", credentials=gmail_credentials)
         else:
             raise ValueError(
                 "Credentials Gmail non disponibles. Authentification requise."
@@ -37,9 +35,8 @@ class GmailAdapter(EmailProvider):
         self,
         max_results: int = 50,
         query: Optional[str] = None,
-        page_token: Optional[str] = None,
-    ) -> Tuple[List[Email], Optional[str]]:
-        """Récupère une liste d'emails depuis Gmail (non lus par défaut)."""
+    ) -> EmailPage:
+        """Récupère une page d'emails depuis Gmail (non lus par défaut)."""
         q = (query or "").strip() or self._DEFAULT_QUERY_UNREAD
         try:
             # pylint: disable=no-member
@@ -50,7 +47,6 @@ class GmailAdapter(EmailProvider):
                     userId="me",
                     maxResults=max_results,
                     q=q,
-                    pageToken=page_token,
                 )
                 .execute()
             )
@@ -63,8 +59,8 @@ class GmailAdapter(EmailProvider):
                 email_obj = self._get_and_parse_to_email(msg["id"])
                 emails.append(email_obj)
 
-            return emails, next_page_token
-        except Exception as e:
+            return EmailPage(emails=emails, next_page_token=next_page_token)
+        except (OSError, ValueError, KeyError, TypeError) as e:
             raise RuntimeError(
                 f"Erreur lors de la récupération des emails: {str(e)}"
             ) from e
@@ -78,72 +74,7 @@ class GmailAdapter(EmailProvider):
             .get(userId="me", id=email_id, format="full")
             .execute()
         )
-        return self._parse_gmail_message(message)
-
-    def _parse_gmail_message(self, message: dict) -> Email:
-        """Parse un message Gmail en objet Email."""
-        payload = message["payload"]
-        headers = payload.get("headers", [])
-
-        # Extraire les headers
-        header_dict = {h["name"].lower(): h["value"] for h in headers}
-
-        # Parser les adresses
-        from_addr = parse_email_address(header_dict.get("from", ""))
-        to_addrs = [
-            parse_email_address(addr)
-            for addr in header_dict.get("to", "").split(",")
-            if addr.strip()
-        ]
-        cc_addrs = (
-            [
-                parse_email_address(addr)
-                for addr in header_dict.get("cc", "").split(",")
-                if addr.strip()
-            ]
-            if header_dict.get("cc")
-            else []
-        )
-
-        # Parser la date (format RFC 2822)
-        date_str = header_dict.get("date", "")
-        try:
-            date = parsedate_to_datetime(date_str) if date_str else datetime.now()
-        except (ValueError, TypeError):
-            date = datetime.now()
-
-        # Extraire le corps de l'email
-        body_text, body_html = extract_email_body(payload)
-
-        # Extraire les pièces jointes
-        attachments = []
-        if "parts" in payload:
-            for part in payload["parts"]:
-                if part.get("filename") and part.get("body", {}).get("attachmentId"):
-                    attachments.append(
-                        EmailAttachment(
-                            filename=part["filename"],
-                            mime_type=part.get("mimeType", "application/octet-stream"),
-                            size=part.get("body", {}).get("size", 0),
-                            attachment_id=part["body"]["attachmentId"],
-                        )
-                    )
-
-        return Email(
-            id=message["id"],
-            thread_id=message["threadId"],
-            subject=header_dict.get("subject", ""),
-            from_address=from_addr,
-            to_addresses=to_addrs,
-            cc_addresses=cc_addrs,
-            bcc_addresses=[],
-            date=date,
-            body_text=body_text,
-            body_html=body_html,
-            attachments=attachments,
-            labels=message.get("labelIds", []),
-            snippet=message.get("snippet"),
-        )
+        return parse_gmail_message(message)
 
     def archive_email(self, email_id: str) -> bool:
         """Archive un email (retire le label INBOX)."""
@@ -155,11 +86,5 @@ class GmailAdapter(EmailProvider):
                 body={"removeLabelIds": ["INBOX"]},
             ).execute()
             return True
-        except Exception:
+        except (OSError, ValueError, KeyError, TypeError):
             return False
-
-    # get_email - À implémenter
-    # get_thread - À implémenter
-    # get_threads - À implémenter
-    # send_email - À implémenter
-    # mark_as_read - À implémenter

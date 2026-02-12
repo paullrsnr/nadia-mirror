@@ -1,9 +1,9 @@
 # pylint: disable=invalid-name
 """Interface abstraite pour les fournisseurs d'email."""
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Optional
 
-from backend.core.models.email import Email
+from backend.core.models.email import EmailPage
 
 
 class EmailProvider(ABC):
@@ -14,17 +14,9 @@ class EmailProvider(ABC):
         self,
         max_results: int = 50,
         query: Optional[str] = None,
-        page_token: Optional[str] = None,
-    ) -> tuple[List[Email], Optional[str]]:
-        """Récupère une liste d'emails."""
-
-    # get_email - À implémenter
-    # get_thread - À implémenter
-    # get_threads - À implémenter
-    # send_email - À implémenter
+    ) -> EmailPage:
+        """Récupère une page d'emails."""
 
     @abstractmethod
     def archive_email(self, email_id: str) -> bool:
         """Archive un email."""
-
-    # mark_as_read - À implémenter
