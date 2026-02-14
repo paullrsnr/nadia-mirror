@@ -12,3 +12,6 @@ cryptography
 pylint
 pytest
 httpx
+sqlalchemy
+alembic
+aiosqlite

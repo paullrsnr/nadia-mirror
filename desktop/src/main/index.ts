@@ -26,7 +26,8 @@ function createWindow() {
 
 async function logoutBeforeQuit(): Promise<void> {
   try {
-    await fetch(`${API_BASE_URL}/auth/logout`, { method: "POST" });
+    // Déconnexion pour gmail (provider par défaut)
+    await fetch(`${API_BASE_URL}/auth/logout/gmail`, { method: "POST" });
   } catch (error) {
     // Ignorer les erreurs (le backend peut déjà être arrêté)
   }

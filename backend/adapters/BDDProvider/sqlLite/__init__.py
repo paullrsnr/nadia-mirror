@@ -1,0 +1,1 @@
+# Adaptateur SQLite — à implémenter

@@ -138,29 +138,29 @@ class TestSqliteStorage(unittest.TestCase):
 
     def tearDown(self):
         """Supprime le répertoire temporaire."""
+        # Fermer l'engine SQLAlchemy pour libérer les connexions
+        from backend.database import dispose_engine
+        dispose_engine()
         shutil.rmtree(self.temp_dir)
 
-    @patch("backend.config.user_space.get_current_user_space_dir")
-    def test_storage_init_creates_database(self, mock_user_space_dir):
+    @patch("backend.config.settings.storage_settings")
+    def test_storage_init_creates_database(self, mock_storage_settings):
         """Test que l'initialisation crée la base de données."""
-        mock_user_space_dir.return_value = self.temp_path
+        mock_storage_settings.DATA_DIR = self.temp_path
 
-        from backend.database.email_storage import SqliteStorage
+        from backend.database import SqliteStorage
 
         storage = SqliteStorage()
 
         self.assertTrue(storage.db_path.exists())
 
     @patch("backend.config.settings.storage_settings")
-    @patch("backend.config.user_space.get_current_user_space_dir")
-    def test_save_and_get_sync_time(self, mock_user_space_dir, mock_storage_settings):
+    def test_save_and_get_sync_time(self, mock_storage_settings):
         """Test sauvegarde et récupération du temps de sync."""
         test_dir = Path(tempfile.mkdtemp(dir=self.temp_dir))
-        mock_user_space_dir.return_value = test_dir
-        # Éviter la migration depuis l'ancien emplacement (DATA_DIR sans emails.db)
         mock_storage_settings.DATA_DIR = test_dir
 
-        from backend.database.email_storage import SqliteStorage
+        from backend.database import SqliteStorage
 
         storage = SqliteStorage()
 
@@ -175,12 +175,12 @@ class TestSqliteStorage(unittest.TestCase):
         self.assertIsNotNone(sync_time)
         self.assertIsInstance(sync_time, datetime)
 
-    @patch("backend.config.user_space.get_current_user_space_dir")
-    def test_save_email(self, mock_user_space_dir):
+    @patch("backend.config.settings.storage_settings")
+    def test_save_email(self, mock_storage_settings):
         """Test sauvegarde d'un email."""
-        mock_user_space_dir.return_value = self.temp_path
+        mock_storage_settings.DATA_DIR = self.temp_path
 
-        from backend.database.email_storage import SqliteStorage
+        from backend.database import SqliteStorage
 
         storage = SqliteStorage()
 

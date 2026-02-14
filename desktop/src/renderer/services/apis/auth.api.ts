@@ -6,8 +6,8 @@ export type { ApiError, AuthStatus, AuthUrl } from "../../models";
 export type MailProvider = "gmail" | "outlook" | "all";
 
 export async function getAuthUrl(provider?: MailProvider): Promise<string> {
-  const params = provider ? `?provider=${provider}` : "";
-  const response = await fetch(`${API_BASE_URL}/auth/url${params}`);
+  const providerPath = provider && provider !== "all" ? provider : "gmail";
+  const response = await fetch(`${API_BASE_URL}/auth/url/${providerPath}`);
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
@@ -23,8 +23,8 @@ export async function getAuthUrl(provider?: MailProvider): Promise<string> {
 }
 
 export async function getAuthStatus(provider?: MailProvider): Promise<AuthStatus> {
-  const params = provider ? `?provider=${provider}` : "";
-  const response = await fetch(`${API_BASE_URL}/auth/status${params}`);
+  const providerPath = provider && provider !== "all" ? provider : "gmail";
+  const response = await fetch(`${API_BASE_URL}/auth/status/${providerPath}`);
 
   if (!response.ok) {
     throw new Error("Erreur lors de la vérification du statut d'authentification");
@@ -35,8 +35,8 @@ export async function getAuthStatus(provider?: MailProvider): Promise<AuthStatus
 }
 
 export async function logout(provider?: MailProvider): Promise<void> {
-  const params = provider ? `?provider=${provider}` : "";
-  const response = await fetch(`${API_BASE_URL}/auth/logout${params}`, {
+  const providerPath = provider && provider !== "all" ? provider : "gmail";
+  const response = await fetch(`${API_BASE_URL}/auth/logout/${providerPath}`, {
     method: "POST",
   });
 
