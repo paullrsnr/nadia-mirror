@@ -13,10 +13,10 @@ GMAIL_API_NAME = "gmail"
 
 def get_user_email_address(credentials: Credentials) -> Optional[str]:
     """Récupère l'adresse email de l'utilisateur via l'API Gmail.
-    
+
     Args:
         credentials: Credentials Google OAuth2
-        
+
     Returns:
         Optional[str]: Adresse email ou None en cas d'erreur
     """
@@ -30,13 +30,13 @@ def get_user_email_address(credentials: Credentials) -> Optional[str]:
 
 def build_gmail_service(credentials: Credentials):
     """Construit un service Gmail API.
-    
+
     Args:
         credentials: Credentials Google OAuth2
-        
+
     Returns:
         Service Gmail API prêt à l'emploi
-        
+
     Raises:
         Exception: En cas d'erreur lors de la construction du service
     """

@@ -44,7 +44,7 @@ class MailboxService:
         normalized = self._normalize_provider(provider)
         if normalized not in LIST_PROVIDERS:
             normalized = DEFAULT_PROVIDER
-        
+
         offset = (page - 1) * max_results
         provider_filter = None if normalized == EmailProvider.ALL.value else normalized
         emails, total = self._storage.get_emails(
@@ -65,7 +65,7 @@ class MailboxService:
         max_results: int = 100,
     ) -> SyncResult | SyncAllResult:
         """Synchronise les non lus depuis le(s) provider(s) vers le stockage local.
-        
+
         Si provider=all, synchronise Gmail puis Outlook (ceux qui sont connectés).
         Sinon, synchronise uniquement le provider demandé (requiert credentials).
         """
@@ -75,7 +75,7 @@ class MailboxService:
 
         if normalized == EmailProvider.ALL.value:
             return self._sync_all_providers(max_results)
-        
+
         return self._sync_single_provider(normalized, max_results)
 
     def _sync_all_providers(self, max_results: int) -> SyncAllResult:
@@ -102,10 +102,12 @@ class MailboxService:
                     status="error",
                     message=str(e),
                 ))
-        
+
         if not results:
-            raise HTTPException(status_code=401, detail=f"{MSG_UNAUTHENTICATED} (aucune boîte)")
-        
+            raise HTTPException(
+                status_code=401, detail=f"{MSG_UNAUTHENTICATED} (aucune boîte)"
+            )
+
         self._storage.update_last_sync_time()
         return SyncAllResult(status="success", results=results)
 
@@ -114,7 +116,7 @@ class MailboxService:
         credentials = get_connection_credentials(provider)
         if not credentials:
             raise HTTPException(status_code=401, detail=MSG_UNAUTHENTICATED)
-        
+
         adapter = self._create_adapter(provider)
         return self._do_sync(adapter, provider, max_results, skip_cooldown=False)
 
@@ -125,7 +127,9 @@ class MailboxService:
             raise HTTPException(status_code=400, detail=MSG_INVALID_PROVIDER)
         return adapter_class()
 
-    def _do_sync(self, adapter, provider_tag: str, max_results: int, skip_cooldown: bool) -> SyncResult:
+    def _do_sync(
+        self, adapter, provider_tag: str, max_results: int, skip_cooldown: bool
+    ) -> SyncResult:
         """Effectue la synchronisation pour un adapter donné."""
         try:
             if not skip_cooldown:
@@ -139,8 +143,14 @@ class MailboxService:
                     )
 
             after = (datetime.now() - timedelta(days=7)).date()
-            query = EmailListQuery(unread_only=True, after_date=after)
-            page_result = adapter.get_emails(max_results=max_results, query=query)
+            # Essayer d'abord les non lus, puis tous les emails récents si aucun non lu
+            query_unread = EmailListQuery(unread_only=True, after_date=after)
+            page_result = adapter.get_emails(max_results=max_results, query=query_unread)
+            
+            # Si aucun email non lu trouvé, récupérer tous les emails récents
+            if not page_result.emails:
+                query_all = EmailListQuery(unread_only=False, after_date=after)
+                page_result = adapter.get_emails(max_results=max_results, query=query_all)
 
             saved_count = 0
             tag = provider_tag.lower()

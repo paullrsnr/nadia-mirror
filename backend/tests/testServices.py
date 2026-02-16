@@ -25,7 +25,7 @@ class TestMailboxService(unittest.TestCase):
         mock_storage_instance.save_email.return_value = True
 
         mock_credentials.return_value = {"access_token": "fake"}
-        
+
         # Mock de l'adapter
         mock_adapter = MagicMock()
         mock_adapter_class = MagicMock(return_value=mock_adapter)
@@ -41,7 +41,7 @@ class TestMailboxService(unittest.TestCase):
             body_text="Contenu test",
         )
         mock_adapter.get_emails.return_value = EmailPage(emails=[test_email], next_page_token=None)
-        
+
         service = MailboxService()
         result = service.sync_emails(provider=EmailProvider.GMAIL.value, max_results=10)
 
@@ -62,7 +62,7 @@ class TestMailboxService(unittest.TestCase):
         mock_storage.return_value = mock_storage_instance
 
         mock_credentials.return_value = {"access_token": "fake"}
-        
+
         # Mock de l'adapter qui lève une exception
         mock_adapter = MagicMock()
         mock_adapter.get_emails.side_effect = ValueError("Non authentifié")

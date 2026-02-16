@@ -1,11 +1,15 @@
 # pylint: disable=invalid-name
 """Tests unitaires pour la couche base de données SQLAlchemy."""
+import shutil
+import time
 import unittest
 import tempfile
 from pathlib import Path
 from datetime import datetime, timezone
 from unittest.mock import patch
 
+from backend.database.models import Base
+from backend.database.session import get_engine
 from backend.database import (
     EmailModel,
     SyncMetadataModel,
@@ -54,15 +58,11 @@ class TestEmailRepository(unittest.TestCase):
         """Initialise une base de données temporaire pour chaque test."""
         self.temp_dir = tempfile.mkdtemp()
         self.db_path = Path(self.temp_dir) / "test_emails.db"
-        
+
         with patch("backend.config.settings.storage_settings.DATA_DIR", Path(self.temp_dir)):
             init_engine(self.db_path)
-            
-            # Créer les tables
-            from backend.database.models import Base
-            from backend.database.session import get_engine
             Base.metadata.create_all(get_engine())
-        
+
         self.session = create_session()
         self.repo = EmailRepository(self.session)
 
@@ -70,7 +70,7 @@ class TestEmailRepository(unittest.TestCase):
         """Nettoie la base de données temporaire."""
         self.session.close()
         dispose_engine()
-        
+
         # Supprimer le fichier temporaire
         if self.db_path.exists():
             self.db_path.unlink()
@@ -92,7 +92,7 @@ class TestEmailRepository(unittest.TestCase):
             labels=["INBOX"],
             snippet="Test snippet"
         )
-        
+
         result = self.repo.save_email(email, "gmail")
         self.assertTrue(result)
 
@@ -115,7 +115,7 @@ class TestEmailRepository(unittest.TestCase):
             snippet="Test snippet"
         )
         self.repo.save_email(email, "gmail")
-        
+
         # Récupérer les emails
         emails, total = self.repo.get_emails(max_results=10, offset=0, provider_filter="gmail")
         self.assertIsInstance(emails, list)
@@ -132,7 +132,7 @@ class TestEmailRepository(unittest.TestCase):
     def test_get_last_sync_time(self):
         """Teste la récupération du dernier temps de sync."""
         self.repo.update_last_sync_time()
-        
+
         last_sync = self.repo.get_last_sync_time()
         self.assertIsNotNone(last_sync)
 
@@ -144,24 +144,17 @@ class TestSqliteStorage(unittest.TestCase):
         """Initialise une base de données temporaire pour chaque test."""
         self.temp_dir = tempfile.mkdtemp()
         self.temp_path = Path(self.temp_dir)
-        
+
         # Utiliser SqliteStorage avec un data_dir personnalisé
         self.storage = SqliteStorage(data_dir=self.temp_path)
 
     def tearDown(self):
         """Nettoie la base de données temporaire."""
         dispose_engine()
-        
-        # Attendre un peu pour que Windows libère le fichier
-        import time
         time.sleep(0.1)
-        
-        # Supprimer le répertoire temporaire
-        import shutil
         try:
             shutil.rmtree(self.temp_path, ignore_errors=True)
-        except Exception:
-            # Ignorer les erreurs de suppression
+        except Exception:  # pylint: disable=broad-exception-caught
             pass
 
     def test_save_email(self):
@@ -181,7 +174,7 @@ class TestSqliteStorage(unittest.TestCase):
             labels=["INBOX"],
             snippet="Test snippet 1"
         )
-        
+
         result = self.storage.save_email(email, "gmail")
         self.assertTrue(result)
 
@@ -204,7 +197,7 @@ class TestSqliteStorage(unittest.TestCase):
             snippet="Test snippet 3"
         )
         self.storage.save_email(email, "gmail")
-        
+
         # Récupérer les emails
         emails, total = self.storage.get_emails(max_results=10, offset=0, provider_filter="gmail")
         self.assertIsInstance(emails, list)

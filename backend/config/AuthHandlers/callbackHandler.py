@@ -21,12 +21,12 @@ class CallbackHandler(Enum):
         """Retourne le handler pour un provider donné."""
         # Enregistrement lazy pour éviter les imports circulaires
         cls._ensure_registered()
-        
+
         for member in cls:
             if hasattr(member, 'provider_value') and member.provider_value == provider:
                 return member.handler
         return None
-    
+
     @classmethod
     def _ensure_registered(cls):
         """S'assure que les handlers sont enregistrés (lazy loading)."""

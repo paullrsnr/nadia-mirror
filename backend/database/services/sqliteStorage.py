@@ -60,12 +60,12 @@ class SqliteStorage:
 
     def _init_database(self) -> None:
         """Initialise l'engine SQLAlchemy et crée les tables si nécessaire.
-        
+
         Note: Les migrations Alembic doivent être exécutées manuellement
         avec 'alembic upgrade head' dans backend/database/.
         """
         init_engine(self.db_path)
-        
+
         # Créer les tables si elles n'existent pas (pour les nouvelles installations)
         from backend.database.models import Base
         from backend.database.session import get_engine
@@ -73,11 +73,11 @@ class SqliteStorage:
 
     def save_email(self, email: Email, provider: str = EmailProvider.GMAIL.value) -> bool:
         """Sauvegarde un email dans la base de données (avec la boîte d'origine).
-        
+
         Args:
             email: Email à sauvegarder.
             provider: Provider d'origine (gmail ou outlook).
-        
+
         Returns:
             True si succès, False sinon.
         """
@@ -95,12 +95,12 @@ class SqliteStorage:
         provider_filter: str | None = None,
     ) -> tuple[list[Email], int]:
         """Retourne les emails en base (paginés). provider_filter: gmail, outlook, ou None/all.
-        
+
         Args:
             max_results: Nombre maximum de résultats.
             offset: Offset pour la pagination.
             provider_filter: Filtre par provider (gmail, outlook) ou None pour tous.
-        
+
         Returns:
             Tuple (liste d'emails, total).
         """
@@ -113,7 +113,7 @@ class SqliteStorage:
 
     def get_last_sync_time(self) -> Optional[datetime]:
         """Récupère le timestamp de la dernière synchronisation.
-        
+
         Returns:
             Datetime de la dernière sync ou None.
         """

@@ -100,7 +100,7 @@ def _get_gmail_auth_status(credentials) -> AuthIdentity:
             save_connection_credentials(credentials, EmailProvider.GMAIL.value)
         except Exception:
             return AuthIdentity(is_authenticated=False)
-    
+
     user_email = get_gmail_user_email(credentials)
     return AuthIdentity(is_authenticated=True, email=user_email)
 
@@ -115,43 +115,43 @@ def _get_all_auth_status() -> AuthIdentity:
     """Retourne le statut d'authentification agrégé (au moins une boîte connectée)."""
     creds_gmail = get_connection_credentials(EmailProvider.GMAIL.value)
     creds_outlook = get_connection_credentials(EmailProvider.OUTLOOK.value)
-    
+
     if not creds_gmail and not creds_outlook:
         return AuthIdentity(is_authenticated=False)
-    
+
     # Essaye d'obtenir un email depuis Gmail d'abord, puis Outlook
     email = None
     if creds_gmail:
         status = _get_gmail_auth_status(creds_gmail)
         if status.is_authenticated:
             email = status.email
-    
+
     if not email and creds_outlook:
         status = _get_outlook_auth_status(creds_outlook)
         if status.is_authenticated:
             email = status.email
-    
+
     return AuthIdentity(is_authenticated=True, email=email or "Plusieurs boîtes")
 
 
 def get_auth_status(provider: str | None = None) -> AuthIdentity:
     """Retourne l'identité auth pour le provider (connecté ou non, email si dispo)."""
     resolved_provider = _resolve_provider(provider)
-    
+
     # Cas spécial : agrégation multi-providers
     if resolved_provider == EmailProvider.ALL.value:
         return _get_all_auth_status()
-    
+
     # Récupération des credentials
     credentials = get_connection_credentials(resolved_provider)
     if not credentials:
         return AuthIdentity(is_authenticated=False)
-    
+
     # Dispatch vers le handler approprié
     handler = AuthStatusHandler.get_handler(resolved_provider)
     if not handler:
         return AuthIdentity(is_authenticated=False)
-    
+
     return handler(credentials)
 
 

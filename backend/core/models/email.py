@@ -13,6 +13,7 @@ from backend.core.models.Email import (
     EmailThread,
     EmailListResult,
     EmailPage,
+    EmailProvider,
 )
 
 __all__ = [
@@ -23,4 +24,5 @@ __all__ = [
     "EmailThread",
     "EmailListResult",
     "EmailPage",
+    "EmailProvider",
 ]

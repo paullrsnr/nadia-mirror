@@ -15,15 +15,15 @@ from backend.core.models.email import EmailAddress
 
 def parse_email_address(address_string: str) -> EmailAddress:
     """Parse une chaîne d'adresse email (ex: 'John Doe <john@example.com>').
-    
+
     Utilise le module standard email.utils pour un parsing robuste.
-    
+
     Args:
         address_string: Chaîne d'adresse au format RFC 2822
-    
+
     Returns:
         EmailAddress: Objet avec name (optionnel) et email
-    
+
     Examples:
         >>> parse_email_address("John Doe <john@example.com>")
         EmailAddress(name="John Doe", email="john@example.com")
@@ -39,13 +39,13 @@ def parse_email_address(address_string: str) -> EmailAddress:
 
 def extract_email_body(payload: dict) -> Tuple[str, Optional[str]]:
     """Extrait le corps texte et HTML depuis un payload email.
-    
+
     Actuellement supporte uniquement Gmail. Pour ajouter d'autres providers,
     détecter le format et router vers le parser approprié.
-    
+
     Args:
         payload: Dictionnaire du payload (format Gmail pour l'instant)
-    
+
     Returns:
         Tuple[str, Optional[str]]: (texte brut, html ou None)
     """

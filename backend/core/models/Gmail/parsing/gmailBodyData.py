@@ -7,7 +7,7 @@ from typing import Optional
 @dataclass
 class GmailBodyData:
     """Données body d'une part Gmail pour l'extraction du corps.
-    
+
     Contient le champ optionnel 'data' en base64 qui représente
     le contenu textuel ou HTML du message.
     """

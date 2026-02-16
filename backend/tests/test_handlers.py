@@ -1,7 +1,6 @@
 # pylint: disable=invalid-name
 """Tests unitaires pour les handlers (Auth et Credentials)."""
 import unittest
-from unittest.mock import MagicMock
 
 from backend.config.AuthHandlers.authUrlHandler import AuthUrlHandler
 from backend.config.AuthHandlers.callbackHandler import CallbackHandler

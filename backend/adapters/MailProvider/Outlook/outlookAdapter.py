@@ -84,7 +84,7 @@ class OutlookAdapter(EmailProvider):
                 params=params,
             )
             response.raise_for_status()
-        data = response.json()
+            data = response.json()
         messages = data.get("value", [])
         next_token = _outlook_next_token(data.get("@odata.nextLink"))
 

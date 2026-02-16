@@ -1,7 +1,7 @@
 """initial_migration_with_indexes
 
 Revision ID: a25189f39cac
-Revises: 
+Revises:
 Create Date: 2026-02-13 23:22:18.613897
 
 """

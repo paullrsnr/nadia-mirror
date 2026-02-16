@@ -1,17 +1,10 @@
 # pylint: disable=invalid-name
-"""Constantes et enums pour les providers d'email (Gmail, Outlook, etc.).
+"""Constantes pour les providers d'email (Gmail, Outlook, etc.).
 
-Point central pour éviter les doublons de chaînes littérales.
+Point central pour validation et messages. L'enum EmailProvider est défini
+dans backend.core.models.Email (ré-exporté ici pour compatibilité).
 """
-from enum import Enum
-
-
-class EmailProvider(str, Enum):
-    """Providers d'email supportés."""
-
-    GMAIL = "gmail"
-    OUTLOOK = "outlook"
-    ALL = "all"  # Pseudo-provider pour "toutes les boîtes"
+from backend.core.models.Email import EmailProvider
 
 
 # --- Tuples de validation (utilisés pour membership tests) ---

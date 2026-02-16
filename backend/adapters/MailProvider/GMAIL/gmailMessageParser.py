@@ -5,7 +5,6 @@ Les modèles Pydantic (GmailMessage, etc.) sont dans backend.core.models.Gmail.
 """
 from datetime import datetime
 from email.utils import parsedate_to_datetime
-from typing import Optional
 
 from backend.core.models.email import Email, EmailAttachment
 from backend.core.models.Gmail import GmailMessage
@@ -42,10 +41,9 @@ def parse_gmail_message(message: dict) -> Email:
     except (ValueError, TypeError):
         date = datetime.now()
 
-    # Corps du message : on repasse par un dict de payload "gmail-like"
-    body_text, body_html = extract_gmail_body(
-        gmail_message.payload.model_dump(by_alias=True)
-    )
+    # Corps : payload brut (GmailPayload n'a pas body/mimeType pour messages simples)
+    raw_payload = message.get("payload", {})
+    body_text, body_html = extract_gmail_body(raw_payload)
 
     # Pièces jointes
     attachments = [

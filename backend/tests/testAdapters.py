@@ -1,11 +1,12 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,import-outside-toplevel
 """Tests unitaires pour les adapters et utilitaires."""
+import base64
 import unittest
 import tempfile
 import shutil
 from pathlib import Path
 from datetime import datetime
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from backend.utils.textCleaner import html_to_text
 from backend.utils.emailParser import parse_email_address, extract_email_body
@@ -106,8 +107,6 @@ class TestEmailParser(unittest.TestCase):
 
     def test_extract_email_body_plain_text(self):
         """Test extraction corps texte simple."""
-        import base64
-
         text_content = "Bonjour, ceci est un test."
         encoded = base64.urlsafe_b64encode(text_content.encode()).decode()
 
@@ -138,8 +137,7 @@ class TestSqliteStorage(unittest.TestCase):
 
     def tearDown(self):
         """Supprime le répertoire temporaire."""
-        # Fermer l'engine SQLAlchemy pour libérer les connexions
-        from backend.database import dispose_engine
+        from backend.database import dispose_engine  # late import pour isolation
         dispose_engine()
         shutil.rmtree(self.temp_dir)
 

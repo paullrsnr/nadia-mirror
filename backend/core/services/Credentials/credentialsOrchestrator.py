@@ -16,10 +16,10 @@ def save_credentials(credentials: Credentials | OutlookTokens, provider: str) ->
     handler_info = SaveCredentialsHandler.get_handler(resolved)
     if not handler_info:
         raise ValueError(f"Provider credentials non supporté: {resolved}")
-    
+
     if not isinstance(credentials, handler_info.expected_type):
         raise TypeError(handler_info.error_msg)
-    
+
     handler_info.save_func(credentials)
 
 

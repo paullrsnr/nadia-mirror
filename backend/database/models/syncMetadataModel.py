@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,too-few-public-methods
 """Modèle SQLAlchemy pour les métadonnées de synchronisation."""
 from sqlalchemy import String, Integer
 from sqlalchemy.orm import Mapped, mapped_column
@@ -8,7 +8,7 @@ from backend.database.models.base import Base
 
 class SyncMetadataModel(Base):
     """Modèle de la table sync_metadata en base de données.
-    
+
     Stocke les informations de synchronisation (timestamp, compteur).
     """
     __tablename__ = "sync_metadata"
@@ -19,4 +19,7 @@ class SyncMetadataModel(Base):
     sync_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
 
     def __repr__(self) -> str:
-        return f"SyncMetadataModel(id={self.id!r}, last_sync_time={self.last_sync_time!r}, sync_count={self.sync_count!r})"
+        return (
+            f"SyncMetadataModel(id={self.id!r}, "
+            f"last_sync_time={self.last_sync_time!r}, sync_count={self.sync_count!r})"
+        )

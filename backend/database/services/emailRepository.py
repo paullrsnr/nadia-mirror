@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 
 class EmailRepository:
     """Repository pour gérer les emails en base de données avec SQLAlchemy.
-    
+
     Fournit des méthodes CRUD et de conversion entre les modèles
     de domaine (Email) et les modèles de base de données (EmailModel).
     """
 
     def __init__(self, session: Session) -> None:
         """Initialise le repository avec une session SQLAlchemy.
-        
+
         Args:
             session: Session SQLAlchemy à utiliser pour les opérations.
         """
@@ -32,11 +32,11 @@ class EmailRepository:
 
     def save_email(self, email: Email, provider: str = EmailProvider.GMAIL.value) -> bool:
         """Sauvegarde un email dans la base de données.
-        
+
         Args:
             email: Email à sauvegarder.
             provider: Provider d'origine (gmail ou outlook).
-        
+
         Returns:
             True si succès, False sinon.
         """
@@ -74,12 +74,12 @@ class EmailRepository:
                 snippet=email.snippet,
                 provider=provider.lower(),
             )
-            
+
             # Merge pour INSERT OR REPLACE
             self.session.merge(email_model)
             self.session.commit()
             return True
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error("Erreur lors de la sauvegarde de l'email: %s", e)
             self.session.rollback()
             return False
@@ -91,44 +91,44 @@ class EmailRepository:
         provider_filter: str | None = None,
     ) -> tuple[list[Email], int]:
         """Retourne les emails en base (paginés).
-        
+
         Args:
             max_results: Nombre maximum de résultats.
             offset: Offset pour la pagination.
             provider_filter: Filtre par provider (gmail, outlook) ou None pour tous.
-        
+
         Returns:
             Tuple (liste d'emails, total).
         """
         try:
             # Construire la requête de base
             query = select(EmailModel)
-            count_query = select(func.count(EmailModel.id))
-            
+            count_query = select(func.count(EmailModel.id))  # pylint: disable=not-callable,e1102
+
             # Appliquer le filtre provider si nécessaire
             if provider_filter and provider_filter.lower() not in ("", EmailProvider.ALL.value):
                 pf = provider_filter.lower()
                 query = query.where(EmailModel.provider == pf)
                 count_query = count_query.where(EmailModel.provider == pf)
-            
+
             # Compter le total
             total = self.session.execute(count_query).scalar() or 0
-            
+
             # Récupérer les emails avec pagination
             query = query.order_by(EmailModel.date.desc()).limit(max_results).offset(offset)
             result = self.session.execute(query)
             email_models = result.scalars().all()
-            
+
             # Convertir en objets Email
             emails = [self._model_to_email(model) for model in email_models]
             return emails, total
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error("Erreur lors de la récupération des emails: %s", e)
             return [], 0
 
     def get_last_sync_time(self) -> Optional[datetime]:
         """Récupère le timestamp de la dernière synchronisation.
-        
+
         Returns:
             Datetime de la dernière sync ou None.
         """
@@ -136,11 +136,11 @@ class EmailRepository:
             query = select(SyncMetadataModel).order_by(SyncMetadataModel.id.desc()).limit(1)
             result = self.session.execute(query)
             sync_metadata = result.scalars().first()
-            
+
             if sync_metadata and sync_metadata.last_sync_time:
                 return datetime.fromisoformat(sync_metadata.last_sync_time)
             return None
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error("Erreur lors de la récupération du dernier sync time: %s", e)
             return None
 
@@ -150,7 +150,7 @@ class EmailRepository:
             # Récupérer le dernier count
             query = select(func.max(SyncMetadataModel.sync_count))
             max_count = self.session.execute(query).scalar() or 0
-            
+
             # Créer un nouveau record
             sync_metadata = SyncMetadataModel(
                 last_sync_time=datetime.now().isoformat(),
@@ -158,16 +158,16 @@ class EmailRepository:
             )
             self.session.add(sync_metadata)
             self.session.commit()
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error("Erreur lors de la mise à jour du sync time: %s", e)
             self.session.rollback()
 
     def _model_to_email(self, model: EmailModel) -> Email:
         """Convertit un EmailModel en Email (objet de domaine).
-        
+
         Args:
             model: EmailModel de la base de données.
-        
+
         Returns:
             Email (objet de domaine).
         """
@@ -176,7 +176,7 @@ class EmailRepository:
                 return []
             try:
                 items = json.loads(data)
-                
+
                 # Gestion de la double sérialisation (anciennes données)
                 if isinstance(items, str):
                     logger.warning(
@@ -184,7 +184,7 @@ class EmailRepository:
                         field_name, model.id
                     )
                     items = json.loads(items)
-                
+
                 return [
                     EmailAddress(email=a["email"], name=a.get("name"))
                     for a in items
@@ -201,15 +201,15 @@ class EmailRepository:
                 return []
             try:
                 items = json.loads(data)
-                
+
                 # Gestion de la double sérialisation (anciennes données)
                 if isinstance(items, str):
                     logger.warning(
-                        "Double sérialisation détectée pour attachments (email_id=%s), parsing à nouveau",
-                        model.id
+                        "Double sérialisation attachments (email_id=%s), re-parse",
+                        model.id,
                     )
                     items = json.loads(items)
-                
+
                 return [
                     EmailAttachment(
                         filename=a["filename"],
@@ -231,12 +231,12 @@ class EmailRepository:
                 labels_list = []
             else:
                 labels_list = json.loads(model.labels)
-                
+
                 # Gestion de la double sérialisation (anciennes données)
                 if isinstance(labels_list, str):
                     logger.warning(
-                        "Double sérialisation détectée pour labels (email_id=%s), parsing à nouveau",
-                        model.id
+                        "Double sérialisation labels (email_id=%s), re-parse",
+                        model.id,
                     )
                     labels_list = json.loads(labels_list)
         except (TypeError, json.JSONDecodeError) as e:

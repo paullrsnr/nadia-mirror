@@ -23,20 +23,20 @@ class EmailsService:
 
     def archive_email(self, email_id: str, provider: str | None) -> ArchiveResult:
         """Archive l'email pour le provider donné et retourne le résultat.
-        
+
         Le provider doit être gmail ou outlook (pas all).
         """
         normalized = self._normalize_provider(provider)
         if normalized not in CONNECTABLE_PROVIDERS:
             raise HTTPException(status_code=400, detail=MSG_PROVIDER_REQUIRED)
-        
+
         credentials = get_connection_credentials(normalized)
         if not credentials:
             raise HTTPException(status_code=401, detail=MSG_UNAUTHENTICATED)
-        
+
         adapter = self._create_adapter(normalized)
         success = adapter.archive_email(email_id)
-        
+
         return ArchiveResult(
             status="success" if success else "error",
             email_id=email_id,

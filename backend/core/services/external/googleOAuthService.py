@@ -12,10 +12,10 @@ GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token"
 
 def create_gmail_oauth_flow() -> Flow:
     """Crée le flux OAuth2 pour Gmail.
-    
+
     Returns:
         Flow: Flux OAuth2 configuré pour Gmail
-        
+
     Raises:
         ValueError: Si les credentials Gmail ne sont pas configurés
     """
@@ -47,10 +47,10 @@ def create_gmail_oauth_flow() -> Flow:
 
 def generate_gmail_auth_url(state: str) -> str:
     """Génère une URL d'authentification OAuth2 pour Gmail.
-    
+
     Args:
         state: État à inclure dans l'URL (généralement le nom du provider)
-        
+
     Returns:
         str: URL d'authentification complète
     """
@@ -66,10 +66,10 @@ def generate_gmail_auth_url(state: str) -> str:
 
 def exchange_gmail_code_for_credentials(code: str):
     """Échange un code OAuth contre des credentials Gmail.
-    
+
     Args:
         code: Code OAuth retourné par Google
-        
+
     Returns:
         Credentials: Credentials Google OAuth2
     """

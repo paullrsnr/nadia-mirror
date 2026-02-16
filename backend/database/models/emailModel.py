@@ -1,9 +1,8 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,too-few-public-methods
 """Modèle SQLAlchemy pour les emails."""
-from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import String, Text, JSON, Index
+from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.database.models.base import Base
@@ -11,7 +10,7 @@ from backend.database.models.base import Base
 
 class EmailModel(Base):
     """Modèle de la table emails en base de données.
-    
+
     Stocke les emails synchronisés depuis Gmail et Outlook.
     """
     __tablename__ = "emails"

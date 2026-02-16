@@ -6,6 +6,7 @@ from backend.core.models.Email.email import Email
 from backend.core.models.Email.emailThread import EmailThread
 from backend.core.models.Email.emailListResult import EmailListResult
 from backend.core.models.Email.emailPage import EmailPage
+from backend.core.models.Email.emailProvider import EmailProvider
 from backend.core.models.Email.archiveResult import ArchiveResult
 from backend.core.models.Email.Sync import SyncResult, ProviderSyncResult, SyncAllResult
 
@@ -17,6 +18,7 @@ __all__ = [
     "EmailThread",
     "EmailListResult",
     "EmailPage",
+    "EmailProvider",
     "ArchiveResult",
     "SyncResult",
     "ProviderSyncResult",
