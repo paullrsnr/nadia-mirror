@@ -12,7 +12,7 @@ from backend.config.AuthHandlers.authStatusHandler import AuthStatusHandler
 
 def _get_gmail_handlers():
     """Importe et retourne les handlers Gmail (import tardif pour éviter la circularité)."""
-    from backend.core.services.authService import (
+    from backend.core.services.auth.authService import (
         _get_gmail_auth_url,
         _process_gmail_callback,
         _get_gmail_auth_status,
@@ -22,7 +22,7 @@ def _get_gmail_handlers():
 
 def _get_outlook_handlers():
     """Importe et retourne les handlers Outlook (import tardif pour éviter la circularité)."""
-    from backend.core.services.authService import (
+    from backend.core.services.auth.authService import (
         _get_outlook_auth_url,
         _process_outlook_callback,
         _get_outlook_auth_status,

@@ -11,7 +11,7 @@ from backend.config.providers import (
 )
 from backend.config.adapterRegistry import AdapterRegistry
 from backend.core.models.Email import ArchiveResult
-from backend.core.services.connectionOrchestrator import get_connection_credentials
+from backend.core.services.connection import get_connection_credentials
 
 
 class EmailsService:
@@ -22,10 +22,7 @@ class EmailsService:
         return (provider or "").strip().lower() or default
 
     def archive_email(self, email_id: str, provider: str | None) -> ArchiveResult:
-        """Archive l'email pour le provider donné et retourne le résultat.
-
-        Le provider doit être gmail ou outlook (pas all).
-        """
+        """Archive l'email pour le provider donné et retourne le résultat."""
         normalized = self._normalize_provider(provider)
         if normalized not in CONNECTABLE_PROVIDERS:
             raise HTTPException(status_code=400, detail=MSG_PROVIDER_REQUIRED)

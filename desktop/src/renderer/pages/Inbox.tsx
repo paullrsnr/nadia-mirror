@@ -69,7 +69,7 @@ export default function Inbox() {
     const archiveProvider = inboxFilter === "all" ? (email.provider ?? "gmail") : inboxFilter;
     if (archiveProvider === "all") return;
     try {
-      await archiveEmail(email.id, archiveProvider);
+      await archiveEmail(email.id, archiveProvider as MailProvider);
       setEmails(emails.filter((e) => e.id !== email.id));
       if (selectedEmail?.id === email.id) {
         setSelectedEmail(null);

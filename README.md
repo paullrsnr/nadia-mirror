@@ -2,7 +2,7 @@
 
 ## Description
 
-NadIA est une assistante virtuelle alimentée par une IA locale (type LLaMA) pour aider à gérer les emails de manière sécurisée et productive. Elle peut connecter des boîtes mail (Gmail d’abord), résumer les messages, proposer des réponses, classer/archiver les emails et identifier les plus importants, le tout sans envoyer de données à l’extérieur (l’IA fonctionne en local).
+NadIA est une assistante virtuelle alimentée par une IA locale (type LLaMA) pour aider à gérer les emails de manière sécurisée et productive. Elle peut connecter des boîtes mail (Gmail d’abord), proposer des réponses, archiver les emails et identifier les plus importants, le tout sans envoyer de données à l’extérieur (l’IA fonctionne en local).
 
 L’application est **autonome** et fonctionne localement :
 
@@ -93,11 +93,9 @@ L'application desktop devrait se lancer automatiquement.
 
 ✅ **Connexion Gmail OAuth2** - Authentification sécurisée avec stockage local chiffré
 ✅ **Synchronisation des emails** - Récupération et stockage local des emails
-✅ **Résumé automatique** - Génération de résumés via LLaMA 3 8B
 ✅ **Détection d'importance** - Calcul de score d'importance pour chaque email
 ✅ **Extraction d'éléments** - Identification des dates, personnes, actions requises
 ✅ **Détection du ton** - Analyse du ton (formel, informel, urgent, etc.)
-✅ **Quick digest** - Résumé global de la boîte mail
 ✅ **Génération de réponses** - Création de réponses via IA
 ✅ **Archivage** - Possibilité d'archiver des emails
 ✅ **Interface desktop** - UI complète avec React + Electron

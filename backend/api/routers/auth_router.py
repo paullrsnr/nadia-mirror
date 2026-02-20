@@ -4,7 +4,7 @@ from fastapi import APIRouter, Path, Query
 
 from backend.api.schemas import AuthStatusResponse, AuthUrlResponse
 from backend.config.providers import EmailProvider
-from backend.core.services.authService import (
+from backend.core.services.auth.authService import (
     get_auth_url,
     process_callback,
     get_auth_status,

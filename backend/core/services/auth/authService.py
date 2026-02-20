@@ -14,7 +14,7 @@ from backend.config.AuthHandlers import (
     AuthStatusHandler,
 )
 from backend.core.models.auth import AuthIdentity
-from backend.core.services.connectionOrchestrator import (
+from backend.core.services.connection import (
     get_connection_credentials,
     save_connection_credentials,
     clear_connection_credentials,
@@ -74,9 +74,7 @@ def get_auth_url(provider: str | None = None) -> str:
 
 
 def process_callback(code: str, provider: str | None = None) -> RedirectResponse:
-    """Échange le code OAuth contre des tokens, sauvegarde les credentials
-    pour le provider, puis renvoie la redirection vers le frontend.
-    """
+    """Échange le code OAuth contre des tokens, sauvegarde les credentials."""
     frontend_callback_base = auth_settings.FRONTEND_AUTH_CALLBACK_URL.rstrip("/")
     resolved_provider = _resolve_provider(provider)
     try:
@@ -119,7 +117,6 @@ def _get_all_auth_status() -> AuthIdentity:
     if not creds_gmail and not creds_outlook:
         return AuthIdentity(is_authenticated=False)
 
-    # Essaye d'obtenir un email depuis Gmail d'abord, puis Outlook
     email = None
     if creds_gmail:
         status = _get_gmail_auth_status(creds_gmail)
@@ -138,16 +135,13 @@ def get_auth_status(provider: str | None = None) -> AuthIdentity:
     """Retourne l'identité auth pour le provider (connecté ou non, email si dispo)."""
     resolved_provider = _resolve_provider(provider)
 
-    # Cas spécial : agrégation multi-providers
     if resolved_provider == EmailProvider.ALL.value:
         return _get_all_auth_status()
 
-    # Récupération des credentials
     credentials = get_connection_credentials(resolved_provider)
     if not credentials:
         return AuthIdentity(is_authenticated=False)
 
-    # Dispatch vers le handler approprié
     handler = AuthStatusHandler.get_handler(resolved_provider)
     if not handler:
         return AuthIdentity(is_authenticated=False)

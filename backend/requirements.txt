@@ -15,3 +15,5 @@ httpx
 sqlalchemy
 alembic
 aiosqlite
+llama-cpp-python
+huggingface_hub

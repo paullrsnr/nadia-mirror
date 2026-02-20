@@ -4,9 +4,10 @@ import "./styles/global.css";
 import Inbox from "./pages/Inbox";
 import Settings from "./pages/Settings";
 import AuthCallback from "./pages/AuthCallback";
+import IA from "./pages/IA";
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<"inbox" | "settings">("inbox");
+  const [currentPage, setCurrentPage] = useState<"inbox" | "settings" | "ia">("inbox");
 
   return (
     <div>
@@ -18,13 +19,21 @@ function App() {
           📬 Boîte de réception
         </button>
         <button
+          onClick={() => setCurrentPage("ia")}
+          style={{ marginRight: 10, fontWeight: currentPage === "ia" ? "bold" : "normal" }}
+        >
+          🤖 IA
+        </button>
+        <button
           onClick={() => setCurrentPage("settings")}
           style={{ fontWeight: currentPage === "settings" ? "bold" : "normal" }}
         >
           ⚙️ Paramètres
         </button>
       </nav>
-      {currentPage === "inbox" ? <Inbox /> : <Settings />}
+      {currentPage === "inbox" && <Inbox />}
+      {currentPage === "settings" && <Settings />}
+      {currentPage === "ia" && <IA />}
     </div>
   );
 }

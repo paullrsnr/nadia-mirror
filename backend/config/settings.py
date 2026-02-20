@@ -13,10 +13,12 @@ from backend.config.Settings import (
     storage_settings,
     email_settings,
     api_settings,
+    llm_settings,
     AuthSettings,
     StorageSettings,
     EmailSettings,
     ApiSettings,
+    LLMSettings,
 )
 
 __all__ = [
@@ -24,8 +26,10 @@ __all__ = [
     "storage_settings",
     "email_settings",
     "api_settings",
+    "llm_settings",
     "AuthSettings",
     "StorageSettings",
     "EmailSettings",
     "ApiSettings",
+    "LLMSettings",
 ]

@@ -9,6 +9,8 @@ export function launchBackend() {
     // Mode développement
     const backendDir = path.join(__dirname, "../../../backend");
     const projectRoot = path.join(__dirname, "../../..");
+    // Le modèle GGUF est stocké côté backend (backend/ressources)
+    const resourcesPath = path.join(projectRoot, "backend", "ressources");
     const isWindows = platform() === "win32";
     const pythonPath = isWindows
       ? path.join(backendDir, ".venv", "Scripts", "python.exe")
@@ -21,6 +23,10 @@ export function launchBackend() {
       {
         cwd: projectRoot,
         stdio: "inherit",
+        env: {
+          ...process.env,
+          RESOURCES_PATH: resourcesPath,
+        },
       }
     );
 
@@ -35,6 +41,7 @@ export function launchBackend() {
   const isWindows = platform() === "win32";
   const backendBinaryName = isWindows ? "nadia-backend.exe" : "nadia-backend";
   const resourcesPath = process.resourcesPath || app.getAppPath();
+  const llmResourcesPath = path.join(resourcesPath, "backend", "ressources");
   const backendPath = path.join(
     resourcesPath,
     "backend",
@@ -62,6 +69,7 @@ export function launchBackend() {
     cwd: path.dirname(backendPath),
     env: {
       ...process.env,
+      RESOURCES_PATH: llmResourcesPath,
     },
   });
 

@@ -8,6 +8,14 @@ from backend.core.models.Email import (
     ProviderSyncResult,
 )
 
+from backend.api.schemas.llm import (
+    InstalledModelResponse,
+    CatalogModelResponse,
+    LLMStatusResponse,
+    DownloadModelRequest,
+    LoadModelRequest,
+)
+
 # Réutilisation des modèles métier pour les réponses API
 AuthUrlResponse = AuthUrl
 AuthStatusResponse = AuthIdentity
@@ -15,3 +23,17 @@ EmailListResponse = EmailListResult
 ArchiveEmailResponse = ArchiveResult
 SyncEmailsResponse = SyncResult | SyncAllResult
 SyncEmailsProviderResponse = ProviderSyncResult
+
+__all__ = [
+    "AuthUrlResponse",
+    "AuthStatusResponse",
+    "EmailListResponse",
+    "ArchiveEmailResponse",
+    "SyncEmailsResponse",
+    "SyncEmailsProviderResponse",
+    "InstalledModelResponse",
+    "CatalogModelResponse",
+    "LLMStatusResponse",
+    "DownloadModelRequest",
+    "LoadModelRequest",
+]

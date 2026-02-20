@@ -10,6 +10,7 @@ from backend.config.Settings.authSettings import AuthSettings
 from backend.config.Settings.storageSettings import StorageSettings
 from backend.config.Settings.emailSettings import EmailSettings
 from backend.config.Settings.apiSettings import ApiSettings
+from backend.config.Settings.llmSettings import LLMSettings
 
 # Chargement du .env une seule fois
 BACKEND_DIR = Path(__file__).parent.parent.parent
@@ -20,3 +21,4 @@ auth_settings = AuthSettings()
 storage_settings = StorageSettings()
 email_settings = EmailSettings()
 api_settings = ApiSettings()
+llm_settings = LLMSettings()

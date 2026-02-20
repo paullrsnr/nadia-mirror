@@ -16,7 +16,7 @@ from backend.config.providers import (
 from backend.config.adapterRegistry import AdapterRegistry
 from backend.core.models.email import EmailListQuery, EmailListResult
 from backend.core.models.Email import SyncResult, SyncAllResult, ProviderSyncResult
-from backend.core.services.connectionOrchestrator import get_connection_credentials
+from backend.core.services.connection import get_connection_credentials
 from backend.database import SqliteStorage
 
 

@@ -6,7 +6,11 @@ Délègue au credentialsOrchestrator (Gmail, Outlook).
 from google.oauth2.credentials import Credentials
 
 from backend.config.settings import email_settings
-from backend.core.services.Credentials import credentialsOrchestrator
+from backend.core.services.Credentials.credentialsOrchestrator import (
+    load_credentials,
+    save_credentials,
+    clear_credentials,
+)
 from backend.core.models.Auth import OutlookTokens
 
 # Gmail renvoie Credentials, Outlook renvoie OutlookTokens
@@ -23,7 +27,7 @@ def get_connection_credentials(
 ) -> ConnectionCredentials | None:
     """Charge les credentials de connexion pour le provider (défaut = config)."""
     resolved_provider = _resolve_provider(provider)
-    return credentialsOrchestrator.load_credentials(resolved_provider)
+    return load_credentials(resolved_provider)
 
 
 def save_connection_credentials(
@@ -32,10 +36,10 @@ def save_connection_credentials(
 ) -> None:
     """Sauvegarde les credentials de connexion pour le provider (défaut = config)."""
     resolved_provider = _resolve_provider(provider)
-    credentialsOrchestrator.save_credentials(credentials, resolved_provider)
+    save_credentials(credentials, resolved_provider)
 
 
 def clear_connection_credentials(provider: str | None = None) -> None:
     """Supprime les credentials de connexion pour le provider (déconnexion)."""
     resolved_provider = _resolve_provider(provider)
-    credentialsOrchestrator.clear_credentials(resolved_provider)
+    clear_credentials(resolved_provider)

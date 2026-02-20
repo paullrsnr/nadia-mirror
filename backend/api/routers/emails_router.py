@@ -8,7 +8,7 @@ from backend.api.schemas import (
     ArchiveEmailResponse,
     SyncEmailsResponse,
 )
-from backend.core.services.emailsService import EmailsService
+from backend.core.services.email.emailsService import EmailsService
 from backend.core.mailboxService import MailboxService
 from backend.core.models.Email import SyncResult, SyncAllResult
 

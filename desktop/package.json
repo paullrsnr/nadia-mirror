@@ -52,6 +52,11 @@
       {
         "from": "../backend/dist/win",
         "to": "backend"
+      },
+      {
+        "from": "../backend/ressources",
+        "to": "backend/ressources",
+        "filter": ["**/*"]
       }
     ],
     "mac": {
