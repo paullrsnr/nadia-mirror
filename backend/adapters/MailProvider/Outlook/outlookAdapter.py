@@ -4,10 +4,11 @@ from typing import Optional
 
 import httpx
 
+from backend.core.exceptions import AuthError
 from backend.ports.emailProvider import EmailProvider
-from backend.core.models.email import EmailListQuery, EmailPage
-from backend.core.models.Auth import OutlookTokens
-from backend.core.services.Credentials import get_outlook_credentials
+from backend.core.models.Email import EmailListQuery, EmailPage
+from backend.adapters.AuthProvider.Outlook.outlookTokens import OutlookTokens
+from backend.adapters.AuthProvider.Outlook.outlookTokenStorage import get_outlook_credentials
 from backend.adapters.MailProvider.Outlook.outlookMessageParser import (
     graph_request_headers,
     parse_outlook_message,
@@ -56,7 +57,7 @@ class OutlookAdapter(EmailProvider):
     def __init__(self):
         self._tokens: OutlookTokens | None = get_outlook_credentials()
         if not self._tokens or not self._tokens.access_token:
-            raise ValueError(
+            raise AuthError(
                 "Credentials Outlook non disponibles. Authentification requise."
             )
 
@@ -64,15 +65,15 @@ class OutlookAdapter(EmailProvider):
         """Retourne un access_token valide (recharge si nécessaire)."""
         tokens = get_outlook_credentials()
         if not tokens:
-            raise ValueError("Credentials Outlook non disponibles.")
+            raise AuthError("Credentials Outlook non disponibles.")
         return tokens.access_token
 
-    def get_emails(
+    def fetch_emails(
         self,
         max_results: int = 50,
         query: Optional[EmailListQuery] = None,
     ) -> EmailPage:
-        """Récupère une page d'emails depuis Outlook (requête canonique → $filter Graph)."""
+        """Fetche une page d'emails depuis Outlook (requête canonique → $filter Graph)."""
         access_token = self._ensure_token()
         url = f"{GRAPH_BASE}/me/messages"
         params = _outlook_params_from_query(max_results, query)

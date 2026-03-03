@@ -8,7 +8,7 @@ la structure récursive des parts.
 import base64
 from typing import Optional, Tuple
 
-from backend.core.models.Gmail.parsing import GmailBodyData, GmailPartForBody
+from backend.adapters.MailProvider.GMAIL.models import GmailBodyData, GmailPartForBody
 from backend.utils.textCleaner import html_to_text
 
 

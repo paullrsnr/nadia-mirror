@@ -1,25 +1,16 @@
-"""Config par domaine : chaque module importe ce dont il a besoin."""
-# Ré-export des classes
-from backend.config.Settings.authSettings import AuthSettings
-from backend.config.Settings.storageSettings import StorageSettings
-from backend.config.Settings.emailSettings import EmailSettings
-from backend.config.Settings.apiSettings import ApiSettings
+"""Charge le .env et expose les instances de settings par domaine."""
+from pathlib import Path
 
-# Ré-export des instances (créées dans settingsLoader)
-from backend.config.Settings.settingsLoader import (
-    auth_settings,
-    storage_settings,
-    email_settings,
-    api_settings,
-)
+from dotenv import load_dotenv
 
-__all__ = [
-    "auth_settings",
-    "storage_settings",
-    "email_settings",
-    "api_settings",
-    "AuthSettings",
-    "StorageSettings",
-    "EmailSettings",
-    "ApiSettings",
-]
+from backend.config.settings.auth import AuthSettings
+from backend.config.settings.storage import StorageSettings
+from backend.config.settings.email import EmailSettings
+from backend.config.settings.api import ApiSettings
+
+load_dotenv(Path(__file__).parent.parent.parent / ".env")
+
+auth_settings = AuthSettings()
+storage_settings = StorageSettings()
+email_settings = EmailSettings()
+api_settings = ApiSettings()

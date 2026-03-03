@@ -2,10 +2,11 @@
 """Adaptateur Gmail pour l'API Google."""
 from typing import Optional
 
+from backend.core.exceptions import AuthError
 from backend.ports.emailProvider import EmailProvider
-from backend.core.models.email import Email, EmailListQuery, EmailPage
-from backend.core.services.Credentials import get_gmail_credentials
-from backend.core.services.external import build_gmail_service
+from backend.core.models.Email import Email, EmailListQuery, EmailPage
+from backend.adapters.AuthProvider.GMAIL.gmailTokenStorage import get_gmail_credentials
+from backend.adapters.MailProvider.GMAIL.gmailApiService import build_gmail_service
 from backend.adapters.MailProvider.GMAIL.gmailMessageParser import parse_gmail_message
 
 
@@ -38,16 +39,16 @@ class GmailAdapter(EmailProvider):
         if gmail_credentials:
             self.gmail_api = build_gmail_service(gmail_credentials)
         else:
-            raise ValueError(
+            raise AuthError(
                 "Credentials Gmail non disponibles. Authentification requise."
             )
 
-    def get_emails(
+    def fetch_emails(
         self,
         max_results: int = 50,
         query: Optional[EmailListQuery] = None,
     ) -> EmailPage:
-        """Récupère une page d'emails depuis Gmail (requête canonique → query Gmail)."""
+        """Fetche une page d'emails depuis Gmail (requête canonique → query Gmail)."""
         q = _gmail_query_string(query)
         try:
             # pylint: disable=no-member

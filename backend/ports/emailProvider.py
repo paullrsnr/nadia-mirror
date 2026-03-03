@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from backend.core.models.email import EmailListQuery, EmailPage
+from backend.core.models.Email import EmailListQuery, EmailPage
 
 
 class EmailProvider(ABC):
@@ -14,12 +14,12 @@ class EmailProvider(ABC):
     """
 
     @abstractmethod
-    def get_emails(
+    def fetch_emails(
         self,
         max_results: int = 50,
         query: Optional[EmailListQuery] = None,
     ) -> EmailPage:
-        """Récupère une page d'emails. query : requête canonique (unread_only, after_date)."""
+        """Fetche une page d'emails depuis le provider distant. query : requête canonique."""
 
     @abstractmethod
     def archive_email(self, email_id: str) -> bool:

@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from backend.utils.textCleaner import html_to_text
 from backend.utils.emailParser import parse_email_address, extract_email_body
-from backend.core.models.email import Email, EmailAddress
+from backend.core.models.Email import Email, EmailAddress
 
 
 class TestTextCleaner(unittest.TestCase):
@@ -137,30 +137,23 @@ class TestSqliteStorage(unittest.TestCase):
 
     def tearDown(self):
         """Supprime le répertoire temporaire."""
-        from backend.database import dispose_engine  # late import pour isolation
+        from backend.adapters.BDDProvider.sqlLite import dispose_engine  # late import pour isolation
         dispose_engine()
         shutil.rmtree(self.temp_dir)
 
-    @patch("backend.config.settings.storage_settings")
-    def test_storage_init_creates_database(self, mock_storage_settings):
+    def test_storage_init_creates_database(self):
         """Test que l'initialisation crée la base de données."""
-        mock_storage_settings.DATA_DIR = self.temp_path
+        from backend.adapters.BDDProvider.sqlLite import SqliteStorage
 
-        from backend.database import SqliteStorage
-
-        storage = SqliteStorage()
+        storage = SqliteStorage(data_dir=self.temp_path)
 
         self.assertTrue(storage.db_path.exists())
 
-    @patch("backend.config.settings.storage_settings")
-    def test_save_and_get_sync_time(self, mock_storage_settings):
+    def test_save_and_get_sync_time(self):
         """Test sauvegarde et récupération du temps de sync."""
-        test_dir = Path(tempfile.mkdtemp(dir=self.temp_dir))
-        mock_storage_settings.DATA_DIR = test_dir
+        from backend.adapters.BDDProvider.sqlLite import SqliteStorage
 
-        from backend.database import SqliteStorage
-
-        storage = SqliteStorage()
+        storage = SqliteStorage(data_dir=self.temp_path)
 
         # Pas de sync au départ (sync_metadata vide)
         self.assertIsNone(storage.get_last_sync_time())
@@ -173,14 +166,11 @@ class TestSqliteStorage(unittest.TestCase):
         self.assertIsNotNone(sync_time)
         self.assertIsInstance(sync_time, datetime)
 
-    @patch("backend.config.settings.storage_settings")
-    def test_save_email(self, mock_storage_settings):
+    def test_save_email(self):
         """Test sauvegarde d'un email."""
-        mock_storage_settings.DATA_DIR = self.temp_path
+        from backend.adapters.BDDProvider.sqlLite import SqliteStorage
 
-        from backend.database import SqliteStorage
-
-        storage = SqliteStorage()
+        storage = SqliteStorage(data_dir=self.temp_path)
 
         email = Email(
             id="test_123",
@@ -192,7 +182,7 @@ class TestSqliteStorage(unittest.TestCase):
             body_text="Corps du message",
         )
 
-        result = storage.save_email(email)
+        result = storage.save_email(email, provider="gmail")
 
         self.assertTrue(result)
 

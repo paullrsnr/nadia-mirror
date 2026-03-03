@@ -3,42 +3,26 @@ import base64
 import os
 
 from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from backend.config.settings import storage_settings
 
 
 def get_encryption_key() -> bytes:
-    """Génère ou récupère la clé de chiffrement basée sur l'utilisateur système."""
+    """Retourne la clé Fernet persistée sur disque, en la créant si absente."""
     key_file = storage_settings.DATA_DIR / ".encryption_key"
 
     if key_file.exists():
         with open(key_file, "rb") as f:
             return f.read()
 
-    # Générer une nouvelle clé basée sur le nom d'utilisateur système
-    # Utiliser PBKDF2 pour dériver une clé à partir d'un salt
-    username = os.getenv("USERNAME") or os.getenv("USER") or "default"
-    salt = b"nadia_salt_2024"  # Salt fixe pour la cohérence
+    # Première exécution : génération d'une clé aléatoire sécurisée
+    key = Fernet.generate_key()
 
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt,
-        iterations=100000,
-    )
-
-    key = base64.urlsafe_b64encode(kdf.derive(username.encode()))
-
-    # Sauvegarder la clé
     storage_settings.DATA_DIR.mkdir(parents=True, exist_ok=True)
     with open(key_file, "wb") as f:
         f.write(key)
 
-    # Sécuriser le fichier de clé
     os.chmod(key_file, 0o600)
-
     return key
 
 
@@ -47,6 +31,7 @@ def encrypt_data(data: str) -> str:
     key = get_encryption_key()
     fernet = Fernet(key)
     encrypted = fernet.encrypt(data.encode())
+    # Double-encodage base64 maintenu pour la compatibilité avec les tokens existants
     return base64.urlsafe_b64encode(encrypted).decode()
 
 

@@ -1,98 +1,120 @@
 # pylint: disable=invalid-name
-"""Tests unitaires pour les services."""
+"""Tests unitaires pour les services du core."""
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from datetime import datetime
 
-from backend.config.providers import EmailProvider
+from backend.core.models.Email import Provider
 from backend.core.mailboxService import MailboxService
-from backend.core.models.email import Email, EmailAddress, EmailPage
+from backend.core.models.Email import Email, EmailAddress, EmailPage
+from backend.ports.emailStorage import EmailStorage
+from backend.ports.credentialGateway import CredentialGateway
 
 
-class TestMailboxService(unittest.TestCase):
-    """Tests pour MailboxService."""
+def _build_service(
+    storage: MagicMock | None = None,
+    adapter_factory: MagicMock | None = None,
+    credential_gateway: MagicMock | None = None,
+) -> MailboxService:
+    return MailboxService(
+        storage=storage or MagicMock(spec=EmailStorage),
+        adapter_factory=adapter_factory or MagicMock(),
+        credential_gateway=credential_gateway or MagicMock(spec=CredentialGateway),
+    )
 
-    @patch("backend.core.mailboxService.get_connection_credentials")
-    @patch("backend.config.adapterRegistry.AdapterRegistry.get_adapter_class")
-    @patch("backend.core.mailboxService.SqliteStorage")
-    def test_sync_emails_success(
-        self, mock_storage: MagicMock, mock_get_adapter: MagicMock, mock_credentials: MagicMock
-    ) -> None:
-        """Test synchronisation réussie."""
-        mock_storage_instance = MagicMock()
-        mock_storage.return_value = mock_storage_instance
-        mock_storage_instance.get_last_sync_time.return_value = None
-        mock_storage_instance.save_email.return_value = True
 
-        mock_credentials.return_value = {"access_token": "fake"}
+def _make_email(email_id: str = "123") -> Email:
+    return Email(
+        id=email_id,
+        thread_id=f"thread_{email_id}",
+        subject="Test",
+        from_address=EmailAddress(email="test@example.com"),
+        to_addresses=[EmailAddress(email="dest@example.com")],
+        date=datetime.now(),
+        body_text="Contenu test",
+    )
 
-        # Mock de l'adapter
-        mock_adapter = MagicMock()
-        mock_adapter_class = MagicMock(return_value=mock_adapter)
-        mock_get_adapter.return_value = mock_adapter_class
 
-        test_email = Email(
-            id="123",
-            thread_id="thread_123",
-            subject="Test",
-            from_address=EmailAddress(email="test@example.com"),
-            to_addresses=[EmailAddress(email="dest@example.com")],
-            date=datetime.now(),
-            body_text="Contenu test",
-        )
-        mock_adapter.get_emails.return_value = EmailPage(emails=[test_email], next_page_token=None)
+class TestMailboxServiceSync(unittest.TestCase):
+    """Tests pour la synchronisation des emails."""
 
-        service = MailboxService()
-        result = service.sync_emails(provider=EmailProvider.GMAIL.value, max_results=10)
+    def test_sync_emails_success(self):
+        """La synchronisation réussit et retourne synced=1, saved=1."""
+        storage = MagicMock(spec=EmailStorage)
+        storage.get_last_sync_time.return_value = None
+        storage.save_email.return_value = True
+
+        adapter = MagicMock()
+        adapter.fetch_emails.return_value = EmailPage(emails=[_make_email()], next_page_token=None)
+        adapter_factory = MagicMock(return_value=adapter)
+
+        credential_gateway = MagicMock(spec=CredentialGateway)
+        credential_gateway.load.return_value = {"access_token": "fake"}
+
+        service = _build_service(storage, adapter_factory, credential_gateway)
+        result = service.sync_emails(provider=Provider.GMAIL.value, max_results=10)
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.synced, 1)
         self.assertEqual(result.saved, 1)
-        mock_storage_instance.update_last_sync_time.assert_called_once()
+        storage.update_last_sync_time.assert_called_once()
 
-    @patch("backend.core.mailboxService.get_connection_credentials")
-    @patch("backend.config.adapterRegistry.AdapterRegistry.get_adapter_class")
-    @patch("backend.core.mailboxService.SqliteStorage")
-    def test_sync_emails_with_error(
-        self, mock_storage: MagicMock, mock_get_adapter: MagicMock, mock_credentials: MagicMock
-    ) -> None:
-        """Test synchronisation avec erreur."""
-        mock_storage_instance = MagicMock()
-        mock_storage_instance.get_last_sync_time.return_value = None
-        mock_storage.return_value = mock_storage_instance
+    def test_sync_emails_skipped_when_recent(self):
+        """La sync est ignorée si la dernière sync est trop récente."""
+        storage = MagicMock(spec=EmailStorage)
+        storage.get_last_sync_time.return_value = datetime.now()
 
-        mock_credentials.return_value = {"access_token": "fake"}
+        credential_gateway = MagicMock(spec=CredentialGateway)
+        credential_gateway.load.return_value = {"access_token": "fake"}
 
-        # Mock de l'adapter qui lève une exception
-        mock_adapter = MagicMock()
-        mock_adapter.get_emails.side_effect = ValueError("Non authentifié")
-        mock_adapter_class = MagicMock(return_value=mock_adapter)
-        mock_get_adapter.return_value = mock_adapter_class
+        service = _build_service(storage, credential_gateway=credential_gateway)
+        result = service.sync_emails(provider=Provider.GMAIL.value)
 
-        service = MailboxService()
-        result = service.sync_emails(provider=EmailProvider.GMAIL.value)
+        self.assertEqual(result.status, "skipped")
+
+    def test_sync_emails_error_from_adapter(self):
+        """Si l'adapter lève ValueError, le résultat est status=error."""
+        storage = MagicMock(spec=EmailStorage)
+        storage.get_last_sync_time.return_value = None
+
+        adapter = MagicMock()
+        adapter.fetch_emails.side_effect = ValueError("Non authentifié")
+        adapter_factory = MagicMock(return_value=adapter)
+
+        credential_gateway = MagicMock(spec=CredentialGateway)
+        credential_gateway.load.return_value = {"access_token": "fake"}
+
+        service = _build_service(storage, adapter_factory, credential_gateway)
+        result = service.sync_emails(provider=Provider.GMAIL.value)
 
         self.assertEqual(result.status, "error")
         self.assertIn("Non authentifié", result.message)
 
-    @patch("backend.core.mailboxService.get_connection_credentials")
-    @patch("backend.config.settings.storage_settings")
-    @patch("backend.core.mailboxService.SqliteStorage")
-    def test_sync_emails_skipped_when_recent(
-        self, mock_storage: MagicMock, mock_settings: MagicMock, mock_credentials: MagicMock
-    ) -> None:
-        """Test que la sync est ignorée si dernière sync trop récente."""
-        mock_settings.SYNC_MIN_INTERVAL_MINUTES = 5
-        mock_storage_instance = MagicMock()
-        mock_storage.return_value = mock_storage_instance
-        mock_storage_instance.get_last_sync_time.return_value = datetime.now()
 
-        mock_credentials.return_value = {"access_token": "fake"}
+class TestMailboxServiceGetStored(unittest.TestCase):
+    """Tests pour la récupération des emails stockés."""
 
-        service = MailboxService()
-        result = service.sync_emails(provider=EmailProvider.GMAIL.value)
+    def test_get_stored_emails_returns_list(self):
+        """get_stored_emails retourne une EmailListResult valide."""
+        storage = MagicMock(spec=EmailStorage)
+        storage.find_emails.return_value = ([_make_email()], 1)
 
-        self.assertEqual(result.status, "skipped")
+        service = _build_service(storage)
+        result = service.get_stored_emails(provider="gmail", max_results=10, page=1)
+
+        self.assertEqual(result.total, 1)
+        self.assertEqual(len(result.emails), 1)
+        storage.find_emails.assert_called_once_with(max_results=10, offset=0, provider_filter="gmail")
+
+    def test_get_stored_emails_all_provider(self):
+        """get_stored_emails avec provider=all ne filtre pas par provider."""
+        storage = MagicMock(spec=EmailStorage)
+        storage.find_emails.return_value = ([], 0)
+
+        service = _build_service(storage)
+        service.get_stored_emails(provider="all", max_results=50, page=1)
+
+        storage.find_emails.assert_called_once_with(max_results=50, offset=0, provider_filter=None)
 
 
 if __name__ == "__main__":

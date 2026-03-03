@@ -7,8 +7,8 @@ sont dans backend.core.models.Graph.
 from datetime import datetime
 from typing import Optional
 
-from backend.core.models.email import Email, EmailAddress
-from backend.core.models.Graph import GraphMessage, GraphRecipient
+from backend.core.models.Email import Email, EmailAddress
+from backend.adapters.MailProvider.Outlook.models import GraphMessage, GraphRecipient
 
 
 BODY_FALLBACK = "[Corps non disponible]"

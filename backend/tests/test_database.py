@@ -8,18 +8,10 @@ from pathlib import Path
 from datetime import datetime, timezone
 from unittest.mock import patch
 
-from backend.database.models import Base
-from backend.database.session import get_engine
-from backend.database import (
-    EmailModel,
-    SyncMetadataModel,
-    EmailRepository,
-    SqliteStorage,
-    init_engine,
-    dispose_engine,
-    create_session,
-)
-from backend.core.models.email import Email, EmailAddress
+from backend.adapters.BDDProvider.sqlLite.models import Base, EmailModel, SyncMetadataModel
+from backend.adapters.BDDProvider.sqlLite.session import get_engine
+from backend.adapters.BDDProvider.sqlLite import SqliteStorage, init_engine, dispose_engine, create_session
+from backend.core.models.Email import Email, EmailAddress
 
 
 class TestEmailModel(unittest.TestCase):
@@ -32,7 +24,7 @@ class TestEmailModel(unittest.TestCase):
     def test_email_model_required_fields(self):
         """Vérifie que les champs requis sont définis."""
         required_fields = ["id", "thread_id", "subject", "from_name", "from_email",
-                          "to_addresses", "date", "body_text", "provider"]
+                           "to_addresses", "date", "body_text", "provider"]
         for field in required_fields:
             self.assertTrue(hasattr(EmailModel, field))
 
@@ -46,163 +38,94 @@ class TestSyncMetadataModel(unittest.TestCase):
 
     def test_sync_metadata_model_fields(self):
         """Vérifie que les champs sont définis."""
-        required_fields = ["id", "last_sync_time", "sync_count"]
-        for field in required_fields:
+        for field in ["id", "last_sync_time", "sync_count"]:
             self.assertTrue(hasattr(SyncMetadataModel, field))
 
 
-class TestEmailRepository(unittest.TestCase):
-    """Tests pour le repository EmailRepository."""
-
-    def setUp(self):
-        """Initialise une base de données temporaire pour chaque test."""
-        self.temp_dir = tempfile.mkdtemp()
-        self.db_path = Path(self.temp_dir) / "test_emails.db"
-
-        with patch("backend.config.settings.storage_settings.DATA_DIR", Path(self.temp_dir)):
-            init_engine(self.db_path)
-            Base.metadata.create_all(get_engine())
-
-        self.session = create_session()
-        self.repo = EmailRepository(self.session)
-
-    def tearDown(self):
-        """Nettoie la base de données temporaire."""
-        self.session.close()
-        dispose_engine()
-
-        # Supprimer le fichier temporaire
-        if self.db_path.exists():
-            self.db_path.unlink()
-
-    def test_save_email(self):
-        """Teste la sauvegarde d'un email."""
-        email = Email(
-            id="test123",
-            thread_id="thread123",
-            subject="Test Subject",
-            from_address=EmailAddress(name="Test", email="test@example.com"),
-            to_addresses=[EmailAddress(name="Dest", email="dest@example.com")],
-            cc_addresses=[],
-            bcc_addresses=[],
-            date=datetime.now(timezone.utc),
-            body_text="Test body",
-            body_html=None,
-            attachments=[],
-            labels=["INBOX"],
-            snippet="Test snippet"
-        )
-
-        result = self.repo.save_email(email, "gmail")
-        self.assertTrue(result)
-
-    def test_get_emails(self):
-        """Teste la récupération des emails."""
-        # Sauvegarder un email d'abord
-        email = Email(
-            id="test456",
-            thread_id="thread456",
-            subject="Test Get",
-            from_address=EmailAddress(name="Test", email="test@example.com"),
-            to_addresses=[EmailAddress(name="Dest", email="dest@example.com")],
-            cc_addresses=[],
-            bcc_addresses=[],
-            date=datetime.now(timezone.utc),
-            body_text="Test body",
-            body_html=None,
-            attachments=[],
-            labels=["INBOX"],
-            snippet="Test snippet"
-        )
-        self.repo.save_email(email, "gmail")
-
-        # Récupérer les emails
-        emails, total = self.repo.get_emails(max_results=10, offset=0, provider_filter="gmail")
-        self.assertIsInstance(emails, list)
-        self.assertGreater(len(emails), 0)
-        self.assertEqual(emails[0].id, "test456")
-        self.assertGreaterEqual(total, 1)
-
-    def test_update_last_sync_time(self):
-        """Teste la mise à jour du dernier temps de sync."""
-        # update_last_sync_time ne prend pas de paramètres
-        self.repo.update_last_sync_time()
-        # Pas de valeur de retour, on vérifie juste qu'il n'y a pas d'erreur
-
-    def test_get_last_sync_time(self):
-        """Teste la récupération du dernier temps de sync."""
-        self.repo.update_last_sync_time()
-
-        last_sync = self.repo.get_last_sync_time()
-        self.assertIsNotNone(last_sync)
+def _make_email(email_id: str) -> Email:
+    return Email(
+        id=email_id,
+        thread_id=f"thread_{email_id}",
+        subject="Test Subject",
+        from_address=EmailAddress(name="Test", email="test@example.com"),
+        to_addresses=[EmailAddress(name="Dest", email="dest@example.com")],
+        cc_addresses=[],
+        bcc_addresses=[],
+        date=datetime.now(timezone.utc),
+        body_text="Test body",
+        body_html=None,
+        attachments=[],
+        labels=["INBOX"],
+        snippet="Test snippet",
+    )
 
 
 class TestSqliteStorage(unittest.TestCase):
-    """Tests pour SqliteStorage."""
+    """Tests pour SqliteStorage (implémentation du port EmailStorage)."""
 
     def setUp(self):
         """Initialise une base de données temporaire pour chaque test."""
         self.temp_dir = tempfile.mkdtemp()
         self.temp_path = Path(self.temp_dir)
-
-        # Utiliser SqliteStorage avec un data_dir personnalisé
         self.storage = SqliteStorage(data_dir=self.temp_path)
 
     def tearDown(self):
         """Nettoie la base de données temporaire."""
         dispose_engine()
         time.sleep(0.1)
-        try:
-            shutil.rmtree(self.temp_path, ignore_errors=True)
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
+        shutil.rmtree(self.temp_path, ignore_errors=True)
 
-    def test_save_email(self):
-        """Teste la sauvegarde d'un email."""
-        email = Email(
-            id="test1",
-            thread_id="thread1",
-            subject="Test 1",
-            from_address=EmailAddress(name="Test", email="test@example.com"),
-            to_addresses=[EmailAddress(name="Dest", email="dest@example.com")],
-            cc_addresses=[],
-            bcc_addresses=[],
-            date=datetime.now(timezone.utc),
-            body_text="Test body 1",
-            body_html=None,
-            attachments=[],
-            labels=["INBOX"],
-            snippet="Test snippet 1"
-        )
-
-        result = self.storage.save_email(email, "gmail")
+    def test_save_email_returns_true_when_new(self):
+        """save_email retourne True si l'email est nouveau."""
+        result = self.storage.save_email(_make_email("new_1"), "gmail")
         self.assertTrue(result)
 
-    def test_get_emails(self):
-        """Teste la récupération des emails."""
-        # Sauvegarder un email d'abord
-        email = Email(
-            id="test3",
-            thread_id="thread3",
-            subject="Test 3",
-            from_address=EmailAddress(name="Test", email="test@example.com"),
-            to_addresses=[EmailAddress(name="Dest", email="dest@example.com")],
-            cc_addresses=[],
-            bcc_addresses=[],
-            date=datetime.now(timezone.utc),
-            body_text="Test body 3",
-            body_html=None,
-            attachments=[],
-            labels=["INBOX"],
-            snippet="Test snippet 3"
-        )
+    def test_save_email_returns_false_when_duplicate(self):
+        """save_email retourne False si l'email existe déjà."""
+        email = _make_email("dup_1")
         self.storage.save_email(email, "gmail")
+        result = self.storage.save_email(email, "gmail")
+        self.assertFalse(result)
 
-        # Récupérer les emails
-        emails, total = self.storage.get_emails(max_results=10, offset=0, provider_filter="gmail")
+    def test_find_emails_returns_saved(self):
+        """find_emails retourne les emails sauvegardés."""
+        self.storage.save_email(_make_email("find_1"), "gmail")
+        emails, total = self.storage.find_emails(max_results=10, offset=0, provider_filter="gmail")
         self.assertIsInstance(emails, list)
         self.assertGreater(len(emails), 0)
         self.assertGreaterEqual(total, 1)
+        self.assertEqual(emails[0].id, "find_1")
+
+    def test_find_emails_provider_filter(self):
+        """find_emails filtre correctement par provider."""
+        self.storage.save_email(_make_email("gmail_1"), "gmail")
+        self.storage.save_email(_make_email("outlook_1"), "outlook")
+        emails, _ = self.storage.find_emails(provider_filter="gmail")
+        self.assertTrue(all(e.provider == "gmail" for e in emails))
+
+    def test_update_and_get_last_sync_time(self):
+        """update_last_sync_time met à jour la ligne unique, get_last_sync_time la lit."""
+        self.assertIsNone(self.storage.get_last_sync_time())
+        self.storage.update_last_sync_time()
+        t1 = self.storage.get_last_sync_time()
+        self.assertIsNotNone(t1)
+        time.sleep(0.01)
+        self.storage.update_last_sync_time()
+        t2 = self.storage.get_last_sync_time()
+        self.assertGreaterEqual(t2, t1)
+
+    def test_update_last_sync_time_single_row(self):
+        """update_last_sync_time ne crée qu'une seule ligne dans sync_metadata."""
+        self.storage.update_last_sync_time()
+        self.storage.update_last_sync_time()
+        self.storage.update_last_sync_time()
+        session = create_session()
+        try:
+            from sqlalchemy import select, func  # pylint: disable=import-outside-toplevel
+            count = session.execute(select(func.count(SyncMetadataModel.id))).scalar()  # pylint: disable=not-callable
+            self.assertEqual(count, 1)
+        finally:
+            session.close()
 
 
 if __name__ == "__main__":

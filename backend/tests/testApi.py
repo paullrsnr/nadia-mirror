@@ -76,8 +76,7 @@ class TestAuthEndpoints(unittest.TestCase):
         """Test endpoint /auth/url avec un provider invalide."""
         response = self.client.get("/auth/url/invalid?redirect_uri=http://localhost")
 
-        # Pour l'instant le handler invalide provoque une 500
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 400)
 
 
 class TestEmailsEndpoints(unittest.TestCase):

@@ -1,38 +1,51 @@
 # pylint: disable=invalid-name
-"""Use case : archivage d'un email (délègue à l'adapter Gmail ou Outlook)."""
-from fastapi import HTTPException
+"""Use case : archivage d'un email (délègue à l'adapter du provider)."""
+from typing import Callable
 
-from backend.config.providers import (
+from backend.core.providers import (
     CONNECTABLE_PROVIDERS,
     DEFAULT_PROVIDER,
     MSG_UNAUTHENTICATED,
     MSG_INVALID_PROVIDER,
     MSG_PROVIDER_REQUIRED,
 )
-from backend.config.adapterRegistry import AdapterRegistry
+from backend.core.exceptions import AuthError, ProviderError
 from backend.core.models.Email import ArchiveResult
-from backend.core.services.connectionOrchestrator import get_connection_credentials
+from backend.ports.emailProvider import EmailProvider as IEmailProvider
+from backend.ports.credentialGateway import CredentialGateway
 
 
 class EmailsService:
-    """Archive un email via l'adapter du provider (Gmail ou Outlook)."""
+    """Archive un email via l'adapter du provider.
+
+    L'adapter_factory est injectée depuis la couche API.
+    """
+
+    def __init__(
+        self,
+        adapter_factory: Callable[[str], IEmailProvider],
+        credential_gateway: CredentialGateway,
+    ) -> None:
+        self._adapter_factory = adapter_factory
+        self._credentials = credential_gateway
 
     def _normalize_provider(self, provider: str | None, default: str = DEFAULT_PROVIDER) -> str:
-        """Normalise le provider (strip, lower, fallback)."""
         return (provider or "").strip().lower() or default
 
     def archive_email(self, email_id: str, provider: str | None) -> ArchiveResult:
-        """Archive l'email pour le provider donné et retourne le résultat.
+        """Archive l'email pour le provider donné.
 
-        Le provider doit être gmail ou outlook (pas all).
+        Raises:
+            ProviderError: provider absent ou invalide.
+            AuthError: credentials manquants.
         """
         normalized = self._normalize_provider(provider)
         if normalized not in CONNECTABLE_PROVIDERS:
-            raise HTTPException(status_code=400, detail=MSG_PROVIDER_REQUIRED)
+            raise ProviderError(MSG_PROVIDER_REQUIRED)
 
-        credentials = get_connection_credentials(normalized)
+        credentials = self._credentials.load(normalized)
         if not credentials:
-            raise HTTPException(status_code=401, detail=MSG_UNAUTHENTICATED)
+            raise AuthError(MSG_UNAUTHENTICATED)
 
         adapter = self._create_adapter(normalized)
         success = adapter.archive_email(email_id)
@@ -42,9 +55,8 @@ class EmailsService:
             email_id=email_id,
         )
 
-    def _create_adapter(self, provider: str):
-        """Crée l'adapter pour le provider (gmail ou outlook)."""
-        adapter_class = AdapterRegistry.get_adapter_class(provider)
-        if not adapter_class:
-            raise HTTPException(status_code=400, detail=MSG_INVALID_PROVIDER)
-        return adapter_class()
+    def _create_adapter(self, provider: str) -> IEmailProvider:
+        try:
+            return self._adapter_factory(provider)
+        except ValueError as e:
+            raise ProviderError(MSG_INVALID_PROVIDER) from e

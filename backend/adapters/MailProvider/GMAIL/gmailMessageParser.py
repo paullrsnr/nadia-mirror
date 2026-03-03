@@ -6,8 +6,8 @@ Les modèles Pydantic (GmailMessage, etc.) sont dans backend.core.models.Gmail.
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 
-from backend.core.models.email import Email, EmailAttachment
-from backend.core.models.Gmail import GmailMessage
+from backend.core.models.Email import Email, EmailAttachment
+from backend.adapters.MailProvider.GMAIL.models import GmailMessage
 from backend.utils.emailParser import parse_email_address
 from backend.adapters.MailProvider.GMAIL.gmailBodyParser import extract_gmail_body
 

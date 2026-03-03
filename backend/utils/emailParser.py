@@ -10,7 +10,7 @@ Pour les fonctions spécifiques à Gmail, voir:
 from email.utils import parseaddr
 from typing import Optional, Tuple
 
-from backend.core.models.email import EmailAddress
+from backend.core.models.Email import EmailAddress
 
 
 def parse_email_address(address_string: str) -> EmailAddress:
@@ -49,6 +49,7 @@ def extract_email_body(payload: dict) -> Tuple[str, Optional[str]]:
     Returns:
         Tuple[str, Optional[str]]: (texte brut, html ou None)
     """
-    # Import local pour éviter la dépendance circulaire
-    from backend.adapters.MailProvider.GMAIL.gmailBodyParser import extract_gmail_body
+    from backend.adapters.MailProvider.GMAIL.gmailBodyParser import (  # pylint: disable=import-outside-toplevel
+        extract_gmail_body,
+    )
     return extract_gmail_body(payload)

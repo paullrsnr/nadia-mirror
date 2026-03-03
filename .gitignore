@@ -18,3 +18,4 @@ backend/build
 *.pyc
 
 .env*
+.idea/
