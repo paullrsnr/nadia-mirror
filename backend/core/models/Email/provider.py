@@ -1,4 +1,3 @@
-"""Enum des providers d'email supportés (identifiants)."""
 from enum import Enum
 
 

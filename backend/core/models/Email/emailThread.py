@@ -1,5 +1,3 @@
-# pylint: disable=invalid-name
-"""Modèle métier : fil de discussion email."""
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -9,8 +7,6 @@ from backend.core.models.Email.emailAddress import EmailAddress
 
 @dataclass
 class EmailThread:
-    """Représentation métier d'un fil de discussion email."""
-
     thread_id: str
     subject: str
     emails: list[Email]

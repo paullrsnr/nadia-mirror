@@ -1,4 +1,3 @@
-"""Modèle : corps d'un message Microsoft Graph (API response)."""
 from pydantic import BaseModel, Field, ConfigDict
 
 

@@ -1,10 +1,9 @@
-"""Adapter Outlook : OAuth + stockage des tokens."""
-from backend.adapters.AuthProvider.Outlook.outlookOAuthAdapter import (
+from backend.adapters.authProvider.Outlook.outlookOAuthAdapter import (
     generate_outlook_auth_url,
     exchange_outlook_code_for_tokens,
     get_outlook_user_email,
 )
-from backend.adapters.AuthProvider.Outlook.outlookTokenStorage import (
+from backend.adapters.authProvider.Outlook.outlookTokenStorage import (
     get_outlook_credentials,
     save_outlook_credentials,
     load_outlook_credentials,

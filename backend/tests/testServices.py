@@ -1,4 +1,3 @@
-# pylint: disable=invalid-name
 """Tests unitaires pour les services du core."""
 import unittest
 from unittest.mock import MagicMock
@@ -13,12 +12,12 @@ from backend.ports.credentialGateway import CredentialGateway
 
 def _build_service(
     storage: MagicMock | None = None,
-    adapter_factory: MagicMock | None = None,
+    email_provider_gateway: MagicMock | None = None,
     credential_gateway: MagicMock | None = None,
 ) -> MailboxService:
     return MailboxService(
         storage=storage or MagicMock(spec=EmailStorage),
-        adapter_factory=adapter_factory or MagicMock(),
+        email_provider_gateway=email_provider_gateway or MagicMock(),
         credential_gateway=credential_gateway or MagicMock(spec=CredentialGateway),
     )
 
@@ -46,12 +45,12 @@ class TestMailboxServiceSync(unittest.TestCase):
 
         adapter = MagicMock()
         adapter.fetch_emails.return_value = EmailPage(emails=[_make_email()], next_page_token=None)
-        adapter_factory = MagicMock(return_value=adapter)
+        email_provider_gateway = MagicMock(**{"create.return_value": adapter})
 
         credential_gateway = MagicMock(spec=CredentialGateway)
         credential_gateway.load.return_value = {"access_token": "fake"}
 
-        service = _build_service(storage, adapter_factory, credential_gateway)
+        service = _build_service(storage, email_provider_gateway, credential_gateway)
         result = service.sync_emails(provider=Provider.GMAIL.value, max_results=10)
 
         self.assertEqual(result.status, "success")
@@ -79,12 +78,12 @@ class TestMailboxServiceSync(unittest.TestCase):
 
         adapter = MagicMock()
         adapter.fetch_emails.side_effect = ValueError("Non authentifié")
-        adapter_factory = MagicMock(return_value=adapter)
+        email_provider_gateway = MagicMock(**{"create.return_value": adapter})
 
         credential_gateway = MagicMock(spec=CredentialGateway)
         credential_gateway.load.return_value = {"access_token": "fake"}
 
-        service = _build_service(storage, adapter_factory, credential_gateway)
+        service = _build_service(storage, email_provider_gateway, credential_gateway)
         result = service.sync_emails(provider=Provider.GMAIL.value)
 
         self.assertEqual(result.status, "error")

@@ -1,4 +1,3 @@
-# pylint: disable=invalid-name
 """Tests unitaires pour l'API FastAPI."""
 import unittest
 from fastapi.testclient import TestClient

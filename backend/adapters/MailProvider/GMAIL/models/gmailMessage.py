@@ -1,9 +1,8 @@
-"""Modèle : message Gmail complet (API response)."""
 from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from backend.adapters.MailProvider.GMAIL.models.gmailPayload import GmailPayload
+from backend.adapters.mailProvider.GMAIL.models.gmailPayload import GmailPayload
 
 
 class GmailMessage(BaseModel):

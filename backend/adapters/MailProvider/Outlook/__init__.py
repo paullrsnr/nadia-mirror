@@ -1,3 +1,3 @@
-from backend.adapters.MailProvider.Outlook.outlookAdapter import OutlookAdapter
+from backend.adapters.mailProvider.Outlook.outlookAdapter import OutlookAdapter
 
 __all__ = ["OutlookAdapter"]

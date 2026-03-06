@@ -1,7 +1,6 @@
-"""Modèle : destinataire Microsoft Graph (API response)."""
 from pydantic import BaseModel, Field, ConfigDict
 
-from backend.adapters.MailProvider.Outlook.models.graphEmailAddress import GraphEmailAddress
+from backend.adapters.mailProvider.Outlook.models.graphEmailAddress import GraphEmailAddress
 
 
 class GraphRecipient(BaseModel):

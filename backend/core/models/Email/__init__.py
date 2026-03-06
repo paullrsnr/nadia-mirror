@@ -1,4 +1,3 @@
-"""Modèles métier du domaine email (core). Pas de dépendance à Pydantic."""
 from backend.core.models.Email.emailListQuery import EmailListQuery
 from backend.core.models.Email.emailAddress import EmailAddress
 from backend.core.models.Email.emailAttachment import EmailAttachment

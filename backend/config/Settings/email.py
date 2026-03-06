@@ -1,4 +1,3 @@
-"""Configuration du provider email par défaut."""
 from pydantic_settings import BaseSettings
 
 

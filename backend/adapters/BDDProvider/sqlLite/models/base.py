@@ -1,5 +1,3 @@
-# pylint: disable=invalid-name
-"""Classe de base pour les modèles SQLAlchemy."""
 from sqlalchemy.orm import DeclarativeBase
 
 

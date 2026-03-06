@@ -1,14 +1,13 @@
-# pylint: disable=invalid-name
-"""Implémentation du port CredentialGateway : dispatche vers le bon token storage."""
 from typing import Any
 
+from backend.core.models.Email import Provider
 from backend.ports.credentialGateway import CredentialGateway
-from backend.adapters.AuthProvider.GMAIL.gmailTokenStorage import (
+from backend.adapters.authProvider.GMAIL.gmailTokenStorage import (
     load_gmail_credentials,
     save_gmail_credentials,
     clear_gmail_credentials,
 )
-from backend.adapters.AuthProvider.Outlook.outlookTokenStorage import (
+from backend.adapters.authProvider.Outlook.outlookTokenStorage import (
     load_outlook_credentials,
     save_outlook_credentials,
     clear_outlook_credentials,
@@ -16,23 +15,21 @@ from backend.adapters.AuthProvider.Outlook.outlookTokenStorage import (
 
 
 class CredentialGatewayAdapter(CredentialGateway):
-    """Dispatche les opérations de credentials vers Gmail ou Outlook selon le provider."""
-
     def load(self, provider: str) -> Any | None:
-        if provider == "gmail":
+        if provider == Provider.GMAIL.value:
             return load_gmail_credentials()
-        if provider == "outlook":
+        if provider == Provider.OUTLOOK.value:
             return load_outlook_credentials()
         return None
 
     def save(self, provider: str, credentials: Any) -> None:
-        if provider == "gmail":
+        if provider == Provider.GMAIL.value:
             save_gmail_credentials(credentials)
-        elif provider == "outlook":
+        elif provider == Provider.OUTLOOK.value:
             save_outlook_credentials(credentials)
 
     def clear(self, provider: str) -> None:
-        if provider == "gmail":
+        if provider == Provider.GMAIL.value:
             clear_gmail_credentials()
-        elif provider == "outlook":
+        elif provider == Provider.OUTLOOK.value:
             clear_outlook_credentials()

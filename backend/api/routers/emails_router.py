@@ -1,4 +1,3 @@
-"""Routeur emails."""
 from typing import Union
 
 from fastapi import APIRouter, Depends, Query, HTTPException
@@ -20,7 +19,6 @@ async def list_emails(
     page: int = Query(default=1, ge=1),
     mailbox: MailboxService = Depends(get_mailbox_service),
 ):
-    """Liste les emails depuis le stockage local."""
     return mailbox.get_stored_emails(provider=provider, max_results=max_results, page=page)
 
 
@@ -30,7 +28,6 @@ async def archive_email(
     provider: str | None = Query(default=None, description="Provider (gmail, outlook)."),
     service: EmailsService = Depends(get_emails_service),
 ):
-    """Archive un email."""
     try:
         return service.archive_email(email_id, provider)
     except ProviderError as e:
@@ -45,7 +42,6 @@ async def sync_emails(
     max_results: int = Query(default=100, ge=1, le=500),
     mailbox: MailboxService = Depends(get_mailbox_service),
 ):
-    """Synchronise les emails non lus vers le stockage local."""
     try:
         return mailbox.sync_emails(provider=provider, max_results=max_results)
     except AuthError as e:

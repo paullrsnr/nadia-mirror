@@ -1,4 +1,3 @@
-"""Modèle : partie 'body' d'un message Gmail (API response)."""
 from typing import Optional
 
 from pydantic import BaseModel, Field

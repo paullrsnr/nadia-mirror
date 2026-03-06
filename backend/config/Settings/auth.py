@@ -1,4 +1,3 @@
-"""Configuration OAuth par provider (Gmail, Outlook)."""
 from pydantic_settings import BaseSettings
 
 

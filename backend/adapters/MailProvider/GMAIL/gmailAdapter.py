@@ -1,55 +1,42 @@
-# pylint: disable=invalid-name
-"""Adaptateur Gmail pour l'API Google."""
+
 from typing import Optional
 
 from backend.core.exceptions import AuthError
 from backend.ports.emailProvider import EmailProvider
 from backend.core.models.Email import Email, EmailListQuery, EmailPage
-from backend.adapters.AuthProvider.GMAIL.gmailTokenStorage import get_gmail_credentials
-from backend.adapters.MailProvider.GMAIL.gmailApiService import build_gmail_service
-from backend.adapters.MailProvider.GMAIL.gmailMessageParser import parse_gmail_message
-
-
-_GMAIL_QUERY_UNREAD = "is:unread"
-
-
-def _gmail_query_string(query: Optional[EmailListQuery]) -> str:
-    """Traduit la requête canonique en chaîne de requête Gmail."""
-    if not query:
-        return _GMAIL_QUERY_UNREAD
-    parts: list[str] = []
-    if query.unread_only:
-        parts.append(_GMAIL_QUERY_UNREAD)
-    if query.after_date:
-        # Gmail : after:YYYY/MM/DD
-        parts.append(f"after:{query.after_date:%Y/%m/%d}")
-    return " ".join(parts) if parts else _GMAIL_QUERY_UNREAD
+from backend.adapters.authProvider.GMAIL.gmailTokenStorage import get_gmail_credentials
+from backend.adapters.mailProvider.GMAIL.gmailApiService import build_gmail_service
+from backend.adapters.mailProvider.GMAIL.gmailMessageParser import parse_gmail_message
 
 
 class GmailAdapter(EmailProvider):
-    """Adaptateur pour l'API Gmail. Utilise uniquement les credentials Gmail."""
 
     def __init__(self):
-        self.gmail_api = None
-        self._ensure_service()
-
-    def _ensure_service(self) -> None:
-        """Initialise le client Gmail si les credentials Gmail sont disponibles."""
         gmail_credentials = get_gmail_credentials()
-        if gmail_credentials:
-            self.gmail_api = build_gmail_service(gmail_credentials)
-        else:
+        if not gmail_credentials:
             raise AuthError(
                 "Credentials Gmail non disponibles. Authentification requise."
             )
+        self.gmail_api = build_gmail_service(gmail_credentials)
+
+    def _query_string(self, query: Optional[EmailListQuery]) -> str:
+        unread = "is:unread"
+        if not query:
+            return unread
+        parts: list[str] = []
+        if query.unread_only:
+            parts.append(unread)
+        if query.after_date:
+            # Gmail : after:YYYY/MM/DD
+            parts.append(f"after:{query.after_date:%Y/%m/%d}")
+        return " ".join(parts) if parts else unread
 
     def fetch_emails(
         self,
         max_results: int = 50,
         query: Optional[EmailListQuery] = None,
     ) -> EmailPage:
-        """Fetche une page d'emails depuis Gmail (requête canonique → query Gmail)."""
-        q = _gmail_query_string(query)
+        q = self._query_string(query)
         try:
             # pylint: disable=no-member
             results = (
@@ -78,7 +65,6 @@ class GmailAdapter(EmailProvider):
             ) from e
 
     def _get_and_parse_to_email(self, email_id: str) -> Email:
-        """Récupère le message Gmail puis le parse en objet métier Email."""
         # pylint: disable=no-member
         message = (
             self.gmail_api.users()
@@ -89,7 +75,6 @@ class GmailAdapter(EmailProvider):
         return parse_gmail_message(message)
 
     def archive_email(self, email_id: str) -> bool:
-        """Archive un email (retire le label INBOX)."""
         try:
             # pylint: disable=no-member
             self.gmail_api.users().messages().modify(

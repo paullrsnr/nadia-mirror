@@ -1,5 +1,4 @@
-# pylint: disable=invalid-name,too-few-public-methods
-"""Modèle SQLAlchemy pour les emails."""
+# pylint: disable=too-few-public-methods
 from typing import Optional
 
 from sqlalchemy import String, Text
@@ -9,10 +8,6 @@ from backend.adapters.BDDProvider.sqlLite.models.base import Base
 
 
 class EmailModel(Base):
-    """Modèle de la table emails en base de données.
-
-    Stocke les emails synchronisés depuis Gmail et Outlook.
-    """
     __tablename__ = "emails"
 
     id: Mapped[str] = mapped_column(String, primary_key=True)

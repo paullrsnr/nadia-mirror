@@ -1,3 +1,3 @@
-from backend.adapters.MailProvider.GMAIL.gmailAdapter import GmailAdapter
+from backend.adapters.mailProvider.GMAIL.gmailAdapter import GmailAdapter
 
 __all__ = ["GmailAdapter"]

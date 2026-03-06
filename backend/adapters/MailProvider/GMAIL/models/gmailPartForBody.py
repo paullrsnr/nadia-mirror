@@ -1,7 +1,6 @@
-"""Modèle de parsing : part Gmail pour l'extraction du corps (structure récursive)."""
 from dataclasses import dataclass, field
 
-from backend.adapters.MailProvider.GMAIL.models.gmailBodyData import GmailBodyData
+from backend.adapters.mailProvider.GMAIL.models.gmailBodyData import GmailBodyData
 
 
 @dataclass

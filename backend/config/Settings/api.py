@@ -1,4 +1,3 @@
-"""Configuration du serveur API."""
 from pydantic_settings import BaseSettings
 
 

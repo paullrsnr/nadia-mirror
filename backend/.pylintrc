@@ -1,10 +1,10 @@
 [MAIN]
-# Configuration pylint pour le backend Nadia
 
 [BASIC]
-# Accepter les noms de modules en camelCase (convention existante)
-# Regex étendue pour accepter snake_case ET camelCase
+# Modules en camelCase (convention du projet)
 module-rgx=[a-z_][a-z0-9_]*|[a-z][a-zA-Z0-9]*
 
+# Noms courts légitimes : f (file handle), e (exception), db, id, ...
+good-names=f,e,i,j,k,db,id,_
+
 [MESSAGES CONTROL]
-# Rien à désactiver globalement

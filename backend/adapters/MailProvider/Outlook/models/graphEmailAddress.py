@@ -1,4 +1,3 @@
-"""Modèle : emailAddress Microsoft Graph (API response)."""
 from typing import Optional
 
 from pydantic import BaseModel

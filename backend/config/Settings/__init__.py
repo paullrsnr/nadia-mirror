@@ -1,4 +1,3 @@
-"""Charge le .env et expose les instances de settings par domaine."""
 from pathlib import Path
 
 from dotenv import load_dotenv

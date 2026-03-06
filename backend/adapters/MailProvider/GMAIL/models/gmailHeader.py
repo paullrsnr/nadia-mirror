@@ -1,4 +1,3 @@
-"""Modèle : header d'un message Gmail (API response)."""
 from pydantic import BaseModel
 
 

@@ -6,13 +6,11 @@ import { platform } from "node:os";
 
 export function launchBackend() {
   if (!app.isPackaged) {
-    // Mode développement
-    const backendDir = path.join(__dirname, "../../../backend");
     const projectRoot = path.join(__dirname, "../../..");
     const isWindows = platform() === "win32";
     const pythonPath = isWindows
-      ? path.join(backendDir, ".venv", "Scripts", "python.exe")
-      : path.join(backendDir, ".venv", "bin", "python3");
+      ? path.join(projectRoot, "venv", "Scripts", "python.exe")
+      : path.join(projectRoot, "venv", "bin", "python3");
 
     // Lancer depuis le répertoire parent pour que les imports backend.* fonctionnent
     const backendProcess = spawn(

@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name,import-outside-toplevel
+# pylint: disable=import-outside-toplevel
 """Tests unitaires pour les adapters et utilitaires."""
 import base64
 import unittest
@@ -127,8 +127,8 @@ class TestEmailParser(unittest.TestCase):
         self.assertIsNone(body_html)
 
 
-class TestSqliteStorage(unittest.TestCase):
-    """Tests pour SqliteStorage."""
+class TestSqliteStorageAdapter(unittest.TestCase):
+    """Tests pour SqliteStorageAdapter."""
 
     def setUp(self):
         """Crée un répertoire temporaire pour les tests."""
@@ -137,23 +137,23 @@ class TestSqliteStorage(unittest.TestCase):
 
     def tearDown(self):
         """Supprime le répertoire temporaire."""
-        from backend.adapters.BDDProvider.sqlLite import dispose_engine  # late import pour isolation
+        from backend.adapters.BDDProvider.sqlLite.session import dispose_engine
         dispose_engine()
         shutil.rmtree(self.temp_dir)
 
     def test_storage_init_creates_database(self):
         """Test que l'initialisation crée la base de données."""
-        from backend.adapters.BDDProvider.sqlLite import SqliteStorage
+        from backend.adapters.BDDProvider.sqlLite import SqliteStorageAdapter
 
-        storage = SqliteStorage(data_dir=self.temp_path)
+        storage = SqliteStorageAdapter(data_dir=self.temp_path)
 
         self.assertTrue(storage.db_path.exists())
 
     def test_save_and_get_sync_time(self):
         """Test sauvegarde et récupération du temps de sync."""
-        from backend.adapters.BDDProvider.sqlLite import SqliteStorage
+        from backend.adapters.BDDProvider.sqlLite import SqliteStorageAdapter
 
-        storage = SqliteStorage(data_dir=self.temp_path)
+        storage = SqliteStorageAdapter(data_dir=self.temp_path)
 
         # Pas de sync au départ (sync_metadata vide)
         self.assertIsNone(storage.get_last_sync_time())
@@ -168,9 +168,9 @@ class TestSqliteStorage(unittest.TestCase):
 
     def test_save_email(self):
         """Test sauvegarde d'un email."""
-        from backend.adapters.BDDProvider.sqlLite import SqliteStorage
+        from backend.adapters.BDDProvider.sqlLite import SqliteStorageAdapter
 
-        storage = SqliteStorage(data_dir=self.temp_path)
+        storage = SqliteStorageAdapter(data_dir=self.temp_path)
 
         email = Email(
             id="test_123",

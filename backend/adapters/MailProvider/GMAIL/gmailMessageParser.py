@@ -1,19 +1,17 @@
-"""Parsing et mapping des messages Gmail (JSON brut -> Email métier).
-
-Ce module encapsule la fonction de mapping vers le modèle métier `Email`.
-Les modèles Pydantic (GmailMessage, etc.) sont dans backend.core.models.Gmail.
-"""
 from datetime import datetime
-from email.utils import parsedate_to_datetime
+from email.utils import parsedate_to_datetime, parseaddr
 
-from backend.core.models.Email import Email, EmailAttachment
-from backend.adapters.MailProvider.GMAIL.models import GmailMessage
-from backend.utils.emailParser import parse_email_address
-from backend.adapters.MailProvider.GMAIL.gmailBodyParser import extract_gmail_body
+from backend.core.models.Email import Email, EmailAddress, EmailAttachment
+from backend.adapters.mailProvider.GMAIL.models import GmailMessage
+from backend.adapters.mailProvider.GMAIL.gmailBodyParser import extract_gmail_body
 
+def parse_email_address(address_string: str) -> EmailAddress:
+    if not address_string or not address_string.strip():
+        return EmailAddress(email="")
+    name, email = parseaddr(address_string)
+    return EmailAddress(name=name if name else None, email=email)
 
 def parse_gmail_message(message: dict) -> Email:
-    """Transforme un message Gmail brut (JSON) en objet Email métier."""
     gmail_message = GmailMessage.model_validate(message)
 
     # Headers normalisés (nom en minuscule)

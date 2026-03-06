@@ -1,10 +1,9 @@
-"""Modèle : message Microsoft Graph complet (API response)."""
 from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from backend.adapters.MailProvider.Outlook.models.graphRecipient import GraphRecipient
-from backend.adapters.MailProvider.Outlook.models.graphMessageBody import GraphMessageBody
+from backend.adapters.mailProvider.Outlook.models.graphRecipient import GraphRecipient
+from backend.adapters.mailProvider.Outlook.models.graphMessageBody import GraphMessageBody
 
 
 class GraphMessage(BaseModel):

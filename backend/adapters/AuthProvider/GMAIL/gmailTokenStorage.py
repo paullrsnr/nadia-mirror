@@ -1,5 +1,3 @@
-# pylint: disable=invalid-name
-"""Stockage des tokens OAuth Gmail : sauvegarde/chargement/suppression sur disque (chiffré)."""
 import json
 import logging
 import os
@@ -13,16 +11,8 @@ from backend.utils.encryption import decrypt_data, encrypt_data
 
 logger = logging.getLogger(__name__)
 
-_PROVIDER = Provider.GMAIL.value
-
-
-def _tokens_path() -> os.PathLike:
-    return storage_settings.tokens_file(_PROVIDER)
-
-
 def save_gmail_credentials(credentials: Credentials) -> None:
-    """Sauvegarde les credentials OAuth Gmail sur disque (chiffrement des champs sensibles)."""
-    path = _tokens_path()
+    path = storage_settings.tokens_file(Provider.GMAIL.value)
     path.parent.mkdir(parents=True, exist_ok=True)
 
     encrypted = {
@@ -45,10 +35,8 @@ def save_gmail_credentials(credentials: Credentials) -> None:
 
 
 def load_gmail_credentials() -> Credentials | None:
-    """Charge les credentials OAuth Gmail depuis le disque (déchiffrement + refresh si expiré)."""
-    path = _tokens_path()
+    path = storage_settings.tokens_file(Provider.GMAIL.value)
 
-    # Compatibilité : ancien fichier tokens.json unique
     if not path.exists():
         legacy = storage_settings.DATA_DIR / "tokens.json"
         if legacy.exists():
@@ -85,18 +73,11 @@ def load_gmail_credentials() -> Credentials | None:
 
 
 def clear_gmail_credentials() -> None:
-    """Supprime le fichier de tokens Gmail (déconnexion)."""
-    path = _tokens_path()
+    path = storage_settings.tokens_file(Provider.GMAIL.value)
     if path.exists():
         path.unlink()
 
 
 def get_gmail_credentials() -> Credentials | None:
-    """Point d'entrée public pour les adapters mail (GmailAdapter)."""
     return load_gmail_credentials()
 
-
-# Alias privés attendus par config/Credential/gmailCredentialProvider (imports lazy)
-_save_gmail_credentials = save_gmail_credentials
-_load_gmail_credentials = load_gmail_credentials
-_clear_gmail_credentials = clear_gmail_credentials

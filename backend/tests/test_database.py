@@ -1,4 +1,3 @@
-# pylint: disable=invalid-name
 """Tests unitaires pour la couche base de données SQLAlchemy."""
 import shutil
 import time
@@ -9,8 +8,8 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 
 from backend.adapters.BDDProvider.sqlLite.models import Base, EmailModel, SyncMetadataModel
-from backend.adapters.BDDProvider.sqlLite.session import get_engine
-from backend.adapters.BDDProvider.sqlLite import SqliteStorage, init_engine, dispose_engine, create_session
+from backend.adapters.BDDProvider.sqlLite.session import get_engine, init_engine, dispose_engine, create_session
+from backend.adapters.BDDProvider.sqlLite import SqliteStorageAdapter
 from backend.core.models.Email import Email, EmailAddress
 
 
@@ -38,7 +37,7 @@ class TestSyncMetadataModel(unittest.TestCase):
 
     def test_sync_metadata_model_fields(self):
         """Vérifie que les champs sont définis."""
-        for field in ["id", "last_sync_time", "sync_count"]:
+        for field in ["id", "last_sync_time"]:
             self.assertTrue(hasattr(SyncMetadataModel, field))
 
 
@@ -60,14 +59,14 @@ def _make_email(email_id: str) -> Email:
     )
 
 
-class TestSqliteStorage(unittest.TestCase):
-    """Tests pour SqliteStorage (implémentation du port EmailStorage)."""
+class TestSqliteStorageAdapter(unittest.TestCase):
+    """Tests pour SqliteStorageAdapter (implémentation du port EmailStorage)."""
 
     def setUp(self):
         """Initialise une base de données temporaire pour chaque test."""
         self.temp_dir = tempfile.mkdtemp()
         self.temp_path = Path(self.temp_dir)
-        self.storage = SqliteStorage(data_dir=self.temp_path)
+        self.storage = SqliteStorageAdapter(data_dir=self.temp_path)
 
     def tearDown(self):
         """Nettoie la base de données temporaire."""

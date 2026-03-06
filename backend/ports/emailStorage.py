@@ -1,4 +1,3 @@
-"""Port de persistance locale des emails."""
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Optional
@@ -7,7 +6,6 @@ from backend.core.models.Email import Email
 
 
 class EmailStorage(ABC):
-    """Contrat pour persister et lire les emails localement."""
 
     @abstractmethod
     def save_email(self, email: Email, provider: str) -> bool:

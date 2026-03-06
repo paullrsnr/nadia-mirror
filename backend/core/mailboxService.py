@@ -1,7 +1,4 @@
-# pylint: disable=invalid-name,too-few-public-methods
-"""Service boîte mail : liste depuis le stockage + synchronisation depuis le provider."""
 from datetime import datetime, timedelta
-from typing import Callable
 
 from backend.core.providers import (
     Provider,
@@ -12,7 +9,7 @@ from backend.core.providers import (
     MSG_INVALID_PROVIDER,
 )
 from backend.core.exceptions import AuthError, ProviderError
-from backend.ports.emailProvider import EmailProvider as IEmailProvider
+from backend.ports.emailProviderGateway import EmailProviderGateway
 from backend.ports.emailStorage import EmailStorage
 from backend.ports.credentialGateway import CredentialGateway
 from backend.core.models.Email import EmailListQuery, EmailListResult
@@ -20,21 +17,15 @@ from backend.core.models.Email import SyncResult, SyncAllResult, ProviderSyncRes
 
 
 class MailboxService:
-    """Liste les emails stockés et synchronise depuis un provider.
-
-    Les dépendances (storage, adapter_factory) sont injectées depuis la couche API.
-    Le core ne sait pas quelle base de données ni quel SDK est utilisé.
-    """
-
     def __init__(
         self,
         storage: EmailStorage,
-        adapter_factory: Callable[[str], IEmailProvider],
+        email_provider_gateway: EmailProviderGateway,
         credential_gateway: CredentialGateway,
         sync_min_interval_minutes: int = 5,
     ) -> None:
         self._storage = storage
-        self._adapter_factory = adapter_factory
+        self._email_provider_gateway = email_provider_gateway
         self._credentials = credential_gateway
         self._sync_min_interval = sync_min_interval_minutes
 
@@ -47,7 +38,6 @@ class MailboxService:
         max_results: int = 50,
         page: int = 1,
     ) -> EmailListResult:
-        """Retourne les emails déjà en base (paginés). provider : gmail, outlook ou all."""
         normalized = self._normalize_provider(provider)
         if normalized not in LIST_PROVIDERS:
             normalized = DEFAULT_PROVIDER
@@ -71,7 +61,6 @@ class MailboxService:
         provider: str | None,
         max_results: int = 100,
     ) -> SyncResult | SyncAllResult:
-        """Synchronise les non lus depuis le(s) provider(s) vers le stockage local."""
         normalized = self._normalize_provider(provider)
         if normalized not in LIST_PROVIDERS:
             normalized = DEFAULT_PROVIDER
@@ -119,14 +108,11 @@ class MailboxService:
         adapter = self._create_adapter(provider)
         return self._do_sync(adapter, provider, max_results, skip_cooldown=False)
 
-    def _create_adapter(self, provider: str) -> IEmailProvider:
-        try:
-            return self._adapter_factory(provider)
-        except ValueError as e:
-            raise ProviderError(MSG_INVALID_PROVIDER) from e
+    def _create_adapter(self, provider: str):
+        return self._email_provider_gateway.create(provider)
 
     def _do_sync(
-        self, adapter: IEmailProvider, provider_tag: str, max_results: int, skip_cooldown: bool
+        self, adapter, provider_tag: str, max_results: int, skip_cooldown: bool
     ) -> SyncResult:
         try:
             if not skip_cooldown:
