@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from backend.core.models.Email.email import Email
+from backend.core.models.email.email import Email
 
 
 @dataclass

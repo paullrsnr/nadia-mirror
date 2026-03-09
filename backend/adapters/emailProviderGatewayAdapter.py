@@ -1,5 +1,5 @@
 from backend.core.exceptions import ProviderError
-from backend.core.models.Email import Provider
+from backend.core.models.email import Provider
 from backend.ports.emailProvider import EmailProvider
 from backend.ports.emailProviderGateway import EmailProviderGateway
 from backend.adapters.mailProvider.GMAIL.gmailAdapter import GmailAdapter

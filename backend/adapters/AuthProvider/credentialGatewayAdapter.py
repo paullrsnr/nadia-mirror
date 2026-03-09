@@ -1,6 +1,6 @@
 from typing import Any
 
-from backend.core.models.Email import Provider
+from backend.core.models.email import Provider
 from backend.ports.credentialGateway import CredentialGateway
 from backend.adapters.authProvider.GMAIL.gmailTokenStorage import (
     load_gmail_credentials,

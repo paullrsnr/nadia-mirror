@@ -4,7 +4,7 @@ import httpx
 
 from backend.core.exceptions import AuthError
 from backend.ports.emailProvider import EmailProvider
-from backend.core.models.Email import EmailListQuery, EmailPage
+from backend.core.models.email import EmailListQuery, EmailPage
 from backend.adapters.authProvider.Outlook.outlookTokens import OutlookTokens
 from backend.adapters.authProvider.Outlook.outlookTokenStorage import get_outlook_credentials
 from backend.adapters.mailProvider.Outlook.outlookMessageParser import (
@@ -20,41 +20,10 @@ class OutlookAdapter(EmailProvider):
         tokens = get_outlook_credentials()
         if not tokens or not tokens.access_token:
             raise AuthError(
-                "Credentials Outlook non disponibles. Authentification requise."
+                "credentials Outlook non disponibles. Authentification requise."
             )
         self._tokens: OutlookTokens = tokens
 
-    def _access_token(self) -> str:
-        tokens = get_outlook_credentials()
-        if not tokens:
-            raise AuthError("Credentials Outlook non disponibles.")
-        return tokens.access_token
-
-    def _build_params(self, max_results: int, query: Optional[EmailListQuery]) -> dict[str, int | str]:
-        params: dict[str, int | str] = {
-            "$top": min(max_results, 500),
-            "$orderby": "receivedDateTime desc",
-            "$select": (
-                "id,conversationId,subject,from,toRecipients,"
-                "body,bodyPreview,receivedDateTime"
-            ),
-        }
-        if not query:
-            params[GRAPH_PARAM_FILTER] = "isRead eq false"
-            return params
-        if query.unread_only:
-            params[GRAPH_PARAM_FILTER] = "isRead eq false"
-        if query.after_date:
-            # Graph : receivedDateTime ge YYYY-MM-DD
-            existing = params.get(GRAPH_PARAM_FILTER, "")
-            date_filter = f"receivedDateTime ge {query.after_date.isoformat()}"
-            params[GRAPH_PARAM_FILTER] = f"{existing} and {date_filter}" if existing else date_filter
-        return params
-
-    def _next_token(self, next_link: Optional[str]) -> Optional[str]:
-        if not next_link or "$skiptoken=" not in next_link:
-            return None
-        return next_link.split("$skiptoken=", 1)[-1]
 
     def fetch_emails(
         self,
@@ -90,3 +59,35 @@ class OutlookAdapter(EmailProvider):
             return True
         except (httpx.HTTPError, ValueError, KeyError):
             return False
+
+    def _access_token(self) -> str:
+        tokens = get_outlook_credentials()
+        if not tokens:
+            raise AuthError("credentials Outlook non disponibles.")
+        return tokens.access_token
+
+    def _build_params(self, max_results: int, query: Optional[EmailListQuery]) -> dict[str, int | str]:
+        params: dict[str, int | str] = {
+            "$top": min(max_results, 500),
+            "$orderby": "receivedDateTime desc",
+            "$select": (
+                "id,conversationId,subject,from,toRecipients,"
+                "body,bodyPreview,receivedDateTime"
+            ),
+        }
+        if not query:
+            params[GRAPH_PARAM_FILTER] = "isRead eq false"
+            return params
+        if query.unread_only:
+            params[GRAPH_PARAM_FILTER] = "isRead eq false"
+        if query.after_date:
+            # Graph : receivedDateTime ge YYYY-MM-DD
+            existing = params.get(GRAPH_PARAM_FILTER, "")
+            date_filter = f"receivedDateTime ge {query.after_date.isoformat()}"
+            params[GRAPH_PARAM_FILTER] = f"{existing} and {date_filter}" if existing else date_filter
+        return params
+
+    def _next_token(self, next_link: Optional[str]) -> Optional[str]:
+        if not next_link or "$skiptoken=" not in next_link:
+            return None
+        return next_link.split("$skiptoken=", 1)[-1]

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from backend.core.models.Email import EmailListQuery, EmailPage
+from backend.core.models.email import EmailListQuery, EmailPage
 
 
 class EmailProvider(ABC):

@@ -1,5 +1,5 @@
-from backend.core.models.Email import Provider
-from backend.core.models.Auth import AuthIdentity
+from backend.core.models.email import Provider
+from backend.core.models.auth import AuthIdentity
 from backend.ports.oauthGateway import OAuthGateway
 from backend.ports.credentialGateway import CredentialGateway
 

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Optional
 
-from backend.core.models.Email import Email
+from backend.core.models.email import Email
 
 
 class EmailStorage(ABC):

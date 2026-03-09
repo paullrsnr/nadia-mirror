@@ -3,7 +3,7 @@ from typing import Optional
 
 from backend.core.exceptions import AuthError
 from backend.ports.emailProvider import EmailProvider
-from backend.core.models.Email import Email, EmailListQuery, EmailPage
+from backend.core.models.email import Email, EmailListQuery, EmailPage
 from backend.adapters.authProvider.GMAIL.gmailTokenStorage import get_gmail_credentials
 from backend.adapters.mailProvider.GMAIL.gmailApiService import build_gmail_service
 from backend.adapters.mailProvider.GMAIL.gmailMessageParser import parse_gmail_message
@@ -15,7 +15,7 @@ class GmailAdapter(EmailProvider):
         gmail_credentials = get_gmail_credentials()
         if not gmail_credentials:
             raise AuthError(
-                "Credentials Gmail non disponibles. Authentification requise."
+                "credentials Gmail non disponibles. Authentification requise."
             )
         self.gmail_api = build_gmail_service(gmail_credentials)
 
@@ -64,15 +64,6 @@ class GmailAdapter(EmailProvider):
                 f"Erreur lors de la récupération des emails: {str(e)}"
             ) from e
 
-    def _get_and_parse_to_email(self, email_id: str) -> Email:
-        # pylint: disable=no-member
-        message = (
-            self.gmail_api.users()
-            .messages()
-            .get(userId="me", id=email_id, format="full")
-            .execute()
-        )
-        return parse_gmail_message(message)
 
     def archive_email(self, email_id: str) -> bool:
         try:
@@ -85,3 +76,13 @@ class GmailAdapter(EmailProvider):
             return True
         except (OSError, ValueError, KeyError, TypeError):
             return False
+
+    def _get_and_parse_to_email(self, email_id: str) -> Email:
+        # pylint: disable=no-member
+        message = (
+            self.gmail_api.users()
+            .messages()
+            .get(userId="me", id=email_id, format="full")
+            .execute()
+        )
+        return parse_gmail_message(message)

@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse
 from backend.api.deps import get_auth_service
 from backend.api.schemas import AuthStatusResponse, AuthUrlResponse
 from backend.config.settings import auth_settings
-from backend.core.models.Email import Provider
+from backend.core.models.email import Provider
 from backend.core.services.authService import AuthService
 
 router = APIRouter()

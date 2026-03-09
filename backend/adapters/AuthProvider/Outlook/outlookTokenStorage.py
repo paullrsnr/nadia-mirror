@@ -6,7 +6,7 @@ import time
 import httpx
 
 from backend.config.settings import storage_settings, auth_settings
-from backend.core.models.Email import Provider
+from backend.core.models.email import Provider
 from backend.adapters.authProvider.Outlook.outlookTokens import OutlookTokens
 
 logger = logging.getLogger(__name__)
@@ -17,27 +17,6 @@ def save_outlook_credentials(tokens: OutlookTokens) -> None:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(tokens.model_dump(), f)
     os.chmod(path, 0o600)
-
-
-def _refresh_tokens(refresh_token: str) -> OutlookTokens:
-    url = f"https://login.microsoftonline.com/{auth_settings.OUTLOOK_TENANT}/oauth2/v2.0/token"
-    data = {
-        "client_id": auth_settings.OUTLOOK_CLIENT_ID,
-        "client_secret": auth_settings.OUTLOOK_CLIENT_SECRET,
-        "refresh_token": refresh_token,
-        "grant_type": "refresh_token",
-    }
-    with httpx.Client() as client:
-        response = client.post(url, data=data)
-        response.raise_for_status()
-
-    body = response.json()
-    expires_in = int(body.get("expires_in", 3600))
-    return OutlookTokens(
-        access_token=body["access_token"],
-        refresh_token=body.get("refresh_token") or refresh_token,
-        expires_at_timestamp=time.time() + expires_in,
-    )
 
 
 def load_outlook_credentials() -> OutlookTokens | None:
@@ -83,3 +62,22 @@ def clear_outlook_credentials() -> None:
 def get_outlook_credentials() -> OutlookTokens | None:
     return load_outlook_credentials()
 
+def _refresh_tokens(refresh_token: str) -> OutlookTokens:
+    url = f"https://login.microsoftonline.com/{auth_settings.OUTLOOK_TENANT}/oauth2/v2.0/token"
+    data = {
+        "client_id": auth_settings.OUTLOOK_CLIENT_ID,
+        "client_secret": auth_settings.OUTLOOK_CLIENT_SECRET,
+        "refresh_token": refresh_token,
+        "grant_type": "refresh_token",
+    }
+    with httpx.Client() as client:
+        response = client.post(url, data=data)
+        response.raise_for_status()
+
+    body = response.json()
+    expires_in = int(body.get("expires_in", 3600))
+    return OutlookTokens(
+        access_token=body["access_token"],
+        refresh_token=body.get("refresh_token") or refresh_token,
+        expires_at_timestamp=time.time() + expires_in,
+    )

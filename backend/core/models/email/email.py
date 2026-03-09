@@ -2,9 +2,9 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field
 
-from backend.core.models.Email.emailAddress import EmailAddress
-from backend.core.models.Email.emailAttachment import EmailAttachment
-from backend.core.models.Email.provider import Provider
+from backend.core.models.email.emailAddress import EmailAddress
+from backend.core.models.email.emailAttachment import EmailAttachment
+from backend.core.models.email.provider import Provider
 
 
 class Email(BaseModel):

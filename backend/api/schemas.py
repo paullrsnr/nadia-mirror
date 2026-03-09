@@ -1,6 +1,6 @@
-from backend.core.models.Auth import AuthIdentity, AuthUrl
-from backend.core.models.Email import EmailListResult
-from backend.core.models.Email import (
+from backend.core.models.auth import AuthIdentity, AuthUrl
+from backend.core.models.email import EmailListResult
+from backend.core.models.email import (
     ArchiveResult,
     SyncResult,
     SyncAllResult,

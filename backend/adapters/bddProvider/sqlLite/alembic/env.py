@@ -14,7 +14,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from backend.adapters.BDDProvider.sqlLite.models import Base
+from backend.adapters.bddProvider.sqlLite.models import Base
 from backend.config.settings import storage_settings
 
 target_metadata = Base.metadata

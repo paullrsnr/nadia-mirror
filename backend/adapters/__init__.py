@@ -1,1 +1,1 @@
-# backend.adapters — MailProvider, LLmProvider, BDDProvider
+# backend.adapters — MailProvider, llmProvider, bddProvider

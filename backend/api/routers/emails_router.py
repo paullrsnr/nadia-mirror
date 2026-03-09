@@ -7,7 +7,7 @@ from backend.api.schemas import EmailListResponse, ArchiveEmailResponse, SyncEma
 from backend.core.exceptions import AuthError, ProviderError
 from backend.core.mailboxService import MailboxService
 from backend.core.services.emailsService import EmailsService
-from backend.core.models.Email import SyncResult, SyncAllResult
+from backend.core.models.email import SyncResult, SyncAllResult
 
 router = APIRouter(prefix="/emails")
 

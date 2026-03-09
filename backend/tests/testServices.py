@@ -3,9 +3,9 @@ import unittest
 from unittest.mock import MagicMock
 from datetime import datetime
 
-from backend.core.models.Email import Provider
+from backend.core.models.email import Provider
 from backend.core.mailboxService import MailboxService
-from backend.core.models.Email import Email, EmailAddress, EmailPage
+from backend.core.models.email import Email, EmailAddress, EmailPage
 from backend.ports.emailStorage import EmailStorage
 from backend.ports.credentialGateway import CredentialGateway
 

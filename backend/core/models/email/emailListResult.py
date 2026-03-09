@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from backend.core.models.Email.email import Email
+from backend.core.models.email.email import Email
 
 
 class EmailListResult(BaseModel):

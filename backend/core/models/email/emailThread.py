@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from backend.core.models.Email.email import Email
-from backend.core.models.Email.emailAddress import EmailAddress
+from backend.core.models.email.email import Email
+from backend.core.models.email.emailAddress import EmailAddress
 
 
 @dataclass

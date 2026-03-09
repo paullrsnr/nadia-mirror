@@ -6,12 +6,12 @@ from typing import Optional
 
 from sqlalchemy import select, func
 
-from backend.core.models.Email import Provider, Email
+from backend.core.models.email import Provider, Email
 from backend.config.settings import storage_settings
 from backend.ports.emailStorage import EmailStorage
-from backend.adapters.BDDProvider.sqlLite.models import Base, EmailModel, SyncMetadataModel
-from backend.adapters.BDDProvider.sqlLite.session import init_engine, create_session, get_engine
-from backend.adapters.BDDProvider.sqlLite import emailMapper
+from backend.adapters.bddProvider.sqlLite.models import Base, EmailModel, SyncMetadataModel
+from backend.adapters.bddProvider.sqlLite.session import init_engine, create_session, get_engine
+from backend.adapters.bddProvider.sqlLite import emailMapper
 
 logger = logging.getLogger(__name__)
 
@@ -29,19 +29,10 @@ class SqliteStorageAdapter(EmailStorage):
             self._migrate_if_needed()
         self._init_db()
 
-    def _migrate_if_needed(self) -> None:
-        if self.db_path.exists():
-            return
-        legacy = storage_settings.DATA_DIR / "user_spaces" / "default" / "emails.db"
-        if legacy.exists():
-            logger.info("Migration DB legacy : %s → %s", legacy, self.db_path)
-            shutil.copy2(legacy, self.db_path)
-
     def _init_db(self) -> None:
         init_engine(self.db_path)
         Base.metadata.create_all(bind=get_engine())
 
-    # --- Port EmailStorage ---
 
     def save_email(self, email: Email, provider: str) -> bool:
         session = create_session()
@@ -103,3 +94,12 @@ class SqliteStorageAdapter(EmailStorage):
             raise
         finally:
             session.close()
+
+    
+    def _migrate_if_needed(self) -> None:
+        if self.db_path.exists():
+            return
+        legacy = storage_settings.DATA_DIR / "user_spaces" / "default" / "emails.db"
+        if legacy.exists():
+            logger.info("Migration DB legacy : %s → %s", legacy, self.db_path)
+            shutil.copy2(legacy, self.db_path)

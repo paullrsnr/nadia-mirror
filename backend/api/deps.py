@@ -4,16 +4,8 @@ from backend.adapters.authProvider.oauthGatewayAdapter import OAuthGatewayAdapte
 from backend.core.mailboxService import MailboxService
 from backend.core.services.authService import AuthService
 from backend.core.services.emailsService import EmailsService
-from backend.adapters.BDDProvider.sqlLite import SqliteStorageAdapter
+from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 from backend.config.settings import storage_settings
-
-
-def _credential_gateway() -> CredentialGatewayAdapter:
-    return CredentialGatewayAdapter()
-
-
-def _oauth_gateway() -> OAuthGatewayAdapter:
-    return OAuthGatewayAdapter()
 
 
 def get_auth_service() -> AuthService:
@@ -37,3 +29,10 @@ def get_emails_service() -> EmailsService:
         email_provider_gateway=EmailProviderGatewayAdapter(),
         credential_gateway=_credential_gateway(),
     )
+
+def _credential_gateway() -> CredentialGatewayAdapter:
+    return CredentialGatewayAdapter()
+
+
+def _oauth_gateway() -> OAuthGatewayAdapter:
+    return OAuthGatewayAdapter()

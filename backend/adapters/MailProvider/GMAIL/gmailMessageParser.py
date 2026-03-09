@@ -1,7 +1,7 @@
 from datetime import datetime
 from email.utils import parsedate_to_datetime, parseaddr
 
-from backend.core.models.Email import Email, EmailAddress, EmailAttachment
+from backend.core.models.email import Email, EmailAddress, EmailAttachment
 from backend.adapters.mailProvider.GMAIL.models import GmailMessage
 from backend.adapters.mailProvider.GMAIL.gmailBodyParser import extract_gmail_body
 

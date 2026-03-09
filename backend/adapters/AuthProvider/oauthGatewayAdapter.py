@@ -1,7 +1,7 @@
 from typing import Any
 
 from backend.core.exceptions import ProviderError
-from backend.core.models.Email import Provider
+from backend.core.models.email import Provider
 from backend.ports.oauthGateway import OAuthGateway
 from backend.adapters.authProvider.GMAIL.gmailOAuthAdapter import (
     generate_gmail_auth_url,

@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.adapters.BDDProvider.sqlLite.models.base import Base
+from backend.adapters.bddProvider.sqlLite.models.base import Base
 
 
 class EmailModel(Base):

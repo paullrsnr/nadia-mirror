@@ -6,7 +6,7 @@ from backend.core.providers import (
     MSG_PROVIDER_REQUIRED,
 )
 from backend.core.exceptions import AuthError, ProviderError
-from backend.core.models.Email import ArchiveResult
+from backend.core.models.email import ArchiveResult
 from backend.ports.emailProviderGateway import EmailProviderGateway
 from backend.ports.credentialGateway import CredentialGateway
 
@@ -20,8 +20,6 @@ class EmailsService:
         self._email_provider_gateway = email_provider_gateway
         self._credentials = credential_gateway
 
-    def _normalize_provider(self, provider: str | None, default: str = DEFAULT_PROVIDER) -> str:
-        return (provider or "").strip().lower() or default
 
     def archive_email(self, email_id: str, provider: str | None) -> ArchiveResult:
         normalized = self._normalize_provider(provider)
@@ -42,3 +40,6 @@ class EmailsService:
 
     def _create_adapter(self, provider: str):
         return self._email_provider_gateway.create(provider)
+
+    def _normalize_provider(self, provider: str | None, default: str = DEFAULT_PROVIDER) -> str:
+        return (provider or "").strip().lower() or default

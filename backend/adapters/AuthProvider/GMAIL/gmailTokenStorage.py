@@ -6,7 +6,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
 from backend.config.settings import storage_settings
-from backend.core.models.Email import Provider
+from backend.core.models.email import Provider
 from backend.utils.encryption import decrypt_data, encrypt_data
 
 logger = logging.getLogger(__name__)

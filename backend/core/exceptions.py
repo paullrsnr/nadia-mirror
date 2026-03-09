@@ -2,7 +2,7 @@
 
 
 class AuthError(Exception):
-    """Credentials manquants ou invalides pour un provider."""
+    """credentials manquants ou invalides pour un provider."""
 
 
 class ProviderError(Exception):

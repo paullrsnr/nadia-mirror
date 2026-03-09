@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from backend.utils.textCleaner import html_to_text
 from backend.utils.emailParser import parse_email_address, extract_email_body
-from backend.core.models.Email import Email, EmailAddress
+from backend.core.models.email import Email, EmailAddress
 
 
 class TestTextCleaner(unittest.TestCase):
@@ -137,13 +137,13 @@ class TestSqliteStorageAdapter(unittest.TestCase):
 
     def tearDown(self):
         """Supprime le répertoire temporaire."""
-        from backend.adapters.BDDProvider.sqlLite.session import dispose_engine
+        from backend.adapters.bddProvider.sqlLite.session import dispose_engine
         dispose_engine()
         shutil.rmtree(self.temp_dir)
 
     def test_storage_init_creates_database(self):
         """Test que l'initialisation crée la base de données."""
-        from backend.adapters.BDDProvider.sqlLite import SqliteStorageAdapter
+        from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 
         storage = SqliteStorageAdapter(data_dir=self.temp_path)
 
@@ -151,7 +151,7 @@ class TestSqliteStorageAdapter(unittest.TestCase):
 
     def test_save_and_get_sync_time(self):
         """Test sauvegarde et récupération du temps de sync."""
-        from backend.adapters.BDDProvider.sqlLite import SqliteStorageAdapter
+        from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 
         storage = SqliteStorageAdapter(data_dir=self.temp_path)
 
@@ -168,7 +168,7 @@ class TestSqliteStorageAdapter(unittest.TestCase):
 
     def test_save_email(self):
         """Test sauvegarde d'un email."""
-        from backend.adapters.BDDProvider.sqlLite import SqliteStorageAdapter
+        from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 
         storage = SqliteStorageAdapter(data_dir=self.temp_path)
 

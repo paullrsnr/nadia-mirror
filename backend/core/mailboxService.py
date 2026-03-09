@@ -12,8 +12,8 @@ from backend.core.exceptions import AuthError, ProviderError
 from backend.ports.emailProviderGateway import EmailProviderGateway
 from backend.ports.emailStorage import EmailStorage
 from backend.ports.credentialGateway import CredentialGateway
-from backend.core.models.Email import EmailListQuery, EmailListResult
-from backend.core.models.Email import SyncResult, SyncAllResult, ProviderSyncResult
+from backend.core.models.email import EmailListQuery, EmailListResult
+from backend.core.models.email import SyncResult, SyncAllResult, ProviderSyncResult
 
 
 class MailboxService:
@@ -29,8 +29,6 @@ class MailboxService:
         self._credentials = credential_gateway
         self._sync_min_interval = sync_min_interval_minutes
 
-    def _normalize_provider(self, provider: str | None, default: str = DEFAULT_PROVIDER) -> str:
-        return (provider or "").strip().lower() or default
 
     def get_stored_emails(
         self,
@@ -152,3 +150,6 @@ class MailboxService:
             return SyncResult(status="error", message=str(e))
         except RuntimeError as e:
             return SyncResult(status="error", message=f"Erreur de synchronisation: {str(e)}")
+
+    def _normalize_provider(self, provider: str | None, default: str = DEFAULT_PROVIDER) -> str:
+        return (provider or "").strip().lower() or default

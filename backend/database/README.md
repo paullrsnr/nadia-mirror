@@ -16,7 +16,7 @@ L’application crée et met à jour la base automatiquement au démarrage (via 
 
 ```python
 from pathlib import Path
-from backend.adapters.BDDProvider.sqlLite import SqliteStorageAdapter
+from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 
 storage = SqliteStorageAdapter(data_dir=Path(r"C:\temp\nadia-db"))
 ```
@@ -42,7 +42,7 @@ cd c:\Users\Alexa\NadIa\nadIA
 2. Aller dans le dossier Alembic :
 
 ```bash
-cd backend/adapters/BDDProvider/sqlLite
+cd backend/adapters/bddProvider/sqlLite
 ```
 
 3. Générer une migration à partir des modèles :

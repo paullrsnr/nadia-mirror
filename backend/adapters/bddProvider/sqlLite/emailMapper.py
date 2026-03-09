@@ -1,8 +1,8 @@
 import json
 from datetime import datetime
 
-from backend.core.models.Email import Email, EmailAddress, EmailAttachment
-from backend.adapters.BDDProvider.sqlLite.models.emailModel import EmailModel
+from backend.core.models.email import Email, EmailAddress, EmailAttachment
+from backend.adapters.bddProvider.sqlLite.models.emailModel import EmailModel
 
 
 def to_domain(model: EmailModel) -> Email:

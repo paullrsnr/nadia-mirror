@@ -1,4 +1,4 @@
-from backend.core.models.Email import Provider
+from backend.core.models.email import Provider
 
 CONNECTABLE_PROVIDERS = (Provider.GMAIL.value, Provider.OUTLOOK.value)
 
