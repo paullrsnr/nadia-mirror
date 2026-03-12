@@ -1,8 +1,7 @@
 from typing import Literal
-from dataclasses import dataclass
+from pydantic import BaseModel
 
 
-@dataclass
-class ArchiveResult:
+class ArchiveResult(BaseModel):
     status: Literal["success", "error"]
     email_id: str

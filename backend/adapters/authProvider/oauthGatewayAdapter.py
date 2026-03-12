@@ -10,7 +10,7 @@ from backend.adapters.authProvider.GMAIL.gmailOAuthAdapter import (
 )
 from backend.adapters.authProvider.Outlook.outlookOAuthAdapter import (
     generate_outlook_auth_url,
-    exchange_outlook_code_for_tokens,
+    get_outlook_tokens,
     get_outlook_user_email,
 )
 
@@ -27,7 +27,7 @@ class OAuthGatewayAdapter(OAuthGateway):
         if provider == Provider.GMAIL.value:
             return exchange_gmail_code_for_credentials(code)
         if provider == Provider.OUTLOOK.value:
-            return exchange_outlook_code_for_tokens(code)
+            return get_outlook_tokens(code)
         raise ProviderError(f"Provider OAuth non supporté : {provider!r}")
 
     def get_user_email(self, provider: str, credentials: Any) -> str | None:

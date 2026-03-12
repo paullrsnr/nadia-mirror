@@ -1,14 +1,13 @@
 from datetime import datetime
 from typing import Optional
-from dataclasses import dataclass, field
+from pydantic import BaseModel, Field
 
 from backend.core.models.email.emailAddress import EmailAddress
 from backend.core.models.email.emailAttachment import EmailAttachment
 from backend.core.models.email.provider import Provider
 
 
-@dataclass
-class Email:
+class Email(BaseModel):
     id: str
     thread_id: str
     subject: str
@@ -16,10 +15,10 @@ class Email:
     to_addresses: list[EmailAddress]
     date: datetime
     body_text: str
-    provider: Provider
-    cc_addresses: list[EmailAddress] = field(default_factory=list)
-    bcc_addresses: list[EmailAddress] = field(default_factory=list)
+    cc_addresses: list[EmailAddress] = Field(default_factory=list)
+    bcc_addresses: list[EmailAddress] = Field(default_factory=list)
     body_html: Optional[str] = None
-    attachments: list[EmailAttachment] = field(default_factory=list)
-    labels: list[str] = field(default_factory=list)
+    attachments: list[EmailAttachment] = Field(default_factory=list)
+    labels: list[str] = Field(default_factory=list)
     snippet: Optional[str] = None
+    provider: Provider

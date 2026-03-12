@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 
 def save_gmail_credentials(credentials: Credentials) -> None:
     path = storage_settings.tokens_file(Provider.GMAIL.value)
-    path.parent.mkdir(parents=True, exist_ok=True)
 
     encrypted = {
         "token": encrypt_data(credentials.token) if credentials.token else None,
@@ -28,26 +27,23 @@ def save_gmail_credentials(credentials: Credentials) -> None:
         "scopes": list(credentials.scopes) if credentials.scopes else [],
     }
 
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(encrypted, f)
+    file = open(path, "w", encoding="utf-8")
+    json.dump(encrypted, file)
+    file.close()
 
-    os.chmod(path, 0o600)
+    os.chmod(path, 0o600) # lecture/écriture uniquement pour le propriétaire
 
 
-def load_gmail_credentials() -> Credentials | None:
+def get_gmail_credentials() -> Credentials | None:
     path = storage_settings.tokens_file(Provider.GMAIL.value)
-
-    if not path.exists():
-        legacy = storage_settings.DATA_DIR / "tokens.json"
-        if legacy.exists():
-            path = legacy
 
     if not path.exists():
         return None
 
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        file = open(path, "r", encoding="utf-8")
+        data = json.load(file)
+        file.close()
 
         credentials = Credentials(
             token=decrypt_data(data["token"]) if data.get("token") else None,
@@ -68,16 +64,9 @@ def load_gmail_credentials() -> Credentials | None:
 
         return credentials
     except Exception as error:
-        logger.exception("Erreur lors du chargement des credentials Gmail: %s", error)
-        return None
-
+        raise ValueError(f"Erreur chargement tokens Gmail: {error!s}") from error
 
 def clear_gmail_credentials() -> None:
     path = storage_settings.tokens_file(Provider.GMAIL.value)
     if path.exists():
         path.unlink()
-
-
-def get_gmail_credentials() -> Credentials | None:
-    return load_gmail_credentials()
-

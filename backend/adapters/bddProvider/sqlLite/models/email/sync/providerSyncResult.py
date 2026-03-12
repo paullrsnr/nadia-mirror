@@ -1,12 +1,12 @@
 from typing import Literal, Optional
-from dataclasses import dataclass
+
+from pydantic import BaseModel
 
 
-@dataclass
-class SyncResult:
+class ProviderSyncResponse(BaseModel):
+    provider: str
     status: Literal["success", "error", "skipped"]
     message: Optional[str] = None
     synced: Optional[int] = None
     saved: Optional[int] = None
     timestamp: Optional[str] = None
-    last_sync: Optional[str] = None

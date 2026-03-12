@@ -27,3 +27,7 @@ def html_to_text(html: str) -> str:
     text = "\n".join(lines)
 
     return text.strip()
+
+
+def normalize_string(value: str | None, default: str = "") -> str:
+    return (value or "").strip().lower() or default

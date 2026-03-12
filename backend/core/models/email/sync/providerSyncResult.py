@@ -1,8 +1,9 @@
 from typing import Literal, Optional
-from pydantic import BaseModel
+from dataclasses import dataclass
 
 
-class ProviderSyncResult(BaseModel):
+@dataclass
+class ProviderSyncResult:
     provider: str
     status: Literal["success", "error", "skipped"]
     message: Optional[str] = None

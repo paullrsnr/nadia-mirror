@@ -1,10 +1,9 @@
-from dataclasses import dataclass
+from pydantic import BaseModel
 
 from backend.core.models.email.email import Email
 
 
-@dataclass
-class EmailListResult:
+class EmailListResult(BaseModel):
     emails: list[Email]
     total: int
     page: int

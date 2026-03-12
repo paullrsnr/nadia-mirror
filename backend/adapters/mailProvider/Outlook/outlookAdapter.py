@@ -6,18 +6,19 @@ from backend.core.exceptions import AuthError
 from backend.ports.emailProvider import EmailProvider
 from backend.core.models.email import EmailListQuery, EmailPage
 from backend.adapters.authProvider.Outlook.outlookTokens import OutlookTokens
-from backend.adapters.authProvider.Outlook.outlookTokenStorage import get_outlook_credentials
+from backend.adapters.authProvider.Outlook.outlookTokenStorage import load_outlook_credentials
 from backend.adapters.mailProvider.Outlook.outlookMessageParser import (
     graph_request_headers,
     parse_outlook_message,
 )
-from backend.adapters.outlook_graph import GRAPH_BASE, GRAPH_PARAM_FILTER
+from backend.adapters.outlook_graph import GRAPH_BASE
 
 
 class OutlookAdapter(EmailProvider):
 
+
     def __init__(self):
-        tokens = get_outlook_credentials()
+        tokens = load_outlook_credentials()
         if not tokens or not tokens.access_token:
             raise AuthError(
                 "credentials Outlook non disponibles. Authentification requise."
@@ -61,12 +62,13 @@ class OutlookAdapter(EmailProvider):
             return False
 
     def _access_token(self) -> str:
-        tokens = get_outlook_credentials()
+        tokens = load_outlook_credentials()
         if not tokens:
             raise AuthError("credentials Outlook non disponibles.")
         return tokens.access_token
 
     def _build_params(self, max_results: int, query: Optional[EmailListQuery]) -> dict[str, int | str]:
+        GRAPH_PARAM_FILTER = "$filter"
         params: dict[str, int | str] = {
             "$top": min(max_results, 500),
             "$orderby": "receivedDateTime desc",

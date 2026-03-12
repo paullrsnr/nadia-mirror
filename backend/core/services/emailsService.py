@@ -1,14 +1,10 @@
 from backend.core.providers import (
     CONNECTABLE_PROVIDERS,
-    DEFAULT_PROVIDER,
-    MSG_UNAUTHENTICATED,
-    MSG_INVALID_PROVIDER,
-    MSG_PROVIDER_REQUIRED,
 )
-from backend.core.exceptions import AuthError, ProviderError
 from backend.core.models.email import ArchiveResult
 from backend.ports.emailProviderGateway import EmailProviderGateway
 from backend.ports.credentialGateway import CredentialGateway
+from backend.utils.textCleaner import normalize_string
 
 
 class EmailsService:
@@ -22,24 +18,17 @@ class EmailsService:
 
 
     def archive_email(self, email_id: str, provider: str | None) -> ArchiveResult:
-        normalized = self._normalize_provider(provider)
+        normalized = normalize_string(provider)
         if normalized not in CONNECTABLE_PROVIDERS:
-            raise ProviderError(MSG_PROVIDER_REQUIRED)
+            return ArchiveResult(status="error", email_id=email_id)
 
         credentials = self._credentials.load(normalized)
         if not credentials:
-            raise AuthError(MSG_UNAUTHENTICATED)
+            return ArchiveResult(status="error", email_id=email_id)
 
-        adapter = self._create_adapter(normalized)
-        success = adapter.archive_email(email_id)
+        success = self._email_provider_gateway.archive_email(normalized, email_id)
 
         return ArchiveResult(
             status="success" if success else "error",
             email_id=email_id,
         )
-
-    def _create_adapter(self, provider: str):
-        return self._email_provider_gateway.create(provider)
-
-    def _normalize_provider(self, provider: str | None, default: str = DEFAULT_PROVIDER) -> str:
-        return (provider or "").strip().lower() or default

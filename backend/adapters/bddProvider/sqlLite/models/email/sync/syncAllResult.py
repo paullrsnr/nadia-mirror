@@ -1,10 +1,9 @@
 from typing import Literal
-from dataclasses import dataclass
+from pydantic import BaseModel
 
 from backend.core.models.email.sync.providerSyncResult import ProviderSyncResult
 
 
-@dataclass
-class SyncAllResult:
+class SyncAllResult(BaseModel):
     status: Literal["success"]
     results: list[ProviderSyncResult]

@@ -1,8 +1,7 @@
 from typing import Optional
-from dataclasses import dataclass
+from pydantic import BaseModel
 
 
-@dataclass
-class EmailAddress:
+class EmailAddress(BaseModel):
     email: str
     name: Optional[str] = None

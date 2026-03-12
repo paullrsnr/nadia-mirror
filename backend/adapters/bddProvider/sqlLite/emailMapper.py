@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-from backend.core.models.email import Email, EmailAddress, EmailAttachment
+from backend.core.models.email import Email, EmailAddress, EmailAttachment, Provider
 from backend.adapters.bddProvider.sqlLite.models.emailModel import EmailModel
 
 
@@ -20,7 +20,7 @@ def to_domain(model: EmailModel) -> Email:
         attachments=_parse_attachments(model.attachments),
         labels=json.loads(model.labels) if model.labels and model.labels != "null" else [],
         snippet=model.snippet,
-        provider=model.provider or None,
+        provider=Provider(model.provider) if model.provider else Provider.ALL,
     )
 
 

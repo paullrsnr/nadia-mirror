@@ -1,4 +1,3 @@
-
 from typing import Optional
 
 from backend.core.exceptions import AuthError
@@ -19,24 +18,12 @@ class GmailAdapter(EmailProvider):
             )
         self.gmail_api = build_gmail_service(gmail_credentials)
 
-    def _query_string(self, query: Optional[EmailListQuery]) -> str:
-        unread = "is:unread"
-        if not query:
-            return unread
-        parts: list[str] = []
-        if query.unread_only:
-            parts.append(unread)
-        if query.after_date:
-            # Gmail : after:YYYY/MM/DD
-            parts.append(f"after:{query.after_date:%Y/%m/%d}")
-        return " ".join(parts) if parts else unread
-
     def fetch_emails(
-        self,
-        max_results: int = 50,
-        query: Optional[EmailListQuery] = None,
+            self,
+            max_results: int = 50,
+            query: Optional[EmailListQuery] = None,
     ) -> EmailPage:
-        q = self._query_string(query)
+        q = self._map_core_query_to_gmail(query)
         try:
             # pylint: disable=no-member
             results = (
@@ -64,7 +51,6 @@ class GmailAdapter(EmailProvider):
                 f"Erreur lors de la récupération des emails: {str(e)}"
             ) from e
 
-
     def archive_email(self, email_id: str) -> bool:
         try:
             # pylint: disable=no-member
@@ -86,3 +72,15 @@ class GmailAdapter(EmailProvider):
             .execute()
         )
         return parse_gmail_message(message)
+
+    def _map_core_query_to_gmail(self, query: Optional[EmailListQuery]) -> str:
+        unread = "is:unread"
+        if not query:
+            return unread
+        parts: list[str] = []
+        if query.unread_only:
+            parts.append(unread)
+        if query.after_date:
+            # Gmail : after:YYYY/MM/DD
+            parts.append(f"after:{query.after_date:%Y/%m/%d}")
+        return " ".join(parts) if parts else unread

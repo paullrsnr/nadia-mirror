@@ -1,9 +1,10 @@
 from typing import Optional
-from pydantic import BaseModel
+from dataclasses import dataclass
 
 
-class EmailAttachment(BaseModel):
+@dataclass
+class EmailAttachment:
     filename: str
     mime_type: str
     size: int
-    attachment_id: Optional[str] = None  # ID pour télécharger depuis Gmail/Outlook
+    attachment_id: Optional[str] = None
