@@ -18,7 +18,7 @@ class GmailAdapter(EmailProvider):
             )
         self.gmail_api = build_gmail_service(gmail_credentials)
 
-    def fetch_emails(
+    def fetch_emails_gmail(
             self,
             max_results: int = 50,
             query: Optional[EmailListQuery] = None,
@@ -51,7 +51,7 @@ class GmailAdapter(EmailProvider):
                 f"Erreur lors de la récupération des emails: {str(e)}"
             ) from e
 
-    def archive_email(self, email_id: str) -> bool:
+    def archive_email_gmail(self, email_id: str) -> bool:
         try:
             # pylint: disable=no-member
             self.gmail_api.users().messages().modify(
@@ -84,3 +84,14 @@ class GmailAdapter(EmailProvider):
             # Gmail : after:YYYY/MM/DD
             parts.append(f"after:{query.after_date:%Y/%m/%d}")
         return " ".join(parts) if parts else unread
+
+
+def fetch_emails_gmail(
+    max_results: int = 50,
+    query: Optional[EmailListQuery] = None,
+) -> EmailPage:
+    return GmailAdapter().fetch_emails_gmail(max_results=max_results, query=query)
+
+
+def archive_email_gmail(email_id: str) -> bool:
+    return GmailAdapter().archive_email_gmail(email_id)

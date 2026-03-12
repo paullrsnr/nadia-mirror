@@ -1,8 +1,6 @@
 fastapi
 uvicorn[standard]
 pydantic
-pydantic-settings
-python-dotenv
 pyinstaller
 google-auth
 google-auth-oauthlib
@@ -14,4 +12,3 @@ pytest
 httpx
 sqlalchemy
 alembic
-aiosqlite

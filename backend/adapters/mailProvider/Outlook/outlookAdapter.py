@@ -26,7 +26,7 @@ class OutlookAdapter(EmailProvider):
         self._tokens: OutlookTokens = tokens
 
 
-    def fetch_emails(
+    def fetch_emails_outlook(
         self,
         max_results: int = 50,
         query: Optional[EmailListQuery] = None,
@@ -45,7 +45,7 @@ class OutlookAdapter(EmailProvider):
         emails = [parse_outlook_message(msg) for msg in data.get("value", [])]
         return EmailPage(emails=emails, next_page_token=self._next_token(data.get("@odata.nextLink")))
 
-    def archive_email(self, email_id: str) -> bool:
+    def archive_email_outlook(self, email_id: str) -> bool:
         access_token = self._ensure_token()
         url = f"{GRAPH_BASE}/me/messages/{email_id}/move"
         body = {"destinationId": "archive"}
@@ -93,3 +93,14 @@ class OutlookAdapter(EmailProvider):
         if not next_link or "$skiptoken=" not in next_link:
             return None
         return next_link.split("$skiptoken=", 1)[-1]
+
+
+def fetch_emails_outlook(
+    max_results: int = 50,
+    query: Optional[EmailListQuery] = None,
+) -> EmailPage:
+    return OutlookAdapter().fetch_emails_outlook(max_results=max_results, query=query)
+
+
+def archive_email_outlook(email_id: str) -> bool:
+    return OutlookAdapter().archive_email_outlook(email_id)

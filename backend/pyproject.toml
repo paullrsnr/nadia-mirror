@@ -10,8 +10,6 @@ dependencies = [
   "fastapi>=0.128",
   "uvicorn[standard]>=0.40",
   "pydantic>=2.12.5",
-  "pydantic-settings",
-  "python-dotenv",
   "httpx",
   "google-auth",
   "google-auth-oauthlib",
