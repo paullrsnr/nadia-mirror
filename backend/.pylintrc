@@ -1,0 +1,10 @@
+[MAIN]
+
+[BASIC]
+# Modules en camelCase (convention du projet)
+module-rgx=[a-z_][a-z0-9_]*|[a-z][a-zA-Z0-9]*
+
+# Noms courts légitimes : f (file handle), e (exception), db, id, ...
+good-names=f,e,i,j,k,db,id,_
+
+[MESSAGES CONTROL]

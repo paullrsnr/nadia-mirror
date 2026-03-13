@@ -1,0 +1,130 @@
+from typing import Sequence, Union
+
+from alembic import op
+import sqlalchemy as sa
+
+
+# revision identifiers, used by Alembic.
+revision: str = 'a25189f39cac'
+down_revision: Union[str, Sequence[str], None] = None
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    op.drop_table('threads')
+    op.drop_table('schema_version')
+    op.alter_column('emails', 'id',
+               existing_type=sa.TEXT(),
+               type_=sa.String(),
+               nullable=False)
+    op.alter_column('emails', 'thread_id',
+               existing_type=sa.TEXT(),
+               type_=sa.String(),
+               nullable=True)
+    op.alter_column('emails', 'subject',
+               existing_type=sa.TEXT(),
+               type_=sa.String(),
+               existing_nullable=True)
+    op.alter_column('emails', 'from_name',
+               existing_type=sa.TEXT(),
+               type_=sa.String(),
+               existing_nullable=True)
+    op.alter_column('emails', 'from_email',
+               existing_type=sa.TEXT(),
+               type_=sa.String(),
+               nullable=False)
+    op.alter_column('emails', 'date',
+               existing_type=sa.TEXT(),
+               type_=sa.String(),
+               existing_nullable=False)
+    op.alter_column('emails', 'provider',
+               existing_type=sa.TEXT(),
+               type_=sa.String(),
+               nullable=False,
+               existing_server_default=sa.text("'gmail'"))
+    op.drop_index(op.f('idx_date'), table_name='emails')
+    op.drop_index(op.f('idx_from_email'), table_name='emails')
+    op.drop_index(op.f('idx_thread_id'), table_name='emails')
+    op.create_index(op.f('ix_emails_date'), 'emails', ['date'], unique=False)
+    op.create_index(op.f('ix_emails_from_email'), 'emails', ['from_email'], unique=False)
+    op.create_index(op.f('ix_emails_thread_id'), 'emails', ['thread_id'], unique=False)
+    op.drop_column('emails', 'updated_at')
+    op.drop_column('emails', 'created_at')
+    op.alter_column('sync_metadata', 'id',
+               existing_type=sa.INTEGER(),
+               nullable=False,
+               autoincrement=True)
+    op.alter_column('sync_metadata', 'last_sync_time',
+               existing_type=sa.TEXT(),
+               type_=sa.String(),
+               nullable=False)
+    op.alter_column('sync_metadata', 'sync_count',
+               existing_type=sa.INTEGER(),
+               nullable=False,
+               existing_server_default=sa.text('0'))
+
+
+def downgrade() -> None:
+    op.alter_column('sync_metadata', 'sync_count',
+               existing_type=sa.INTEGER(),
+               nullable=True,
+               existing_server_default=sa.text('0'))
+    op.alter_column('sync_metadata', 'last_sync_time',
+               existing_type=sa.String(),
+               type_=sa.TEXT(),
+               nullable=True)
+    op.alter_column('sync_metadata', 'id',
+               existing_type=sa.INTEGER(),
+               nullable=True,
+               autoincrement=True)
+    op.add_column('emails', sa.Column('created_at', sa.TEXT(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True))
+    op.add_column('emails', sa.Column('updated_at', sa.TEXT(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True))
+    op.drop_index(op.f('ix_emails_thread_id'), table_name='emails')
+    op.drop_index(op.f('ix_emails_from_email'), table_name='emails')
+    op.drop_index(op.f('ix_emails_date'), table_name='emails')
+    op.create_index(op.f('idx_thread_id'), 'emails', ['thread_id'], unique=False)
+    op.create_index(op.f('idx_from_email'), 'emails', ['from_email'], unique=False)
+    op.create_index(op.f('idx_date'), 'emails', ['date'], unique=False)
+    op.alter_column('emails', 'provider',
+               existing_type=sa.String(),
+               type_=sa.TEXT(),
+               nullable=True,
+               existing_server_default=sa.text("'gmail'"))
+    op.alter_column('emails', 'date',
+               existing_type=sa.String(),
+               type_=sa.TEXT(),
+               existing_nullable=False)
+    op.alter_column('emails', 'from_email',
+               existing_type=sa.String(),
+               type_=sa.TEXT(),
+               nullable=True)
+    op.alter_column('emails', 'from_name',
+               existing_type=sa.String(),
+               type_=sa.TEXT(),
+               existing_nullable=True)
+    op.alter_column('emails', 'subject',
+               existing_type=sa.String(),
+               type_=sa.TEXT(),
+               existing_nullable=True)
+    op.alter_column('emails', 'thread_id',
+               existing_type=sa.String(),
+               type_=sa.TEXT(),
+               nullable=False)
+    op.alter_column('emails', 'id',
+               existing_type=sa.String(),
+               type_=sa.TEXT(),
+               nullable=True)
+    op.create_table('schema_version',
+    sa.Column('version', sa.INTEGER(), nullable=True),
+    sa.Column('applied_at', sa.TEXT(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.PrimaryKeyConstraint('version')
+    )
+    op.create_table('threads',
+    sa.Column('thread_id', sa.TEXT(), nullable=True),
+    sa.Column('subject', sa.TEXT(), nullable=True),
+    sa.Column('last_message_date', sa.TEXT(), nullable=True),
+    sa.Column('unread_count', sa.INTEGER(), server_default=sa.text('0'), nullable=True),
+    sa.Column('updated_at', sa.TEXT(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.PrimaryKeyConstraint('thread_id')
+    )
