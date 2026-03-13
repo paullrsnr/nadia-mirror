@@ -2,3 +2,13 @@ fastapi
 uvicorn[standard]
 pydantic
 pyinstaller
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+cryptography
+pylint
+pytest
+httpx
+sqlalchemy
+alembic

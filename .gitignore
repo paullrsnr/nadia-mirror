@@ -8,3 +8,14 @@ backend/__pycache__/
 backend/.venv/
 backend/dist
 backend/build
+
+# Python cache files
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.pyc
+
+.env*
+.idea/
