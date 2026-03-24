@@ -6,11 +6,11 @@ import tempfile
 import shutil
 from pathlib import Path
 from datetime import datetime
-from unittest.mock import patch
 
 from backend.utils.textCleaner import html_to_text
-from backend.utils.emailParser import parse_email_address, extract_email_body
-from backend.core.models.email import Email, EmailAddress
+from backend.adapters.mailProvider.GMAIL.gmailMessageParser import parse_email_address
+from backend.adapters.mailProvider.GMAIL.gmailBodyParser import extract_gmail_body
+from backend.core.models.email import Email, EmailAddress, Provider
 
 
 class TestTextCleaner(unittest.TestCase):
@@ -106,13 +106,13 @@ class TestEmailParser(unittest.TestCase):
         self.assertEqual(result.email, "")
 
     def test_extract_email_body_plain_text(self):
-        """Test extraction corps texte simple."""
+        """Test extraction corps texte simple (payload Gmail)."""
         text_content = "Bonjour, ceci est un test."
         encoded = base64.urlsafe_b64encode(text_content.encode()).decode()
 
         payload = {"mimeType": "text/plain", "body": {"data": encoded}}
 
-        body_text, body_html = extract_email_body(payload)
+        body_text, body_html = extract_gmail_body(payload)
 
         self.assertEqual(body_text, text_content)
         self.assertIsNone(body_html)
@@ -121,7 +121,7 @@ class TestEmailParser(unittest.TestCase):
         """Test extraction corps vide."""
         payload = {"mimeType": "text/plain", "body": {}}
 
-        body_text, body_html = extract_email_body(payload)
+        body_text, body_html = extract_gmail_body(payload)
 
         self.assertEqual(body_text, "[Corps de l'email non disponible]")
         self.assertIsNone(body_html)
@@ -180,6 +180,7 @@ class TestSqliteStorageAdapter(unittest.TestCase):
             to_addresses=[EmailAddress(email="dest@test.com")],
             date=datetime.now(),
             body_text="Corps du message",
+            provider=Provider.GMAIL,
         )
 
         result = storage.save_email(email, provider="gmail")

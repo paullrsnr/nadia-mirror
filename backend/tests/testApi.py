@@ -1,8 +1,12 @@
 """Tests unitaires pour l'API FastAPI."""
 import unittest
+from unittest.mock import MagicMock
+
 from fastapi.testclient import TestClient
 
+from backend.api.deps import get_auth_service, get_mailbox_service
 from backend.api.main import app
+from backend.core.models.email import EmailListResult
 
 
 class TestApiHealth(unittest.TestCase):
@@ -33,6 +37,9 @@ class TestAuthEndpoints(unittest.TestCase):
         """Initialisation du client de test."""
         self.client = TestClient(app)
 
+    def tearDown(self):
+        app.dependency_overrides.pop(get_auth_service, None)
+
     def test_auth_status_gmail(self):
         """Test endpoint /auth/status/gmail."""
         response = self.client.get("/auth/status/gmail")
@@ -54,22 +61,30 @@ class TestAuthEndpoints(unittest.TestCase):
         self.assertIsInstance(data["is_authenticated"], bool)
 
     def test_auth_url_gmail(self):
-        """Test endpoint /auth/url/gmail."""
+        """Test endpoint /auth/url/gmail (OAuth mocké, sans secrets réels)."""
+        mock_svc = MagicMock()
+        mock_svc.get_auth_url.return_value = "https://oauth.test/gmail"
+        app.dependency_overrides[get_auth_service] = lambda: mock_svc
+
         response = self.client.get("/auth/url/gmail?redirect_uri=http://localhost")
 
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertIn("auth_url", data)
-        self.assertIsInstance(data["auth_url"], str)
+        self.assertEqual(data["auth_url"], "https://oauth.test/gmail")
 
     def test_auth_url_outlook(self):
-        """Test endpoint /auth/url/outlook."""
+        """Test endpoint /auth/url/outlook (OAuth mocké)."""
+        mock_svc = MagicMock()
+        mock_svc.get_auth_url.return_value = "https://oauth.test/outlook"
+        app.dependency_overrides[get_auth_service] = lambda: mock_svc
+
         response = self.client.get("/auth/url/outlook?redirect_uri=http://localhost")
 
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertIn("auth_url", data)
-        self.assertIsInstance(data["auth_url"], str)
+        self.assertEqual(data["auth_url"], "https://oauth.test/outlook")
 
     def test_auth_url_invalid_provider(self):
         """Test endpoint /auth/url avec un provider invalide."""
@@ -85,12 +100,23 @@ class TestEmailsEndpoints(unittest.TestCase):
         """Initialisation du client de test."""
         self.client = TestClient(app)
 
+    def tearDown(self):
+        app.dependency_overrides.pop(get_mailbox_service, None)
+
     def test_get_emails_endpoint_exists(self):
-        """Test que l'endpoint /emails existe."""
+        """Test que l'endpoint GET /emails/ répond (MailboxService mocké, sans SQLite réel)."""
+        mock_mailbox = MagicMock()
+        mock_mailbox.get_stored_emails.return_value = EmailListResult(
+            emails=[], total=0, page=1, page_size=10
+        )
+        app.dependency_overrides[get_mailbox_service] = lambda: mock_mailbox
+
         response = self.client.get("/emails/?provider=gmail&max_results=10")
 
-        # L'endpoint devrait répondre (même si erreur de données)
-        self.assertIn(response.status_code, [200, 500])
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["total"], 0)
+        self.assertEqual(data["emails"], [])
 
     def test_get_emails_invalid_max_results(self):
         """Test endpoint /emails avec max_results invalide."""

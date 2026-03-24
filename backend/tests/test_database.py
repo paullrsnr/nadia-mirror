@@ -5,12 +5,11 @@ import unittest
 import tempfile
 from pathlib import Path
 from datetime import datetime, timezone
-from unittest.mock import patch
 
-from backend.adapters.bddProvider.sqlLite.models import Base, EmailModel, SyncMetadataModel
-from backend.adapters.bddProvider.sqlLite.session import get_engine, init_engine, dispose_engine, create_session
+from backend.adapters.bddProvider.sqlLite.models import EmailModel, SyncMetadataModel
+from backend.adapters.bddProvider.sqlLite.session import dispose_engine, create_session
 from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
-from backend.core.models.email import Email, EmailAddress
+from backend.core.models.email import Email, EmailAddress, Provider
 
 
 class TestEmailModel(unittest.TestCase):
@@ -56,6 +55,7 @@ def _make_email(email_id: str) -> Email:
         attachments=[],
         labels=["INBOX"],
         snippet="Test snippet",
+        provider=Provider.GMAIL,
     )
 
 
@@ -100,7 +100,7 @@ class TestSqliteStorageAdapter(unittest.TestCase):
         self.storage.save_email(_make_email("gmail_1"), "gmail")
         self.storage.save_email(_make_email("outlook_1"), "outlook")
         emails, _ = self.storage.find_emails(provider_filter="gmail")
-        self.assertTrue(all(e.provider == "gmail" for e in emails))
+        self.assertTrue(all(e.provider == Provider.GMAIL for e in emails))
 
     def test_update_and_get_last_sync_time(self):
         """update_last_sync_time met à jour la ligne unique, get_last_sync_time la lit."""

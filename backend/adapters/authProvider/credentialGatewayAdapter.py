@@ -1,5 +1,6 @@
-from typing import Any
+from google.oauth2.credentials import Credentials
 
+from backend.adapters.authProvider.Outlook.outlookTokens import OutlookTokens
 from backend.core.models.email import Provider
 from backend.ports.credentialGateway import CredentialGateway
 from backend.adapters.authProvider.GMAIL.gmailTokenStorage import (
@@ -13,8 +14,6 @@ from backend.adapters.authProvider.Outlook.outlookTokenStorage import (
     clear_outlook_credentials,
 )
 
-from google.oauth2.credentials import Credentials
-from backend.adapters.authProvider.Outlook.outlookTokens import OutlookTokens
 
 class CredentialGatewayAdapter(CredentialGateway):
     def load(self, provider: str) -> Credentials | OutlookTokens | None:
@@ -24,7 +23,7 @@ class CredentialGatewayAdapter(CredentialGateway):
             return load_outlook_credentials()
         return None
 
-    def save(self, provider: str, credentials: Any) -> None:
+    def save(self, provider: str, credentials: Credentials | OutlookTokens) -> None:
         if provider == Provider.GMAIL.value:
             save_gmail_credentials(credentials)
         elif provider == Provider.OUTLOOK.value:

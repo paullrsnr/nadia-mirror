@@ -64,10 +64,11 @@ def load_outlook_credentials() -> OutlookTokens | None:
                 expires_at_timestamp=time.time() + int(body.get("expires_in", 3600)),
             )
             save_outlook_credentials(tokens)
-            return tokens
         except Exception as error:
             logger.exception("Erreur refresh tokens Outlook: %s", error)
             return None
+
+    return tokens
 
 
 def clear_outlook_credentials() -> None:

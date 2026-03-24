@@ -3,7 +3,10 @@ from typing import Optional
 from backend.core.exceptions import AuthError
 from backend.ports.emailProvider import EmailProvider
 from backend.core.models.email import Email, EmailListQuery, EmailPage
-from backend.adapters.authProvider.GMAIL.gmailTokenStorage import get_gmail_credentials
+from backend.adapters.authProvider.GMAIL.gmailTokenStorage import (
+    get_gmail_credentials,
+    clear_gmail_credentials,
+)
 from backend.adapters.mailProvider.GMAIL.gmailApiService import build_gmail_service
 from backend.adapters.mailProvider.GMAIL.gmailMessageParser import parse_gmail_message
 
@@ -18,7 +21,7 @@ class GmailAdapter(EmailProvider):
             )
         self.gmail_api = build_gmail_service(gmail_credentials)
 
-    def fetch_emails_gmail(
+    def fetch_emails(
             self,
             max_results: int = 50,
             query: Optional[EmailListQuery] = None,
@@ -50,8 +53,20 @@ class GmailAdapter(EmailProvider):
             raise RuntimeError(
                 f"Erreur lors de la récupération des emails: {str(e)}"
             ) from e
+        except Exception as e:
+            # Cas classique quand Google invalide le refresh token : invalid_grant.
+            # On purge le token local pour forcer une reconnexion propre.
+            error_message = str(e)
+            if "invalid_grant" in error_message:
+                clear_gmail_credentials()
+                raise AuthError(
+                    "Session Gmail expirée ou invalide. Reconnexion requise."
+                ) from e
+            raise RuntimeError(
+                f"Erreur lors de la récupération des emails: {error_message}"
+            ) from e
 
-    def archive_email_gmail(self, email_id: str) -> bool:
+    def archive_email(self, email_id: str) -> bool:
         try:
             # pylint: disable=no-member
             self.gmail_api.users().messages().modify(
@@ -84,14 +99,3 @@ class GmailAdapter(EmailProvider):
             # Gmail : after:YYYY/MM/DD
             parts.append(f"after:{query.after_date:%Y/%m/%d}")
         return " ".join(parts) if parts else unread
-
-
-def fetch_emails_gmail(
-    max_results: int = 50,
-    query: Optional[EmailListQuery] = None,
-) -> EmailPage:
-    return GmailAdapter().fetch_emails_gmail(max_results=max_results, query=query)
-
-
-def archive_email_gmail(email_id: str) -> bool:
-    return GmailAdapter().archive_email_gmail(email_id)

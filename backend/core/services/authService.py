@@ -1,5 +1,3 @@
-from fastapi.responses import RedirectResponse
-
 from backend.core.models.email import Provider
 from backend.core.models.auth import AuthIdentity
 from backend.ports.oauthGateway import OAuthGateway
@@ -19,11 +17,11 @@ class AuthService:
     def get_auth_url(self, provider: str) -> str:
         return self._oauth_gateway.generate_auth_url(provider, state=provider)
 
-    def process_callback(self, code: str, provider: str) -> RedirectResponse:
-        credentials = self._oauth_gateway.exchange_code(provider, code)
+    def process_callback(self, code: str, provider: str, state: str) -> str:
+        credentials = self._oauth_gateway.exchange_code(provider, code, state=state)
         self._credentials.save(provider, credentials)
         base = auth_settings.FRONTEND_AUTH_CALLBACK_URL.rstrip("/")
-        return RedirectResponse(url=f"{base}?success=1", status_code=302)
+        return f"{base}?success=1"
 
     def get_auth_status(self, provider: str) -> AuthIdentity:
         if provider == Provider.ALL.value:
