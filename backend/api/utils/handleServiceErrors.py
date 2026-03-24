@@ -8,7 +8,6 @@ T = TypeVar("T")
 
 
 def handle_service_errors(func: Callable[[], T]) -> T | JSONResponse:
-    """Exécute une fonction et capture les erreurs pour retourner une réponse JSON appropriée."""
     try:
         return func()
     except ValueError as e:

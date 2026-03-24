@@ -64,12 +64,10 @@ CATALOG: list[CatalogModel] = [
 
 
 def list_catalog() -> list[CatalogModel]:
-    """Retourne la liste des modèles disponibles au téléchargement."""
     return CATALOG
 
 
 def get_catalog_model(model_id: str) -> CatalogModel | None:
-    """Récupère un modèle du catalogue par son ID."""
     for model in CATALOG:
         if model.id == model_id:
             return model

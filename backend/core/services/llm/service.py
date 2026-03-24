@@ -13,14 +13,12 @@ _llm_service: Optional["LlmService"] = None
 
 
 class LlmService:
-    """Service de gestion des modèles LLM."""
 
     def __init__(self, llm_adapter: LlmPort):
         self._adapter = llm_adapter
         self._selected_model_id: str | None = None
 
     def get_status(self) -> LLMStatusResponse:
-        """Retourne le statut actuel du service LLM."""
         models_dir = get_models_dir()
         installed = self._list_installed_models(models_dir)
 
@@ -38,7 +36,6 @@ class LlmService:
         )
 
     def get_catalog(self) -> list[CatalogModelResponse]:
-        """Retourne la liste des modèles disponibles au téléchargement."""
         return [
             CatalogModelResponse(
                 id=m.id,
@@ -51,25 +48,7 @@ class LlmService:
             for m in CATALOG
         ]
 
-    def _list_installed_models(self, models_dir: Path) -> list[InstalledModelResponse]:
-        """Liste les modèles GGUF installés dans le répertoire."""
-        installed = []
-        if models_dir.exists():
-            for f in models_dir.glob("*.gguf"):
-                model_id = f.stem
-                installed.append(InstalledModelResponse(
-                    id=model_id,
-                    name=f.name,
-                    path=str(f),
-                ))
-        return installed
-
     def load_model_by_id(self, model_id: str) -> dict:
-        """
-        Charge un modèle par son ID.
-        Retourne un dict avec le résultat.
-        Lève ValueError si le modèle est introuvable.
-        """
         models_dir = get_models_dir()
 
         catalog_model = get_catalog_model(model_id)
@@ -90,20 +69,28 @@ class LlmService:
 
         return {"model_id": model_id, "message": "Modèle chargé"}
 
+    def unload_model(self) -> None:
+        self._adapter.unload_model()
+        self._selected_model_id = None
+
+    def _list_installed_models(self, models_dir: Path) -> list[InstalledModelResponse]:
+        installed = []
+        if models_dir.exists():
+            for f in models_dir.glob("*.gguf"):
+                model_id = f.stem
+                installed.append(
+                    InstalledModelResponse(id=model_id, name=f.name, path=str(f))
+                )
+        return installed
+
     def _load_model_from_path(self, model_path: Path) -> bool:
-        """Charge un modèle depuis le chemin spécifié."""
         success = self._adapter.load_model(model_path)
         if success:
             self._selected_model_id = model_path.stem
         return success
 
-    def unload_model(self) -> None:
-        """Décharge le modèle actuellement chargé."""
-        self._adapter.unload_model()
-        self._selected_model_id = None
 
 def get_llm_service() -> LlmService:
-    """Retourne l'instance singleton du service LLM."""
     global _llm_service
     if _llm_service is None:
         raise RuntimeError("LlmService non initialisé. Appelez init_llm_service() d'abord.")
@@ -111,7 +98,6 @@ def get_llm_service() -> LlmService:
 
 
 def init_llm_service(adapter: LlmPort) -> LlmService:
-    """Initialise le service LLM avec l'adapter fourni."""
     global _llm_service
     _llm_service = LlmService(adapter)
     return _llm_service

@@ -9,16 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 def get_models_dir() -> Path:
-    """Retourne le répertoire des modèles."""
     models_dir = Path(llm_settings.MODELS_DIR)
     models_dir.mkdir(parents=True, exist_ok=True)
     return models_dir
 
 
 async def stream_download_sse(repo: str, filename: str) -> AsyncGenerator[str, None]:
-    """
-    Télécharge un modèle depuis Hugging Face Hub et streame la progression en SSE.
-    """
     try:
         from huggingface_hub import hf_hub_download
     except ImportError:

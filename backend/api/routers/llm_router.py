@@ -1,4 +1,3 @@
-"""Routeur LLM : modèles (liste / téléchargement / chargement)."""
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
