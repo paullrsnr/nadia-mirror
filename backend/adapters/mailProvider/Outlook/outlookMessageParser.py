@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from backend.core.models.email import Email, EmailAddress
+from backend.core.models.email.provider import Provider
 from backend.adapters.mailProvider.Outlook.models import GraphMessage, GraphRecipient
 
 
@@ -31,6 +32,7 @@ def parse_outlook_message(message: dict) -> Email:
         body_text=body_text,
         body_html=body_html,
         snippet=graph_message.body_preview,
+        provider=Provider.OUTLOOK,
     )
 
 def _graph_address_to_email_address(recipient: Optional[GraphRecipient]) -> EmailAddress:

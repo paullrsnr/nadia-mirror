@@ -9,8 +9,6 @@ from backend.ports.llm import LlmPort
 
 logger = logging.getLogger(__name__)
 
-_llm_service: Optional["LlmService"] = None
-
 
 class LlmService:
 
@@ -88,16 +86,3 @@ class LlmService:
         if success:
             self._selected_model_id = model_path.stem
         return success
-
-
-def get_llm_service() -> LlmService:
-    global _llm_service
-    if _llm_service is None:
-        raise RuntimeError("LlmService non initialisé. Appelez init_llm_service() d'abord.")
-    return _llm_service
-
-
-def init_llm_service(adapter: LlmPort) -> LlmService:
-    global _llm_service
-    _llm_service = LlmService(adapter)
-    return _llm_service

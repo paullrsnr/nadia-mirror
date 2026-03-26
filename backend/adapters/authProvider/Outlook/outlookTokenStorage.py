@@ -19,7 +19,7 @@ def save_outlook_credentials(tokens: OutlookTokens) -> None:
     json.dump(tokens.model_dump(), response)
     response.close()
 
-    os.chmod(path, 0o600)  # lecture et écriture pour l'utilisateur uniquement
+    os.chmod(path, 0o600)
 
 
 def load_outlook_credentials() -> OutlookTokens | None:
@@ -67,7 +67,6 @@ def load_outlook_credentials() -> OutlookTokens | None:
         except Exception as error:
             logger.exception("Erreur refresh tokens Outlook: %s", error)
             return None
-
     return tokens
 
 

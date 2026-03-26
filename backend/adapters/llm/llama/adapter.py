@@ -29,15 +29,11 @@ class LlamaCppAdapter(LlamaPort):
             logger.error("llama-cpp-python n'est pas installé")
             return False
 
+        if self._model is not None and self._model_path == model_path:
+            logger.info("Modèle déjà chargé")
+            return True
         if self._model is not None:
-            if self._model_path == model_path:
-                logger.info("Modèle déjà chargé")
-                return True
             self.unload_model()
-
-        if not model_path.exists():
-            logger.error("Modèle introuvable à %s", model_path)
-            return False
 
         try:
             logger.info("Chargement du modèle depuis %s...", model_path)
