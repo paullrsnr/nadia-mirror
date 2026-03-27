@@ -1,5 +1,6 @@
-from typing import Any
+from google.oauth2.credentials import Credentials
 
+from backend.adapters.authProvider.Outlook.outlookTokens import OutlookTokens
 from backend.core.exceptions import ProviderError
 from backend.core.models.email import Provider
 from backend.ports.oauthGateway import OAuthGateway
@@ -23,14 +24,18 @@ class OAuthGatewayAdapter(OAuthGateway):
             return generate_outlook_auth_url(state)
         raise ProviderError(f"Provider OAuth non supporté : {provider!r}")
 
-    def exchange_code(self, provider: str, code: str) -> Any:
+    def exchange_code(self, provider: str, code: str, state: str) -> Credentials | OutlookTokens:
         if provider == Provider.GMAIL.value:
-            return exchange_gmail_code_for_credentials(code)
+            return exchange_gmail_code_for_credentials(code, state=state)
         if provider == Provider.OUTLOOK.value:
             return get_outlook_tokens(code)
         raise ProviderError(f"Provider OAuth non supporté : {provider!r}")
 
-    def get_user_email(self, provider: str, credentials: Any) -> str | None:
+    def get_user_email(
+        self,
+        provider: str,
+        credentials: Credentials | OutlookTokens,
+    ) -> str | None:
         if provider == Provider.GMAIL.value:
             return get_gmail_user_email(credentials)
         if provider == Provider.OUTLOOK.value:

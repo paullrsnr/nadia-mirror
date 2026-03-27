@@ -3,7 +3,6 @@ from typing import Optional
 import httpx
 
 from backend.core.exceptions import AuthError
-from backend.ports.emailProvider import EmailProvider
 from backend.core.models.email import EmailListQuery, EmailPage
 from backend.adapters.authProvider.Outlook.outlookTokens import OutlookTokens
 from backend.adapters.authProvider.Outlook.outlookTokenStorage import load_outlook_credentials
@@ -14,7 +13,7 @@ from backend.adapters.mailProvider.Outlook.outlookMessageParser import (
 from backend.adapters.outlook_graph import GRAPH_BASE
 
 
-class OutlookAdapter(EmailProvider):
+class OutlookAdapter:
 
 
     def __init__(self):
@@ -46,7 +45,7 @@ class OutlookAdapter(EmailProvider):
         return EmailPage(emails=emails, next_page_token=self._next_token(data.get("@odata.nextLink")))
 
     def archive_email_outlook(self, email_id: str) -> bool:
-        access_token = self._ensure_token()
+        access_token = self._access_token()
         url = f"{GRAPH_BASE}/me/messages/{email_id}/move"
         body = {"destinationId": "archive"}
         try:
@@ -95,10 +94,7 @@ class OutlookAdapter(EmailProvider):
         return next_link.split("$skiptoken=", 1)[-1]
 
 
-def fetch_emails_outlook(
-    max_results: int = 50,
-    query: Optional[EmailListQuery] = None,
-) -> EmailPage:
+def fetch_emails_outlook(max_results: int = 50, query: Optional[EmailListQuery] = None) -> EmailPage:
     return OutlookAdapter().fetch_emails_outlook(max_results=max_results, query=query)
 
 

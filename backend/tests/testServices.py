@@ -8,6 +8,7 @@ from backend.core.mailboxService import MailboxService
 from backend.core.models.email import Email, EmailAddress, EmailPage
 from backend.ports.emailStorage import EmailStorage
 from backend.ports.credentialGateway import CredentialGateway
+from backend.ports.emailProviderGateway import EmailProviderGateway
 
 
 def _build_service(
@@ -31,6 +32,7 @@ def _make_email(email_id: str = "123") -> Email:
         to_addresses=[EmailAddress(email="dest@example.com")],
         date=datetime.now(),
         body_text="Contenu test",
+        provider=Provider.GMAIL,
     )
 
 
@@ -43,9 +45,9 @@ class TestMailboxServiceSync(unittest.TestCase):
         storage.get_last_sync_time.return_value = None
         storage.save_email.return_value = True
 
-        adapter = MagicMock()
-        adapter.fetch_emails.return_value = EmailPage(emails=[_make_email()], next_page_token=None)
-        email_provider_gateway = MagicMock(**{"create.return_value": adapter})
+        page = EmailPage(emails=[_make_email()], next_page_token=None)
+        email_provider_gateway = MagicMock(spec=EmailProviderGateway)
+        email_provider_gateway.fetch_emails.return_value = page
 
         credential_gateway = MagicMock(spec=CredentialGateway)
         credential_gateway.load.return_value = {"access_token": "fake"}
@@ -57,6 +59,7 @@ class TestMailboxServiceSync(unittest.TestCase):
         self.assertEqual(result.synced, 1)
         self.assertEqual(result.saved, 1)
         storage.update_last_sync_time.assert_called_once()
+        email_provider_gateway.fetch_emails.assert_called()
 
     def test_sync_emails_skipped_when_recent(self):
         """La sync est ignorée si la dernière sync est trop récente."""
@@ -72,13 +75,12 @@ class TestMailboxServiceSync(unittest.TestCase):
         self.assertEqual(result.status, "skipped")
 
     def test_sync_emails_error_from_adapter(self):
-        """Si l'adapter lève ValueError, le résultat est status=error."""
+        """Si fetch_emails lève ValueError, le résultat est status=error."""
         storage = MagicMock(spec=EmailStorage)
         storage.get_last_sync_time.return_value = None
 
-        adapter = MagicMock()
-        adapter.fetch_emails.side_effect = ValueError("Non authentifié")
-        email_provider_gateway = MagicMock(**{"create.return_value": adapter})
+        email_provider_gateway = MagicMock(spec=EmailProviderGateway)
+        email_provider_gateway.fetch_emails.side_effect = ValueError("Non authentifié")
 
         credential_gateway = MagicMock(spec=CredentialGateway)
         credential_gateway.load.return_value = {"access_token": "fake"}

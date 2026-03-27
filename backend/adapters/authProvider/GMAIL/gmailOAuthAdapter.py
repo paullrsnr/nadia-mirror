@@ -3,20 +3,28 @@ from google_auth_oauthlib.flow import Flow
 from backend.config.settings import auth_settings
 from backend.adapters.mailProvider.GMAIL.gmailApiService import get_gmail_user_email
 
+_PKCE_CODE_VERIFIERS: dict[str, str] = {}
+
 
 def generate_gmail_auth_url(state: str) -> str:
     flow = _create_gmail_oauth_flow()
-    auth_url, _ = flow.authorization_url(
+    auth_url, generated_state = flow.authorization_url(
         access_type="offline",
         include_granted_scopes="true",
         prompt="consent",
         state=state,
     )
+    if flow.code_verifier:
+        _PKCE_CODE_VERIFIERS[generated_state] = flow.code_verifier
     return auth_url
 
 
-def exchange_gmail_code_for_credentials(code: str):
+def exchange_gmail_code_for_credentials(code: str, state: str):
     flow = _create_gmail_oauth_flow()
+    if state:
+        verifier = _PKCE_CODE_VERIFIERS.pop(state)
+        if verifier:
+            flow.code_verifier = verifier
     flow.fetch_token(code=code)
     return flow.credentials
 

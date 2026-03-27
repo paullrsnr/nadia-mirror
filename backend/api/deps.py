@@ -6,6 +6,8 @@ from backend.core.services.authService import AuthService
 from backend.core.services.emailsService import EmailsService
 from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 from backend.config.settings import storage_settings
+from backend.adapters.llm.llmGatewayAdapter import LlmGatewayAdapter
+from backend.core.services.llm.service import LlmService
 
 
 _credential_gateway = CredentialGatewayAdapter()
@@ -30,6 +32,8 @@ _auth_service = AuthService(
     credential_gateway=_credential_gateway,
 )
 
+_llm_service = LlmService(LlmGatewayAdapter())
+
 
 def get_auth_service() -> AuthService:
     return _auth_service
@@ -41,3 +45,7 @@ def get_mailbox_service() -> MailboxService:
 
 def get_emails_service() -> EmailsService:
     return _emails_service
+
+
+def get_llm_service() -> LlmService:
+    return _llm_service
