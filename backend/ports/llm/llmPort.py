@@ -31,3 +31,7 @@ class LlmPort(ABC):
         """Retourne le chemin du modèle chargé, ou None."""
         ...
 
+    @abstractmethod
+    def chat(self, messages: list[dict]) -> str:
+        """Envoie des messages au modèle et retourne la réponse."""
+        ...

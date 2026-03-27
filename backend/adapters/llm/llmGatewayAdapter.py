@@ -24,3 +24,6 @@ class LlmGatewayAdapter(LlmPort):
 
     def get_loaded_model_path(self) -> Optional[Path]:
         return self._adapter.get_loaded_model_path()
+
+    def chat(self, messages: list[dict]) -> str:
+        return self._adapter.chat(messages)

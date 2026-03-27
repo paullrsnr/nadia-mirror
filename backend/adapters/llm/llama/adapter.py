@@ -71,3 +71,9 @@ class LlamaCppAdapter(LlamaPort):
 
     def get_loaded_model_path(self) -> Optional[Path]:
         return self._model_path
+
+    def chat(self, messages: list[dict]) -> str:
+        if not self.is_loaded():
+            raise RuntimeError("Aucun modèle chargé")
+        result = self._model.create_chat_completion(messages=messages, max_tokens=512)
+        return result["choices"][0]["message"]["content"]
