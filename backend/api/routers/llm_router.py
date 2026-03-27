@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse
 
 from backend.core.models.llm import (
     LLMStatusResponse,
+    CatalogModelResponse,
     DownloadModelRequest,
     LoadModelRequest,
 )
@@ -18,9 +19,9 @@ def llm_status(service: LlmService = Depends(get_llm_service)):
     return service.get_status()
 
 
-@router.get("/models/catalog")
+@router.get("/models/catalog", response_model=list[CatalogModelResponse])
 def models_catalog(service: LlmService = Depends(get_llm_service)):
-    return {"models": service.get_catalog()}
+    return service.get_catalog()
 
 
 @router.post("/models/download/stream")
