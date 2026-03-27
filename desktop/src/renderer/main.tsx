@@ -3,10 +3,24 @@ import ReactDOM from "react-dom/client";
 import "./styles/global.css";
 import Inbox from "./pages/Inbox";
 import Settings from "./pages/Settings";
+import Models from "./pages/Models";
 import AuthCallback from "./pages/AuthCallback";
 
+type Page = "inbox" | "settings" | "models";
+
 function App() {
-  const [currentPage, setCurrentPage] = useState<"inbox" | "settings">("inbox");
+  const [currentPage, setCurrentPage] = useState<Page>("inbox");
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case "inbox":
+        return <Inbox />;
+      case "settings":
+        return <Settings />;
+      case "models":
+        return <Models />;
+    }
+  };
 
   return (
     <div>
@@ -18,13 +32,19 @@ function App() {
           📬 Boîte de réception
         </button>
         <button
+          onClick={() => setCurrentPage("models")}
+          style={{ marginRight: 10, fontWeight: currentPage === "models" ? "bold" : "normal" }}
+        >
+          🤖 Modèles IA
+        </button>
+        <button
           onClick={() => setCurrentPage("settings")}
           style={{ fontWeight: currentPage === "settings" ? "bold" : "normal" }}
         >
           ⚙️ Paramètres
         </button>
       </nav>
-      {currentPage === "inbox" ? <Inbox /> : <Settings />}
+      {renderPage()}
     </div>
   );
 }

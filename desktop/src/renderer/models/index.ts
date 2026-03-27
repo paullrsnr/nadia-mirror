@@ -7,3 +7,6 @@ export type { AuthStatus, ConnectableProvider, AuthStateByProvider } from "./Aut
 export type { AuthUrl } from "./AuthUrl";
 export type { ApiError } from "./ApiError";
 export type { EmailCardProps } from "./EmailCardProps";
+export type { LlmStatus } from "./LlmStatus";
+export type { InstalledModel } from "./InstalledModel";
+export type { CatalogModel } from "./CatalogModel";

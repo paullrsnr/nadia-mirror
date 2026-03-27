@@ -2,6 +2,7 @@ from datetime import datetime
 from email.utils import parsedate_to_datetime, parseaddr
 
 from backend.core.models.email import Email, EmailAddress, EmailAttachment
+from backend.core.models.email.provider import Provider
 from backend.adapters.mailProvider.GMAIL.models import GmailMessage
 from backend.adapters.mailProvider.GMAIL.gmailBodyParser import extract_gmail_body
 
@@ -69,4 +70,5 @@ def parse_gmail_message(message: dict) -> Email:
         attachments=attachments,
         labels=gmail_message.label_ids,
         snippet=gmail_message.snippet,
+        provider=Provider.GMAIL,
     )
