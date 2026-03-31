@@ -2,7 +2,8 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, Query, HTTPException
 
-from backend.api.deps import get_mailbox_service, get_emails_service
+from backend.api.deps import get_mailbox_service, get_emails_service, get_storage
+from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 from backend.api.schemas import EmailListResponse, ArchiveEmailResponse, SyncEmailsResponse
 from backend.core.exceptions import AuthError, ProviderError
 from backend.core.mailboxService import MailboxService
@@ -29,6 +30,15 @@ def archive_email(
     service: EmailsService = Depends(get_emails_service),
 ):
     return service.archive_email(email_id, provider)
+
+
+@router.get("/thread/{thread_id}")
+def get_thread_emails(
+    thread_id: str,
+    storage: SqliteStorageAdapter = Depends(get_storage),
+):
+    emails = storage.find_emails_by_thread(thread_id)
+    return {"emails": emails, "count": len(emails)}
 
 
 @router.post("/sync", response_model=Union[SyncResult, SyncAllResult])

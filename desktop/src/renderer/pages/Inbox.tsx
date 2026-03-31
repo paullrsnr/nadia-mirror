@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import EmailCard from "../components/EmailCard";
-import { Email, getEmails, syncEmails, archiveEmail } from "../services/apis/emails.api";
+import { Email, getEmails, syncEmails, archiveEmail, getThreadEmails } from "../services/apis/emails.api";
 import { getAuthStatus, type MailProvider } from "../services/apis/auth.api";
-import { summarizeEmail } from "../services/apis/llm.api";
+import { summarizeEmail, summarizeThread } from "../services/apis/llm.api";
 import { colors, spacing, radius } from "../theme";
 
 const DEFAULT_INBOX_VIEW: MailProvider = "all";
@@ -17,6 +17,7 @@ export default function Inbox() {
   const [inboxFilter, setInboxFilter] = useState<MailProvider>(DEFAULT_INBOX_VIEW);
   const [summary, setSummary] = useState<string | null>(null);
   const [summarizing, setSummarizing] = useState(false);
+  const [threadCount, setThreadCount] = useState<number>(1);
 
   useEffect(() => {
     checkAuthAndLoadEmails();
@@ -67,6 +68,15 @@ export default function Inbox() {
   async function handleEmailClick(email: Email) {
     setSelectedEmail(email);
     setSummary(null);
+    setThreadCount(1);
+    if (email.thread_id) {
+      try {
+        const thread = await getThreadEmails(email.thread_id);
+        setThreadCount(thread.count);
+      } catch {
+        // silencieux — le bouton thread sera simplement masqué
+      }
+    }
   }
 
   async function handleSummarize(email: Email) {
@@ -78,6 +88,26 @@ export default function Inbox() {
         email.body_text ?? "",
         email.from_address.email
       );
+      setSummary(result.summary);
+    } catch {
+      setSummary("Erreur lors du résumé. Vérifiez qu'un modèle LLM est chargé.");
+    } finally {
+      setSummarizing(false);
+    }
+  }
+
+  async function handleSummarizeThread(email: Email) {
+    if (!email.thread_id) return;
+    setSummarizing(true);
+    setSummary(null);
+    try {
+      const thread = await getThreadEmails(email.thread_id);
+      const messages = thread.emails.map((e) => ({
+        from_address: e.from_address.email,
+        body: e.body_text ?? "",
+        date: e.date ? new Date(e.date).toLocaleString("fr-FR") : "",
+      }));
+      const result = await summarizeThread(email.subject ?? "", messages);
       setSummary(result.summary);
     } catch {
       setSummary("Erreur lors du résumé. Vérifiez qu'un modèle LLM est chargé.");
@@ -187,21 +217,38 @@ export default function Inbox() {
                 {new Date(selectedEmail.date).toLocaleString("fr-FR")}
               </div>
             </div>
-            <button
-              onClick={() => handleSummarize(selectedEmail)}
-              disabled={summarizing}
-              style={{
-                padding: `${spacing.sm}px 16px`,
-                backgroundColor: colors.buttonPrimary,
-                color: colors.background,
-                border: "none",
-                borderRadius: radius.sm,
-                cursor: summarizing ? "not-allowed" : "pointer",
-                marginBottom: spacing.md,
-              }}
-            >
-              {summarizing ? "Résumé en cours..." : "Résumer avec l'IA"}
-            </button>
+            <div style={{ display: "flex", gap: spacing.sm, marginBottom: spacing.md }}>
+              <button
+                onClick={() => handleSummarize(selectedEmail)}
+                disabled={summarizing}
+                style={{
+                  padding: `${spacing.sm}px 16px`,
+                  backgroundColor: colors.buttonPrimary,
+                  color: colors.background,
+                  border: "none",
+                  borderRadius: radius.sm,
+                  cursor: summarizing ? "not-allowed" : "pointer",
+                }}
+              >
+                {summarizing ? "Résumé en cours..." : "Résumer avec l'IA"}
+              </button>
+              {threadCount > 1 && (
+                <button
+                  onClick={() => handleSummarizeThread(selectedEmail)}
+                  disabled={summarizing}
+                  style={{
+                    padding: `${spacing.sm}px 16px`,
+                    backgroundColor: colors.buttonPrimary,
+                    color: colors.background,
+                    border: "none",
+                    borderRadius: radius.sm,
+                    cursor: summarizing ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {summarizing ? "Résumé en cours..." : `Résumer la discussion (${threadCount} messages)`}
+                </button>
+              )}
+            </div>
             {summary && (
               <div
                 style={{

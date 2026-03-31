@@ -49,3 +49,7 @@ def get_emails_service() -> EmailsService:
 
 def get_llm_service() -> LlmService:
     return _llm_service
+
+
+def get_storage() -> SqliteStorageAdapter:
+    return _storage_adapter

@@ -96,6 +96,18 @@ class SqliteStorageAdapter(EmailStorage):
             session.close()
 
     
+    def find_emails_by_thread(self, thread_id: str) -> list[Email]:
+        session = create_session()
+        try:
+            query = (
+                select(EmailModel)
+                .where(EmailModel.thread_id == thread_id)
+                .order_by(EmailModel.date.asc())
+            )
+            return [emailMapper.to_domain(m) for m in session.execute(query).scalars().all()]
+        finally:
+            session.close()
+
     def _migrate_if_needed(self) -> None:
         if self.db_path.exists():
             return

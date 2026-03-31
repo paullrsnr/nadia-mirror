@@ -7,6 +7,8 @@ from backend.core.models.llm.downloadModelRequest import DownloadModelRequest
 from backend.core.models.llm.loadModelRequest import LoadModelRequest
 from backend.core.models.llm.summarizeRequest import SummarizeRequest
 from backend.core.models.llm.summarizeResponse import SummarizeResponse
+from backend.core.models.llm.threadMessageItem import ThreadMessageItem
+from backend.core.models.llm.summarizeThreadRequest import SummarizeThreadRequest
 
 __all__ = [
     "ChatRole",
@@ -18,4 +20,6 @@ __all__ = [
     "LoadModelRequest",
     "SummarizeRequest",
     "SummarizeResponse",
+    "SummarizeThreadRequest",
+    "ThreadMessageItem",
 ]

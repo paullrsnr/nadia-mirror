@@ -30,3 +30,7 @@ class EmailStorage(ABC):
     @abstractmethod
     def update_last_sync_time(self) -> None:
         """Met à jour le timestamp de dernière synchronisation."""
+
+    @abstractmethod
+    def find_emails_by_thread(self, thread_id: str) -> list[Email]:
+        """Retourne tous les emails d'un même fil de discussion, triés par date."""

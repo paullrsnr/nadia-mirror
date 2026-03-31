@@ -30,6 +30,14 @@ export async function archiveEmail(emailId: string, provider?: MailProvider): Pr
   }
 }
 
+export async function getThreadEmails(threadId: string): Promise<{ emails: Email[]; count: number }> {
+  const response = await fetch(`${API_BASE_URL}/emails/thread/${threadId}`);
+  if (!response.ok) {
+    throw new Error("Erreur lors de la récupération du fil de discussion");
+  }
+  return response.json();
+}
+
 export async function syncEmails(
   maxResults: number = 100,
   provider?: MailProvider,

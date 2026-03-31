@@ -94,6 +94,28 @@ export async function downloadModel(
   }
 }
 
+export interface ThreadMessage {
+  from_address: string;
+  body: string;
+  date: string;
+}
+
+export async function summarizeThread(
+  subject: string,
+  messages: ThreadMessage[]
+): Promise<SummarizeResponse> {
+  const response = await fetch(`${API_BASE_URL}/llm/summarize-thread`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ subject, messages }),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: "Erreur inconnue" }));
+    throw new Error(error.detail || "Erreur lors du résumé de la discussion");
+  }
+  return response.json();
+}
+
 export async function loadModel(modelId: string): Promise<{ model_id: string; message: string }> {
   const response = await fetch(`${API_BASE_URL}/llm/models/load`, {
     method: "POST",

@@ -2,10 +2,10 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from backend.core.models.llm import LLMStatusResponse, InstalledModelResponse, CatalogModelResponse, SummarizeRequest, SummarizeResponse
+from backend.core.models.llm import LLMStatusResponse, InstalledModelResponse, CatalogModelResponse, SummarizeRequest, SummarizeResponse, SummarizeThreadRequest
 from backend.core.services.llm.download import get_models_dir
 from backend.core.services.llm.catalog import CATALOG, get_catalog_model
-from backend.core.services.llm.prompts import EMAIL_SUMMARIZER
+from backend.core.services.llm.prompts import EMAIL_SUMMARIZER, THREAD_SUMMARIZER
 from backend.ports.llm import LlmPort
 from backend.core.models.llm import ChatMessage, ChatRole
 
@@ -96,6 +96,30 @@ class LlmService:
                     f"De : {payload.from_address}\n"
                     f"Objet : {payload.subject}\n\n"
                     f"{payload.body[:1200]}"
+                ),
+            ),
+        ]
+
+        summary = self._adapter.get_short_answer(messages)
+        return SummarizeResponse(summary=summary)
+
+    def summarize_thread(self, payload: SummarizeThreadRequest) -> SummarizeResponse:
+        if not self._adapter.is_loaded():
+            raise ValueError("Aucun modèle LLM chargé")
+
+        thread_text = "\n\n---\n\n".join(
+            f"De : {msg.from_address}\nDate : {msg.date}\n\n{msg.body[:600]}"
+            for msg in payload.messages
+        )
+
+        messages = [
+            THREAD_SUMMARIZER,
+            ChatMessage(
+                role=ChatRole.USER,
+                content=(
+                    f"Résume cette discussion email :\n\n"
+                    f"Objet : {payload.subject}\n\n"
+                    f"{thread_text}"
                 ),
             ),
         ]
