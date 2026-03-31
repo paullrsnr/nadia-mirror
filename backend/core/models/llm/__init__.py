@@ -9,6 +9,7 @@ from backend.core.models.llm.summarizeRequest import SummarizeRequest
 from backend.core.models.llm.summarizeResponse import SummarizeResponse
 from backend.core.models.llm.threadMessageItem import ThreadMessageItem
 from backend.core.models.llm.summarizeThreadRequest import SummarizeThreadRequest
+from backend.core.models.llm.classifyEmailRequest import ClassifyEmailRequest
 
 __all__ = [
     "ChatRole",
@@ -22,4 +23,5 @@ __all__ = [
     "SummarizeResponse",
     "SummarizeThreadRequest",
     "ThreadMessageItem",
+    "ClassifyEmailRequest",
 ]

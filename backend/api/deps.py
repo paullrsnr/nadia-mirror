@@ -4,6 +4,7 @@ from backend.adapters.authProvider.oauthGatewayAdapter import OAuthGatewayAdapte
 from backend.core.mailboxService import MailboxService
 from backend.core.services.authService import AuthService
 from backend.core.services.emailsService import EmailsService
+from backend.core.services.classificationService import ClassificationService
 from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 from backend.config.settings import storage_settings
 from backend.adapters.llm.llmGatewayAdapter import LlmGatewayAdapter
@@ -15,11 +16,14 @@ _oauth_gateway = OAuthGatewayAdapter()
 _email_provider_gateway = EmailProviderGatewayAdapter()
 _storage_adapter = SqliteStorageAdapter()
 
+_llm_service = LlmService(LlmGatewayAdapter())
+
 _mailbox_service = MailboxService(
     storage=_storage_adapter,
     email_provider_gateway=_email_provider_gateway,
     credential_gateway=_credential_gateway,
     sync_min_interval_minutes=storage_settings.SYNC_MIN_INTERVAL_MINUTES,
+    llm_service=_llm_service,
 )
 
 _emails_service = EmailsService(
@@ -32,7 +36,10 @@ _auth_service = AuthService(
     credential_gateway=_credential_gateway,
 )
 
-_llm_service = LlmService(LlmGatewayAdapter())
+_classification_service = ClassificationService(
+    llm_service=_llm_service,
+    storage=_storage_adapter,
+)
 
 
 def get_auth_service() -> AuthService:
@@ -53,3 +60,7 @@ def get_llm_service() -> LlmService:
 
 def get_storage() -> SqliteStorageAdapter:
     return _storage_adapter
+
+
+def get_classification_service() -> ClassificationService:
+    return _classification_service

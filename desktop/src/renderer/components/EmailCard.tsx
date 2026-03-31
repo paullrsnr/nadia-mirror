@@ -37,6 +37,11 @@ export default function EmailCard({
         <div className="main">
           <div className="meta">
             <span className="text-primary">{fromName}</span>
+            {email.category && (
+              <span className={`category-badge category-badge--${email.category}`}>
+                {email.category}
+              </span>
+            )}
           </div>
           <div className={`text-secondary subject`}>
             {email.subject || "[Sans objet]"}

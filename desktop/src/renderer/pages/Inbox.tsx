@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import EmailCard from "../components/EmailCard";
-import { Email, getEmails, syncEmails, archiveEmail, getThreadEmails } from "../services/apis/emails.api";
+import { Email, getEmails, syncEmails, archiveEmail, getThreadEmails, classifyEmail, classifyAllEmails } from "../services/apis/emails.api";
 import { getAuthStatus, type MailProvider } from "../services/apis/auth.api";
 import { summarizeEmail, summarizeThread } from "../services/apis/llm.api";
 import { colors, spacing, radius } from "../theme";
@@ -18,6 +18,8 @@ export default function Inbox() {
   const [summary, setSummary] = useState<string | null>(null);
   const [summarizing, setSummarizing] = useState(false);
   const [threadCount, setThreadCount] = useState<number>(1);
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [classifying, setClassifying] = useState(false);
 
   useEffect(() => {
     checkAuthAndLoadEmails();
@@ -72,7 +74,8 @@ export default function Inbox() {
     if (email.thread_id) {
       try {
         const thread = await getThreadEmails(email.thread_id);
-        setThreadCount(thread.count);
+        const ids = new Set(thread.emails.map((e) => e.id));
+        setThreadCount(ids.has(email.id) ? thread.count : thread.count + 1);
       } catch {
         // silencieux — le bouton thread sera simplement masqué
       }
@@ -96,13 +99,48 @@ export default function Inbox() {
     }
   }
 
+  async function handleClassify(email: Email) {
+    setClassifying(true);
+    try {
+      const result = await classifyEmail(email.id);
+      setEmails(emails.map((e) => e.id === email.id ? { ...e, category: result.category } : e));
+      if (selectedEmail?.id === email.id) {
+        setSelectedEmail({ ...email, category: result.category });
+      }
+    } catch {
+      setError("Erreur lors de la classification. Vérifiez qu'un modèle LLM est chargé.");
+    } finally {
+      setClassifying(false);
+    }
+  }
+
+  async function handleClassifyAll() {
+    setClassifying(true);
+    setError(null);
+    try {
+      const result = await classifyAllEmails(20);
+      if (result.classified > 0) {
+        await loadEmails();
+      }
+    } catch {
+      setError("Erreur lors de la classification. Vérifiez qu'un modèle LLM est chargé.");
+    } finally {
+      setClassifying(false);
+    }
+  }
+
   async function handleSummarizeThread(email: Email) {
     if (!email.thread_id) return;
     setSummarizing(true);
     setSummary(null);
     try {
       const thread = await getThreadEmails(email.thread_id);
-      const messages = thread.emails.map((e) => ({
+      const threadMap = new Map(thread.emails.map((e) => [e.id, e]));
+      threadMap.set(email.id, email);
+      const threadEmails = Array.from(threadMap.values()).sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+      const messages = threadEmails.map((e) => ({
         from_address: e.from_address.email,
         body: e.body_text ?? "",
         date: e.date ? new Date(e.date).toLocaleString("fr-FR") : "",
@@ -120,7 +158,7 @@ export default function Inbox() {
     const archiveProvider = inboxFilter === "all" ? (email.provider ?? "gmail") : inboxFilter;
     if (archiveProvider === "all") return;
     try {
-      await archiveEmail(email.id, archiveProvider);
+      await archiveEmail(email.id, archiveProvider as MailProvider);
       setEmails(emails.filter((e) => e.id !== email.id));
       if (selectedEmail?.id === email.id) {
         setSelectedEmail(null);
@@ -163,20 +201,55 @@ export default function Inbox() {
               </select>
             </label>
           </div>
-          <button
-            onClick={handleSync}
-            disabled={syncing}
-            style={{
-              padding: `${spacing.sm}px 16px`,
-              backgroundColor: colors.buttonPrimary,
-              color: colors.background,
-              border: "none",
-              borderRadius: radius.sm,
-              cursor: syncing ? "not-allowed" : "pointer",
-            }}
-          >
-            {syncing ? "Synchronisation..." : "Synchroniser"}
-          </button>
+          <div style={{ display: "flex", gap: spacing.sm, flexWrap: "wrap" }}>
+            <button
+              onClick={handleSync}
+              disabled={syncing}
+              style={{
+                padding: `${spacing.sm}px 16px`,
+                backgroundColor: colors.buttonPrimary,
+                color: colors.background,
+                border: "none",
+                borderRadius: radius.sm,
+                cursor: syncing ? "not-allowed" : "pointer",
+              }}
+            >
+              {syncing ? "Synchronisation..." : "Synchroniser"}
+            </button>
+            <button
+              onClick={handleClassifyAll}
+              disabled={classifying || syncing}
+              style={{
+                padding: `${spacing.sm}px 16px`,
+                backgroundColor: colors.backgroundMuted,
+                color: colors.textSecondary,
+                border: `1px solid ${colors.borderStrong}`,
+                borderRadius: radius.sm,
+                cursor: classifying ? "not-allowed" : "pointer",
+              }}
+            >
+              {classifying ? "Classification..." : "Classifier (IA)"}
+            </button>
+          </div>
+          <div style={{ marginTop: spacing.sm }}>
+            <label>
+              Catégorie :
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                style={{ marginLeft: spacing.sm }}
+              >
+                <option value="all">Toutes</option>
+                <option value="travail">Travail</option>
+                <option value="personnel">Personnel</option>
+                <option value="finance">Finance</option>
+                <option value="shopping">Shopping</option>
+                <option value="marketing">Marketing</option>
+                <option value="notification">Notification</option>
+                <option value="autre">Autre</option>
+              </select>
+            </label>
+          </div>
         </div>
 
         {loading ? (
@@ -186,14 +259,16 @@ export default function Inbox() {
             Aucun email
           </div>
         ) : (
-          emails.map((email) => (
-            <EmailCard
-              key={email.id}
-              email={email}
-              onClick={() => handleEmailClick(email)}
-              onArchive={() => handleArchive(email)}
-            />
-          ))
+          emails
+            .filter((e) => categoryFilter === "all" || e.category === categoryFilter)
+            .map((email) => (
+              <EmailCard
+                key={email.id}
+                email={email}
+                onClick={() => handleEmailClick(email)}
+                onArchive={() => handleArchive(email)}
+              />
+            ))
         )}
 
         {error && (
@@ -217,7 +292,25 @@ export default function Inbox() {
                 {new Date(selectedEmail.date).toLocaleString("fr-FR")}
               </div>
             </div>
-            <div style={{ display: "flex", gap: spacing.sm, marginBottom: spacing.md }}>
+            <div style={{ display: "flex", gap: spacing.sm, marginBottom: spacing.md, flexWrap: "wrap" }}>
+              <button
+                onClick={() => handleClassify(selectedEmail)}
+                disabled={classifying || summarizing}
+                style={{
+                  padding: `${spacing.sm}px 16px`,
+                  backgroundColor: colors.backgroundMuted,
+                  color: colors.textSecondary,
+                  border: `1px solid ${colors.borderStrong}`,
+                  borderRadius: radius.sm,
+                  cursor: classifying ? "not-allowed" : "pointer",
+                }}
+              >
+                {classifying
+                  ? "Classification..."
+                  : selectedEmail.category
+                  ? `Catégorie : ${selectedEmail.category}`
+                  : "Classifier avec l'IA"}
+              </button>
               <button
                 onClick={() => handleSummarize(selectedEmail)}
                 disabled={summarizing}
@@ -249,6 +342,7 @@ export default function Inbox() {
                 </button>
               )}
             </div>
+
             {summary && (
               <div
                 style={{

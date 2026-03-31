@@ -34,3 +34,15 @@ class EmailStorage(ABC):
     @abstractmethod
     def find_emails_by_thread(self, thread_id: str) -> list[Email]:
         """Retourne tous les emails d'un même fil de discussion, triés par date."""
+
+    @abstractmethod
+    def find_email_by_id(self, email_id: str) -> Optional[Email]:
+        """Retourne un email par son identifiant, ou None s'il n'existe pas."""
+
+    @abstractmethod
+    def update_email_category(self, email_id: str, category: str) -> bool:
+        """Met à jour la catégorie d'un email. Retourne True si l'email existe."""
+
+    @abstractmethod
+    def find_uncategorized_emails(self, limit: int = 50) -> list[Email]:
+        """Retourne les emails sans catégorie, les plus récents en premier."""

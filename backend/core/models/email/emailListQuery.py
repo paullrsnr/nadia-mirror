@@ -8,3 +8,4 @@ class EmailListQuery:
 
     unread_only: bool = True
     after_date: Optional[date] = None
+    sent_only: bool = False

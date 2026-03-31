@@ -21,6 +21,7 @@ def to_domain(model: EmailModel) -> Email:
         labels=json.loads(model.labels) if model.labels and model.labels != "null" else [],
         snippet=model.snippet,
         provider=Provider(model.provider) if model.provider else Provider.ALL,
+        category=model.category,
     )
 
 
@@ -47,6 +48,7 @@ def to_model(email: Email, provider: str) -> EmailModel:
         labels=json.dumps(email.labels),
         snippet=email.snippet,
         provider=provider.lower(),
+        category=email.category,
     )
 
 

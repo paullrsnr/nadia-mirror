@@ -23,3 +23,4 @@ class Email:
     attachments: list[EmailAttachment] = field(default_factory=list)
     labels: list[str] = field(default_factory=list)
     snippet: Optional[str] = None
+    category: Optional[str] = None

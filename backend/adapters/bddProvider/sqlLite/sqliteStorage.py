@@ -37,8 +37,12 @@ class SqliteStorageAdapter(EmailStorage):
     def save_email(self, email: Email, provider: str) -> bool:
         session = create_session()
         try:
-            is_new = session.get(EmailModel, email.id) is None
-            session.merge(emailMapper.to_model(email, provider))
+            existing = session.get(EmailModel, email.id)
+            is_new = existing is None
+            model = emailMapper.to_model(email, provider)
+            if existing is not None and existing.category is not None:
+                model.category = existing.category
+            session.merge(model)
             session.commit()
             return is_new
         except Exception:
@@ -96,6 +100,42 @@ class SqliteStorageAdapter(EmailStorage):
             session.close()
 
     
+    def find_email_by_id(self, email_id: str) -> Optional[Email]:
+        session = create_session()
+        try:
+            model = session.get(EmailModel, email_id)
+            return emailMapper.to_domain(model) if model else None
+        finally:
+            session.close()
+
+    def update_email_category(self, email_id: str, category: str) -> bool:
+        session = create_session()
+        try:
+            model = session.get(EmailModel, email_id)
+            if model is None:
+                return False
+            model.category = category
+            session.commit()
+            return True
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def find_uncategorized_emails(self, limit: int = 50) -> list[Email]:
+        session = create_session()
+        try:
+            query = (
+                select(EmailModel)
+                .where(EmailModel.category.is_(None))
+                .order_by(EmailModel.date.desc())
+                .limit(limit)
+            )
+            return [emailMapper.to_domain(m) for m in session.execute(query).scalars().all()]
+        finally:
+            session.close()
+
     def find_emails_by_thread(self, thread_id: str) -> list[Email]:
         session = create_session()
         try:

@@ -2,10 +2,10 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, Query, HTTPException
 
-from backend.api.deps import get_mailbox_service, get_emails_service, get_storage
+from backend.api.deps import get_mailbox_service, get_emails_service, get_storage, get_classification_service
 from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
-from backend.api.schemas import EmailListResponse, ArchiveEmailResponse, SyncEmailsResponse
-from backend.core.exceptions import AuthError, ProviderError
+from backend.core.services.classificationService import ClassificationService
+from backend.api.schemas import EmailListResponse, ArchiveEmailResponse
 from backend.core.mailboxService import MailboxService
 from backend.core.services.emailsService import EmailsService
 from backend.core.models.email import SyncResult, SyncAllResult
@@ -39,6 +39,25 @@ def get_thread_emails(
 ):
     emails = storage.find_emails_by_thread(thread_id)
     return {"emails": emails, "count": len(emails)}
+
+
+@router.post("/classify/{email_id}")
+def classify_email(
+    email_id: str,
+    service: ClassificationService = Depends(get_classification_service),
+):
+    try:
+        return service.classify_one(email_id)
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/classify-all")
+def classify_all_emails(
+    limit: int = Query(default=20, ge=1, le=100),
+    service: ClassificationService = Depends(get_classification_service),
+):
+    return service.classify_all_uncategorized(limit=limit)
 
 
 @router.post("/sync", response_model=Union[SyncResult, SyncAllResult])

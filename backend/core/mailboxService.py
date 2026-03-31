@@ -1,4 +1,6 @@
+import logging
 from datetime import datetime, timedelta
+from typing import Optional
 
 from backend.core.providers import (
     Provider,
@@ -15,6 +17,8 @@ from backend.core.models.email import EmailListQuery, EmailListResult
 from backend.core.models.email import SyncResult, SyncAllResult, ProviderSyncResult
 from backend.utils.textCleaner import normalize_string
 
+logger = logging.getLogger(__name__)
+
 
 class MailboxService:
     def __init__(
@@ -23,11 +27,13 @@ class MailboxService:
         email_provider_gateway: EmailProviderGateway,
         credential_gateway: CredentialGateway,
         sync_min_interval_minutes: int = 5,
+        llm_service: Optional[object] = None,
     ) -> None:
         self._storage = storage
         self._email_provider_gateway = email_provider_gateway
         self._credentials = credential_gateway
         self._sync_min_interval = sync_min_interval_minutes
+        self._llm = llm_service
 
 
     def get_stored_emails(
@@ -142,8 +148,22 @@ class MailboxService:
             saved_count = 0
             tag = provider_tag.lower()
             for email in page_result.emails:
-                if self._storage.save_email(email, provider=tag):
+                is_new = self._storage.save_email(email, provider=tag)
+                if is_new:
                     saved_count += 1
+                    self._auto_classify(email)
+
+            # Sync des emails envoyés pour avoir les discussions complètes
+            try:
+                sent_result = self._email_provider_gateway.fetch_emails(
+                    provider=provider_tag,
+                    max_results=50,
+                    query=EmailListQuery(unread_only=False, after_date=after, sent_only=True),
+                )
+                for email in sent_result.emails:
+                    self._storage.save_email(email, provider=tag)
+            except Exception as exc:  # pylint: disable=broad-except
+                logger.warning("Sync emails envoyés échoué pour %s : %s", provider_tag, exc)
 
             if not skip_cooldown:
                 self._storage.update_last_sync_time()
@@ -158,3 +178,17 @@ class MailboxService:
             return SyncResult(status="error", message=str(e))
         except RuntimeError as e:
             return SyncResult(status="error", message=f"Erreur de synchronisation: {str(e)}")
+
+    def _auto_classify(self, email) -> None:
+        if self._llm is None:
+            return
+        try:
+            from backend.core.models.llm import ClassifyEmailRequest
+            category = self._llm.classify_email(ClassifyEmailRequest(
+                subject=email.subject or "",
+                snippet=email.snippet or (email.body_text[:400] if email.body_text else ""),
+                from_address=email.from_address.email,
+            ))
+            self._storage.update_email_category(email.id, category)
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.warning("Classification automatique échouée pour %s : %s", email.id, exc)

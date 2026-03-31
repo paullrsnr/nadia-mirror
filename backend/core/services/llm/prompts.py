@@ -8,6 +8,18 @@ EMAIL_SUMMARIZER = ChatMessage(
     ),
 )
 
+CATEGORIES = ["travail", "personnel", "finance", "shopping", "marketing", "notification", "autre"]
+
+EMAIL_CLASSIFIER = ChatMessage(
+    role=ChatRole.SYSTEM,
+    content=(
+        "Tu es un assistant qui classe des emails en catégories. "
+        "Réponds UNIQUEMENT avec un seul mot parmi : "
+        "travail, personnel, finance, shopping, marketing, notification, autre. "
+        "Aucune explication, aucune ponctuation, juste le mot."
+    ),
+)
+
 THREAD_SUMMARIZER = ChatMessage(
     role=ChatRole.SYSTEM,
     content=(

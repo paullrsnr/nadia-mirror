@@ -30,6 +30,23 @@ export async function archiveEmail(emailId: string, provider?: MailProvider): Pr
   }
 }
 
+export async function classifyEmail(emailId: string): Promise<{ email_id: string; category: string }> {
+  const response = await fetch(`${API_BASE_URL}/emails/classify/${emailId}`, { method: "POST" });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: "Erreur inconnue" }));
+    throw new Error(error.detail || "Erreur lors de la classification");
+  }
+  return response.json();
+}
+
+export async function classifyAllEmails(limit = 20): Promise<{ classified: number }> {
+  const response = await fetch(`${API_BASE_URL}/emails/classify-all?limit=${limit}`, { method: "POST" });
+  if (!response.ok) {
+    throw new Error("Erreur lors de la classification");
+  }
+  return response.json();
+}
+
 export async function getThreadEmails(threadId: string): Promise<{ emails: Email[]; count: number }> {
   const response = await fetch(`${API_BASE_URL}/emails/thread/${threadId}`);
   if (!response.ok) {

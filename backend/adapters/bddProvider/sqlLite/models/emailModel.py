@@ -25,6 +25,7 @@ class EmailModel(Base):
     labels: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     snippet: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     provider: Mapped[str] = mapped_column(String, nullable=False)
+    category: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
     def __repr__(self) -> str:
         return f"EmailModel(id={self.id!r}, subject={self.subject!r}, provider={self.provider!r})"

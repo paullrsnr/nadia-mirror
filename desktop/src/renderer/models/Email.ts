@@ -16,4 +16,5 @@ export interface Email {
   snippet?: string;
   /** Boîte d'origine (gmail | outlook) pour archivage en vue "Toutes les boîtes" */
   provider?: string;
+  category?: string;
 }

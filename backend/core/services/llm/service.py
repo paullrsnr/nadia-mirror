@@ -2,10 +2,10 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from backend.core.models.llm import LLMStatusResponse, InstalledModelResponse, CatalogModelResponse, SummarizeRequest, SummarizeResponse, SummarizeThreadRequest
+from backend.core.models.llm import LLMStatusResponse, InstalledModelResponse, CatalogModelResponse, SummarizeRequest, SummarizeResponse, SummarizeThreadRequest, ClassifyEmailRequest
 from backend.core.services.llm.download import get_models_dir
 from backend.core.services.llm.catalog import CATALOG, get_catalog_model
-from backend.core.services.llm.prompts import EMAIL_SUMMARIZER, THREAD_SUMMARIZER
+from backend.core.services.llm.prompts import EMAIL_SUMMARIZER, THREAD_SUMMARIZER, EMAIL_CLASSIFIER, CATEGORIES
 from backend.ports.llm import LlmPort
 from backend.core.models.llm import ChatMessage, ChatRole
 
@@ -102,6 +102,29 @@ class LlmService:
 
         summary = self._adapter.get_short_answer(messages)
         return SummarizeResponse(summary=summary)
+
+    def classify_email(self, payload: ClassifyEmailRequest) -> str:
+        """Retourne la catégorie de l'email (ex: 'travail', 'personnel', ...)."""
+        if not self._adapter.is_loaded():
+            raise ValueError("Aucun modèle LLM chargé")
+
+        content = (
+            f"De : {payload.from_address}\n"
+            f"Objet : {payload.subject}\n\n"
+            f"{payload.snippet[:400]}"
+        )
+
+        messages = [
+            EMAIL_CLASSIFIER,
+            ChatMessage(role=ChatRole.USER, content=content),
+        ]
+
+        raw = self._adapter.get_short_answer(messages).strip().lower()
+        # Valide que la réponse est bien une catégorie connue
+        for cat in CATEGORIES:
+            if cat in raw:
+                return cat
+        return "autre"
 
     def summarize_thread(self, payload: SummarizeThreadRequest) -> SummarizeResponse:
         if not self._adapter.is_loaded():
