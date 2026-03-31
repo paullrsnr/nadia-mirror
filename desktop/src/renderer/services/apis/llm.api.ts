@@ -12,10 +12,31 @@ export async function getLlmStatus(): Promise<LlmStatus> {
   return response.json();
 }
 
-export async function getCatalog(): Promise<{ models: CatalogModel[] }> {
+export async function getCatalog(): Promise<CatalogModel[]> {
   const response = await fetch(`${API_BASE_URL}/llm/models/catalog`);
   if (!response.ok) {
     throw new Error("Erreur lors de la récupération du catalogue");
+  }
+  return response.json();
+}
+
+export interface SummarizeResponse {
+  summary: string;
+}
+
+export async function summarizeEmail(
+  subject: string,
+  body: string,
+  fromAddress: string = ""
+): Promise<SummarizeResponse> {
+  const response = await fetch(`${API_BASE_URL}/llm/summarize`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ subject, body, from_address: fromAddress }),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: "Erreur inconnue" }));
+    throw new Error(error.detail || "Erreur lors du résumé");
   }
   return response.json();
 }

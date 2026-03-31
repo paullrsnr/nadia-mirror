@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import EmailCard from "../components/EmailCard";
 import { Email, getEmails, syncEmails, archiveEmail } from "../services/apis/emails.api";
 import { getAuthStatus, type MailProvider } from "../services/apis/auth.api";
+import { summarizeEmail } from "../services/apis/llm.api";
 import { colors, spacing, radius } from "../theme";
 
 const DEFAULT_INBOX_VIEW: MailProvider = "all";
@@ -14,6 +15,8 @@ export default function Inbox() {
   const [error, setError] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [inboxFilter, setInboxFilter] = useState<MailProvider>(DEFAULT_INBOX_VIEW);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summarizing, setSummarizing] = useState(false);
 
   useEffect(() => {
     checkAuthAndLoadEmails();
@@ -63,6 +66,24 @@ export default function Inbox() {
 
   async function handleEmailClick(email: Email) {
     setSelectedEmail(email);
+    setSummary(null);
+  }
+
+  async function handleSummarize(email: Email) {
+    setSummarizing(true);
+    setSummary(null);
+    try {
+      const result = await summarizeEmail(
+        email.subject ?? "",
+        email.body_text ?? "",
+        email.from_address.email
+      );
+      setSummary(result.summary);
+    } catch {
+      setSummary("Erreur lors du résumé. Vérifiez qu'un modèle LLM est chargé.");
+    } finally {
+      setSummarizing(false);
+    }
   }
 
   async function handleArchive(email: Email) {
@@ -166,6 +187,35 @@ export default function Inbox() {
                 {new Date(selectedEmail.date).toLocaleString("fr-FR")}
               </div>
             </div>
+            <button
+              onClick={() => handleSummarize(selectedEmail)}
+              disabled={summarizing}
+              style={{
+                padding: `${spacing.sm}px 16px`,
+                backgroundColor: colors.buttonPrimary,
+                color: colors.background,
+                border: "none",
+                borderRadius: radius.sm,
+                cursor: summarizing ? "not-allowed" : "pointer",
+                marginBottom: spacing.md,
+              }}
+            >
+              {summarizing ? "Résumé en cours..." : "Résumer avec l'IA"}
+            </button>
+            {summary && (
+              <div
+                style={{
+                  padding: spacing.card,
+                  backgroundColor: colors.backgroundMuted,
+                  borderRadius: radius.sm,
+                  marginBottom: spacing.md,
+                  borderLeft: `3px solid ${colors.buttonPrimary}`,
+                }}
+              >
+                <strong style={{ fontSize: "12px", color: colors.textSecondary }}>RÉSUMÉ IA</strong>
+                <p style={{ margin: `${spacing.xs}px 0 0`, whiteSpace: "pre-wrap" }}>{summary}</p>
+              </div>
+            )}
             <div style={{ marginTop: spacing.page, whiteSpace: "pre-wrap" }}>
               {selectedEmail.body_text}
             </div>

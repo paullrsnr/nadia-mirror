@@ -6,6 +6,8 @@ from backend.core.models.llm import (
     CatalogModelResponse,
     DownloadModelRequest,
     LoadModelRequest,
+    SummarizeRequest,
+    SummarizeResponse,
 )
 from backend.core.services.llm import stream_download_sse
 from backend.core.services.llm.service import LlmService
@@ -36,3 +38,8 @@ async def models_download_stream(payload: DownloadModelRequest):
 @router.post("/models/load")
 def models_load(payload: LoadModelRequest, service: LlmService = Depends(get_llm_service)):
     return service.load_model_by_id(payload.model_id)
+
+
+@router.post("/summarize", response_model=SummarizeResponse)
+def llm_summarize(payload: SummarizeRequest, service: LlmService = Depends(get_llm_service)):
+    return service.summarize_email(payload)
