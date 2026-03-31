@@ -8,6 +8,7 @@ try:
 except ImportError:
     Llama = None  # type: ignore
 
+from backend.ports.llm import ChatMessage
 from backend.ports.llm.llama import LlamaPort
 from backend.config.settings import llm_settings
 
@@ -71,3 +72,9 @@ class LlamaCppAdapter(LlamaPort):
 
     def get_loaded_model_path(self) -> Optional[Path]:
         return self._model_path
+
+    def get_short_answer(self, messages: list[ChatMessage]) -> str:
+        if not self.is_loaded():
+            raise RuntimeError("Aucun modèle chargé")
+        result = self._model.create_chat_completion(messages=[m.to_dict() for m in messages], max_tokens=512)
+        return result["choices"][0]["message"]["content"]

@@ -2,10 +2,12 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from backend.core.models.llm import LLMStatusResponse, InstalledModelResponse, CatalogModelResponse
+from backend.core.models.llm import LLMStatusResponse, InstalledModelResponse, CatalogModelResponse, SummarizeRequest, SummarizeResponse
 from backend.core.services.llm.download import get_models_dir
 from backend.core.services.llm.catalog import CATALOG, get_catalog_model
+from backend.core.services.llm.prompts import EMAIL_SUMMARIZER
 from backend.ports.llm import LlmPort
+from backend.core.models.llm import ChatMessage, ChatRole
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +82,26 @@ class LlmService:
                     InstalledModelResponse(id=model_id, name=f.name, path=str(f))
                 )
         return installed
+
+    def summarize_email(self, payload: SummarizeRequest) -> SummarizeResponse:
+        if not self._adapter.is_loaded():
+            raise ValueError("Aucun modèle LLM chargé")
+
+        messages = [
+            EMAIL_SUMMARIZER,
+            ChatMessage(
+                role=ChatRole.USER,
+                content=(
+                    f"Résume cet email en 2-3 phrases :\n\n"
+                    f"De : {payload.from_address}\n"
+                    f"Objet : {payload.subject}\n\n"
+                    f"{payload.body[:1200]}"
+                ),
+            ),
+        ]
+
+        summary = self._adapter.get_short_answer(messages)
+        return SummarizeResponse(summary=summary)
 
     def _load_model_from_path(self, model_path: Path) -> bool:
         success = self._adapter.load_model(model_path)

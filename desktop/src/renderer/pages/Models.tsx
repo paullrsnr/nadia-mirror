@@ -49,7 +49,7 @@ export default function Models() {
     try {
       const [statusData, catalogData] = await Promise.all([getLlmStatus(), getCatalog()]);
       setStatus(statusData);
-      setCatalog(catalogData.models);
+      setCatalog(catalogData);
     } catch (err) {
       setError("Impossible de charger les données LLM");
       console.error(err);
