@@ -1,4 +1,4 @@
-import type { EmailListResponse, SyncResponse } from "../../models";
+import type { Email, EmailListResponse, SyncResponse } from "../../models";
 import type { MailProvider } from "./auth.api";
 import { API_BASE_URL } from "./config";
 
@@ -51,6 +51,15 @@ export async function getThreadEmails(threadId: string): Promise<{ emails: Email
   const response = await fetch(`${API_BASE_URL}/emails/thread/${threadId}`);
   if (!response.ok) {
     throw new Error("Erreur lors de la récupération du fil de discussion");
+  }
+  return response.json();
+}
+
+export async function suggestReply(emailId: string): Promise<{ important: boolean; draft: string | null }> {
+  const response = await fetch(`${API_BASE_URL}/emails/suggest-reply/${emailId}`, { method: "POST" });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: "Erreur inconnue" }));
+    throw new Error(error.detail || "Erreur lors de la génération du brouillon");
   }
   return response.json();
 }

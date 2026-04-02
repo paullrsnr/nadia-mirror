@@ -46,3 +46,20 @@ class EmailStorage(ABC):
     @abstractmethod
     def find_uncategorized_emails(self, limit: int = 50) -> list[Email]:
         """Retourne les emails sans catégorie, les plus récents en premier."""
+
+    @abstractmethod
+    def update_email_draft(self, email_id: str, draft: str) -> bool:
+        """Sauvegarde un brouillon de réponse. Retourne True si l'email existe."""
+
+    @abstractmethod
+    def archive_email_locally(self, email_id: str) -> bool:
+        """Marque l'email comme archivé en local. Retourne True si l'email existe."""
+
+    @abstractmethod
+    def set_pending_archive(self, email_id: str, pending: bool) -> bool:
+        """Marque/démarque un email comme en attente d'archivage. Retourne True si l'email existe."""
+
+    @abstractmethod
+    def find_pending_archive_emails(self) -> list[Email]:
+        """Retourne les emails en attente de confirmation d'archivage."""
+

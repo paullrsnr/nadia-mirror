@@ -89,15 +89,17 @@ class GmailAdapter:
 
     def _map_core_query_to_gmail(self, query: Optional[EmailListQuery]) -> str:
         if not query:
-            return "is:unread"
+            return "in:inbox is:unread"
         parts: list[str] = []
         if query.sent_only:
             parts.append("in:sent")
-        elif query.unread_only:
-            parts.append("is:unread")
+        else:
+            parts.append("in:inbox")
+            if query.unread_only:
+                parts.append("is:unread")
         if query.after_date:
             parts.append(f"after:{query.after_date:%Y/%m/%d}")
-        return " ".join(parts) if parts else "is:unread"
+        return " ".join(parts)
 
 
 def fetch_emails_gmail(max_results: int = 50, query: Optional[EmailListQuery] = None) -> EmailPage:

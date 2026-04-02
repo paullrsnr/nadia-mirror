@@ -26,6 +26,9 @@ class EmailModel(Base):
     snippet: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     provider: Mapped[str] = mapped_column(String, nullable=False)
     category: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    draft_reply: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    is_archived: Mapped[bool] = mapped_column(default=False, nullable=False)
+    pending_archive: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     def __repr__(self) -> str:
         return f"EmailModel(id={self.id!r}, subject={self.subject!r}, provider={self.provider!r})"

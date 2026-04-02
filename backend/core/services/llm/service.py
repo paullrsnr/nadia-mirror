@@ -1,11 +1,10 @@
 import logging
 from pathlib import Path
-from typing import Optional
 
 from backend.core.models.llm import LLMStatusResponse, InstalledModelResponse, CatalogModelResponse, SummarizeRequest, SummarizeResponse, SummarizeThreadRequest, ClassifyEmailRequest
 from backend.core.services.llm.download import get_models_dir
 from backend.core.services.llm.catalog import CATALOG, get_catalog_model
-from backend.core.services.llm.prompts import EMAIL_SUMMARIZER, THREAD_SUMMARIZER, EMAIL_CLASSIFIER, CATEGORIES
+from backend.core.services.llm.prompts import EMAIL_SUMMARIZER, THREAD_SUMMARIZER, EMAIL_CLASSIFIER, CATEGORIES, EMAIL_IMPORTANCE_SCORER, REPLY_DRAFTER, AUTO_ARCHIVE_EVALUATOR
 from backend.ports.llm import LlmPort
 from backend.core.models.llm import ChatMessage, ChatRole
 
@@ -149,6 +148,62 @@ class LlmService:
 
         summary = self._adapter.get_short_answer(messages)
         return SummarizeResponse(summary=summary)
+
+    def is_important(self, subject: str, snippet: str, from_address: str) -> bool:
+        """Retourne True si l'email nécessite une réponse."""
+        if not self._adapter.is_loaded():
+            raise ValueError("Aucun modèle LLM chargé")
+
+        content = (
+            f"De : {from_address}\n"
+            f"Objet : {subject}\n\n"
+            f"{snippet[:400]}"
+        )
+        messages = [
+            EMAIL_IMPORTANCE_SCORER,
+            ChatMessage(role=ChatRole.USER, content=content),
+        ]
+        raw = self._adapter.get_short_answer(messages).strip().lower()
+        return "oui" in raw
+
+    def draft_reply(self, subject: str, body: str, from_address: str) -> str:
+        """Génère un brouillon de réponse à l'email."""
+        if not self._adapter.is_loaded():
+            raise ValueError("Aucun modèle LLM chargé")
+
+        content = (
+            f"De : {from_address}\n"
+            f"Objet : {subject}\n\n"
+            f"{body[:1200]}"
+        )
+        messages = [
+            REPLY_DRAFTER,
+            ChatMessage(role=ChatRole.USER, content=content),
+        ]
+        return self._adapter.get_short_answer(messages).strip()
+
+    def evaluate_archive_decision(self, rules: str, subject: str, snippet: str, from_address: str) -> str:
+        """Retourne 'oui', 'non' ou 'incertain' selon les règles d'archivage."""
+        if not self._adapter.is_loaded():
+            raise ValueError("Aucun modèle LLM chargé")
+
+        content = (
+            f"Règles d'archivage : {rules}\n\n"
+            f"Email à évaluer :\n"
+            f"De : {from_address}\n"
+            f"Objet : {subject}\n\n"
+            f"{snippet[:400]}"
+        )
+        messages = [
+            AUTO_ARCHIVE_EVALUATOR,
+            ChatMessage(role=ChatRole.USER, content=content),
+        ]
+        raw = self._adapter.get_short_answer(messages).strip().lower()
+        if "oui" in raw:
+            return "oui"
+        if "non" in raw:
+            return "non"
+        return "incertain"
 
     def _load_model_from_path(self, model_path: Path) -> bool:
         success = self._adapter.load_model(model_path)

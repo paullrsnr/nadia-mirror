@@ -40,8 +40,13 @@ class SqliteStorageAdapter(EmailStorage):
             existing = session.get(EmailModel, email.id)
             is_new = existing is None
             model = emailMapper.to_model(email, provider)
-            if existing is not None and existing.category is not None:
-                model.category = existing.category
+            if existing is not None:
+                if existing.category is not None:
+                    model.category = existing.category
+                if existing.draft_reply is not None:
+                    model.draft_reply = existing.draft_reply
+                model.is_archived = existing.is_archived
+                model.pending_archive = existing.pending_archive
             session.merge(model)
             session.commit()
             return is_new
@@ -59,8 +64,8 @@ class SqliteStorageAdapter(EmailStorage):
     ) -> tuple[list[Email], int]:
         session = create_session()
         try:
-            query = select(EmailModel)
-            count_query = select(func.count(EmailModel.id))  # pylint: disable=not-callable
+            query = select(EmailModel).where(EmailModel.is_archived == False)  # noqa: E712
+            count_query = select(func.count(EmailModel.id)).where(EmailModel.is_archived == False)  # noqa: E712, pylint: disable=not-callable
 
             if provider_filter and provider_filter.lower() not in ("", Provider.ALL.value):
                 pf = provider_filter.lower()
@@ -133,6 +138,64 @@ class SqliteStorageAdapter(EmailStorage):
                 .limit(limit)
             )
             return [emailMapper.to_domain(m) for m in session.execute(query).scalars().all()]
+        finally:
+            session.close()
+
+    def archive_email_locally(self, email_id: str) -> bool:
+        session = create_session()
+        try:
+            model = session.get(EmailModel, email_id)
+            if model is None:
+                return False
+            model.is_archived = True
+            session.commit()
+            return True
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def set_pending_archive(self, email_id: str, pending: bool) -> bool:
+        session = create_session()
+        try:
+            model = session.get(EmailModel, email_id)
+            if model is None:
+                return False
+            model.pending_archive = pending
+            session.commit()
+            return True
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def find_pending_archive_emails(self) -> list[Email]:
+        session = create_session()
+        try:
+            query = (
+                select(EmailModel)
+                .where(EmailModel.pending_archive == True)  # noqa: E712
+                .where(EmailModel.is_archived == False)  # noqa: E712
+                .order_by(EmailModel.date.desc())
+            )
+            return [emailMapper.to_domain(m) for m in session.execute(query).scalars().all()]
+        finally:
+            session.close()
+
+    def update_email_draft(self, email_id: str, draft: str) -> bool:
+        session = create_session()
+        try:
+            model = session.get(EmailModel, email_id)
+            if model is None:
+                return False
+            model.draft_reply = draft
+            session.commit()
+            return True
+        except Exception:
+            session.rollback()
+            raise
         finally:
             session.close()
 

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import type { ApiError } from "../services/apis/auth.api";
 import AuthProviderCard from "../components/AuthProviderCard";
-import { colors, spacing } from "../theme";
+import { getAutoArchiveRules, saveAutoArchiveRules } from "../services/apis/autoArchive.api";
+import { colors, spacing, radius } from "../theme";
 import {
   getAllAuthStatuses,
   getAuthStatus,
@@ -32,6 +33,12 @@ export default function Settings() {
     outlook: false,
   });
   const [error, setError] = useState<string | null>(null);
+  const [archiveRules, setArchiveRules] = useState("");
+  const [archiveRulesSaved, setArchiveRulesSaved] = useState(false);
+
+  useEffect(() => {
+    getAutoArchiveRules().then((data) => setArchiveRules(data.rules)).catch(() => {});
+  }, []);
 
   const refreshAllAuthStatuses = useCallback(async () => {
     const state = await getAllAuthStatuses();
@@ -45,17 +52,17 @@ export default function Settings() {
   async function refreshAuthStatusForProvider(provider: ConnectableProvider) {
     try {
       const status = await getAuthStatus(provider);
-      setAuthByProvider((prev) => ({ ...prev, [provider]: status }));
+      setAuthByProvider((prev: AuthStateByProvider) => ({ ...prev, [provider]: status }));
       return status;
     } catch {
       const fallback = { is_authenticated: false, email: null };
-      setAuthByProvider((prev) => ({ ...prev, [provider]: fallback }));
+      setAuthByProvider((prev: AuthStateByProvider) => ({ ...prev, [provider]: fallback }));
       return fallback;
     }
   }
 
   async function handleConnect(provider: ConnectableProvider) {
-    setLoading((prev) => ({ ...prev, [provider]: true }));
+    setLoading((prev: Record<ConnectableProvider, boolean>) => ({ ...prev, [provider]: true }));
     setError(null);
     try {
       const authUrl = await getAuthUrl(provider);
@@ -66,7 +73,7 @@ export default function Settings() {
           const status = await refreshAuthStatusForProvider(provider);
           if (status?.is_authenticated) {
             clearInterval(interval);
-            setLoading((prev) => ({ ...prev, [provider]: false }));
+            setLoading((prev: Record<ConnectableProvider, boolean>) => ({ ...prev, [provider]: false }));
           }
         } catch {
           // on ignore les erreurs et on réessaie au prochain tick
@@ -75,7 +82,7 @@ export default function Settings() {
 
       setTimeout(() => {
         clearInterval(interval);
-        setLoading((prev) => ({ ...prev, [provider]: false }));
+        setLoading((prev: Record<ConnectableProvider, boolean>) => ({ ...prev, [provider]: false }));
       }, POLL_TIMEOUT_MS);
     } catch (err) {
       const apiError = err as ApiError;
@@ -84,21 +91,27 @@ export default function Settings() {
         apiError?.message ||
         `Erreur lors de la connexion à ${PROVIDER_LABELS[provider]}`;
       setError(errorMessage);
-      setLoading((prev) => ({ ...prev, [provider]: false }));
+      setLoading((prev: Record<ConnectableProvider, boolean>) => ({ ...prev, [provider]: false }));
     }
   }
 
   async function handleDisconnect(provider: ConnectableProvider) {
-    setLoading((prev) => ({ ...prev, [provider]: true }));
+    setLoading((prev: Record<ConnectableProvider, boolean>) => ({ ...prev, [provider]: true }));
     setError(null);
     try {
       await logout(provider);
-      setAuthByProvider((prev) => ({ ...prev, [provider]: { is_authenticated: false, email: null } }));
+      setAuthByProvider((prev: AuthStateByProvider) => ({ ...prev, [provider]: { is_authenticated: false, email: null } }));
     } catch {
       setError("Erreur lors de la déconnexion");
     } finally {
-      setLoading((prev) => ({ ...prev, [provider]: false }));
+      setLoading((prev: Record<ConnectableProvider, boolean>) => ({ ...prev, [provider]: false }));
     }
+  }
+
+  async function handleSaveArchiveRules() {
+    await saveAutoArchiveRules(archiveRules);
+    setArchiveRulesSaved(true);
+    setTimeout(() => setArchiveRulesSaved(false), 2000);
   }
 
   return (
@@ -116,6 +129,29 @@ export default function Settings() {
           onDisconnect={() => handleDisconnect(provider)}
         />
       ))}
+
+      <div style={{ marginTop: spacing.page, padding: spacing.page, border: `1px solid ${colors.borderStrong}`, borderRadius: radius.sm }}>
+        <h2 style={{ margin: `0 0 ${spacing.sm}px` }}>Archivage automatique (IA)</h2>
+        <p style={{ margin: `0 0 ${spacing.sm}px`, color: colors.textSecondary, fontSize: "13px" }}>
+          Décrivez les emails à archiver automatiquement. L'IA archivera directement les emails correspondants et vous demandera confirmation pour les cas incertains.
+        </p>
+        <p style={{ margin: `0 0 ${spacing.sm}px`, color: colors.textMuted, fontSize: "12px" }}>
+          Exemples : "emails marketing et newsletters", "promotions Amazon et Spotify", "notifications automatiques sans action requise"
+        </p>
+        <textarea
+          value={archiveRules}
+          onChange={(e) => setArchiveRules(e.target.value)}
+          placeholder="Ex : Archiver les newsletters, les emails promotionnels, et les notifications automatiques des réseaux sociaux."
+          rows={4}
+          style={{ width: "100%", padding: spacing.sm, borderRadius: radius.sm, border: `1px solid ${colors.borderStrong}`, backgroundColor: colors.backgroundMuted, color: colors.textPrimary, fontSize: "13px", resize: "vertical", boxSizing: "border-box" }}
+        />
+        <button
+          onClick={handleSaveArchiveRules}
+          style={{ marginTop: spacing.sm, padding: `${spacing.sm}px 16px`, backgroundColor: colors.buttonPrimary, color: colors.background, border: "none", borderRadius: radius.sm, cursor: "pointer" }}
+        >
+          {archiveRulesSaved ? "Enregistré ✓" : "Enregistrer les règles"}
+        </button>
+      </div>
 
       {error && (
         <p style={{ color: colors.error, marginTop: spacing.page }}>{error}</p>

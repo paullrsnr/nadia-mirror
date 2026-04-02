@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import EmailCard from "../components/EmailCard";
-import { Email, getEmails, syncEmails, archiveEmail, getThreadEmails, classifyEmail, classifyAllEmails } from "../services/apis/emails.api";
+import { Email, getEmails, syncEmails, archiveEmail, getThreadEmails, classifyEmail, classifyAllEmails, suggestReply } from "../services/apis/emails.api";
+import { getPendingArchive, confirmArchive, rejectArchive } from "../services/apis/autoArchive.api";
 import { getAuthStatus, type MailProvider } from "../services/apis/auth.api";
 import { summarizeEmail, summarizeThread } from "../services/apis/llm.api";
 import { colors, spacing, radius } from "../theme";
@@ -20,6 +21,9 @@ export default function Inbox() {
   const [threadCount, setThreadCount] = useState<number>(1);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [classifying, setClassifying] = useState(false);
+  const [draft, setDraft] = useState<string | null>(null);
+  const [drafting, setDrafting] = useState(false);
+  const [pendingArchive, setPendingArchive] = useState<Email[]>([]);
 
   useEffect(() => {
     checkAuthAndLoadEmails();
@@ -31,6 +35,8 @@ export default function Inbox() {
       setIsAuthenticated(authStatus.is_authenticated);
       if (authStatus.is_authenticated) {
         await loadEmails();
+        const pending = await getPendingArchive();
+        setPendingArchive(pending.emails);
       }
     } catch {
       setError("Erreur de connexion");
@@ -59,6 +65,8 @@ export default function Inbox() {
         setError(result.message ?? "Erreur lors de la synchronisation");
       } else {
         await loadEmails();
+        const pending = await getPendingArchive();
+        setPendingArchive(pending.emails);
       }
     } catch (err) {
       setError("Erreur lors de la synchronisation");
@@ -70,6 +78,7 @@ export default function Inbox() {
   async function handleEmailClick(email: Email) {
     setSelectedEmail(email);
     setSummary(null);
+    setDraft(null);
     setThreadCount(1);
     if (email.thread_id) {
       try {
@@ -126,6 +135,35 @@ export default function Inbox() {
       setError("Erreur lors de la classification. Vérifiez qu'un modèle LLM est chargé.");
     } finally {
       setClassifying(false);
+    }
+  }
+
+  async function handleConfirmArchive(email: Email) {
+    await confirmArchive(email.id);
+    setPendingArchive((prev) => prev.filter((e) => e.id !== email.id));
+    setEmails((prev) => prev.filter((e) => e.id !== email.id));
+    if (selectedEmail?.id === email.id) setSelectedEmail(null);
+  }
+
+  async function handleRejectArchive(email: Email) {
+    await rejectArchive(email.id);
+    setPendingArchive((prev) => prev.filter((e) => e.id !== email.id));
+  }
+
+  async function handleSuggestReply(email: Email) {
+    setDrafting(true);
+    setDraft(null);
+    try {
+      const result = await suggestReply(email.id);
+      if (result.important && result.draft) {
+        setDraft(result.draft);
+      } else {
+        setDraft("Cet email ne semble pas nécessiter de réponse.");
+      }
+    } catch {
+      setDraft("Erreur lors de la génération du brouillon. Vérifiez qu'un modèle LLM est chargé.");
+    } finally {
+      setDrafting(false);
     }
   }
 
@@ -252,6 +290,30 @@ export default function Inbox() {
           </div>
         </div>
 
+        {pendingArchive.length > 0 && (
+          <div style={{ borderBottom: `1px solid ${colors.borderStrong}`, backgroundColor: colors.backgroundMuted }}>
+            <div style={{ padding: `${spacing.sm}px ${spacing.page}px`, fontSize: "12px", color: colors.textSecondary, fontWeight: 600 }}>
+              L'IA suggère d'archiver {pendingArchive.length} email{pendingArchive.length > 1 ? "s" : ""}
+            </div>
+            {pendingArchive.map((email) => (
+              <div key={email.id} style={{ padding: `${spacing.sm}px ${spacing.page}px`, borderTop: `1px solid ${colors.borderStrong}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: spacing.sm }}>
+                <div style={{ flex: 1, overflow: "hidden" }}>
+                  <div style={{ fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{email.subject || "[Sans objet]"}</div>
+                  <div style={{ fontSize: "11px", color: colors.textMuted }}>{email.from_address.name || email.from_address.email}</div>
+                </div>
+                <div style={{ display: "flex", gap: spacing.sm, flexShrink: 0 }}>
+                  <button onClick={() => handleConfirmArchive(email)} style={{ padding: "4px 10px", fontSize: "12px", backgroundColor: colors.buttonPrimary, color: colors.background, border: "none", borderRadius: radius.sm, cursor: "pointer" }}>
+                    Archiver
+                  </button>
+                  <button onClick={() => handleRejectArchive(email)} style={{ padding: "4px 10px", fontSize: "12px", backgroundColor: "transparent", color: colors.textSecondary, border: `1px solid ${colors.borderStrong}`, borderRadius: radius.sm, cursor: "pointer" }}>
+                    Garder
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {loading ? (
           <div style={{ padding: spacing.page, textAlign: "center" }}>Chargement...</div>
         ) : emails.length === 0 ? (
@@ -341,6 +403,20 @@ export default function Inbox() {
                   {summarizing ? "Résumé en cours..." : `Résumer la discussion (${threadCount} messages)`}
                 </button>
               )}
+              <button
+                onClick={() => handleSuggestReply(selectedEmail)}
+                disabled={drafting || summarizing}
+                style={{
+                  padding: `${spacing.sm}px 16px`,
+                  backgroundColor: colors.backgroundMuted,
+                  color: colors.textSecondary,
+                  border: `1px solid ${colors.borderStrong}`,
+                  borderRadius: radius.sm,
+                  cursor: drafting ? "not-allowed" : "pointer",
+                }}
+              >
+                {drafting ? "Analyse en cours..." : "Suggérer une réponse (IA)"}
+              </button>
             </div>
 
             {summary && (
@@ -355,6 +431,20 @@ export default function Inbox() {
               >
                 <strong style={{ fontSize: "12px", color: colors.textSecondary }}>RÉSUMÉ IA</strong>
                 <p style={{ margin: `${spacing.xs}px 0 0`, whiteSpace: "pre-wrap" }}>{summary}</p>
+              </div>
+            )}
+            {(draft ?? selectedEmail.draft_reply) && (
+              <div
+                style={{
+                  padding: spacing.card,
+                  backgroundColor: colors.backgroundMuted,
+                  borderRadius: radius.sm,
+                  marginBottom: spacing.md,
+                  borderLeft: `3px solid ${colors.textSecondary}`,
+                }}
+              >
+                <strong style={{ fontSize: "12px", color: colors.textSecondary }}>BROUILLON DE RÉPONSE</strong>
+                <p style={{ margin: `${spacing.xs}px 0 0`, whiteSpace: "pre-wrap" }}>{draft ?? selectedEmail.draft_reply}</p>
               </div>
             )}
             <div style={{ marginTop: spacing.page, whiteSpace: "pre-wrap" }}>

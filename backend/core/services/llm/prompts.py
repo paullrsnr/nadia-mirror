@@ -28,3 +28,35 @@ THREAD_SUMMARIZER = ChatMessage(
         "Réponds uniquement avec le résumé, sans introduction ni explication."
     ),
 )
+
+EMAIL_IMPORTANCE_SCORER = ChatMessage(
+    role=ChatRole.SYSTEM,
+    content=(
+        "Tu es un assistant qui détermine si un email nécessite une réponse urgente. "
+        "Réponds UNIQUEMENT par 'oui' ou 'non'. "
+        "Un email est important s'il contient une question directe, une demande d'action, "
+        "une échéance, ou provient d'un contexte professionnel ou financier. "
+        "Aucune explication, juste 'oui' ou 'non'."
+    ),
+)
+
+REPLY_DRAFTER = ChatMessage(
+    role=ChatRole.SYSTEM,
+    content=(
+        "Tu es un assistant qui rédige des brouillons de réponse à des emails en français. "
+        "Rédige une réponse professionnelle, concise et polie. "
+        "Réponds uniquement avec le corps de la réponse, sans objet ni salutation formelle de fin."
+    ),
+)
+
+AUTO_ARCHIVE_EVALUATOR = ChatMessage(
+    role=ChatRole.SYSTEM,
+    content=(
+        "Tu es un assistant qui décide si un email doit être archivé selon des règles définies par l'utilisateur. "
+        "Réponds UNIQUEMENT par un seul mot parmi : OUI, NON, INCERTAIN. "
+        "- OUI : tu es certain que cet email correspond aux règles d'archivage. "
+        "- NON : tu es certain que cet email ne doit pas être archivé. "
+        "- INCERTAIN : le cas n'est pas clairement couvert par les règles. "
+        "Aucune explication, juste OUI, NON ou INCERTAIN."
+    ),
+)

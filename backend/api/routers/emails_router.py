@@ -2,9 +2,10 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, Query, HTTPException
 
-from backend.api.deps import get_mailbox_service, get_emails_service, get_storage, get_classification_service
+from backend.api.deps import get_mailbox_service, get_emails_service, get_storage, get_classification_service, get_reply_service
 from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 from backend.core.services.classificationService import ClassificationService
+from backend.core.services.replyService import ReplyService
 from backend.api.schemas import EmailListResponse, ArchiveEmailResponse
 from backend.core.mailboxService import MailboxService
 from backend.core.services.emailsService import EmailsService
@@ -58,6 +59,17 @@ def classify_all_emails(
     service: ClassificationService = Depends(get_classification_service),
 ):
     return service.classify_all_uncategorized(limit=limit)
+
+
+@router.post("/suggest-reply/{email_id}")
+def suggest_reply(
+    email_id: str,
+    service: ReplyService = Depends(get_reply_service),
+):
+    try:
+        return service.suggest_reply(email_id)
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.post("/sync", response_model=Union[SyncResult, SyncAllResult])

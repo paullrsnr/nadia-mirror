@@ -1,4 +1,5 @@
 import logging
+import threading
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -13,8 +14,11 @@ from backend.core.exceptions import AuthError
 from backend.ports.emailProviderGateway import EmailProviderGateway
 from backend.ports.emailStorage import EmailStorage
 from backend.ports.credentialGateway import CredentialGateway
-from backend.core.models.email import EmailListQuery, EmailListResult
+from backend.core.models.email import Email, EmailListQuery, EmailListResult
 from backend.core.models.email import SyncResult, SyncAllResult, ProviderSyncResult
+from backend.core.services.llm.service import LlmService
+from backend.core.services.replyService import ReplyService
+from backend.core.services.autoArchiveService import AutoArchiveService
 from backend.utils.textCleaner import normalize_string
 
 logger = logging.getLogger(__name__)
@@ -27,13 +31,17 @@ class MailboxService:
         email_provider_gateway: EmailProviderGateway,
         credential_gateway: CredentialGateway,
         sync_min_interval_minutes: int = 5,
-        llm_service: Optional[object] = None,
+        llm_service: Optional[LlmService] = None,
+        reply_service: Optional[ReplyService] = None,
+        auto_archive_service: Optional[AutoArchiveService] = None,
     ) -> None:
         self._storage = storage
         self._email_provider_gateway = email_provider_gateway
         self._credentials = credential_gateway
         self._sync_min_interval = sync_min_interval_minutes
         self._llm = llm_service
+        self._reply = reply_service
+        self._auto_archive = auto_archive_service
 
 
     def get_stored_emails(
@@ -146,12 +154,20 @@ class MailboxService:
                 )
 
             saved_count = 0
+            new_emails = []
             tag = provider_tag.lower()
             for email in page_result.emails:
                 is_new = self._storage.save_email(email, provider=tag)
                 if is_new:
                     saved_count += 1
-                    self._auto_classify(email)
+                    new_emails.append(email)
+
+            if new_emails:
+                threading.Thread(
+                    target=self._enrich_new_emails,
+                    args=(new_emails,),
+                    daemon=True,
+                ).start()
 
             # Sync des emails envoyés pour avoir les discussions complètes
             try:
@@ -179,7 +195,14 @@ class MailboxService:
         except RuntimeError as e:
             return SyncResult(status="error", message=f"Erreur de synchronisation: {str(e)}")
 
-    def _auto_classify(self, email) -> None:
+    def _enrich_new_emails(self, emails: list[Email]) -> None:
+        for email in emails:
+            self._auto_classify(email)
+            self._auto_draft_reply(email)
+            if self._auto_archive is not None:
+                self._auto_archive.evaluate_and_apply(email)
+
+    def _auto_classify(self, email: Email) -> None:
         if self._llm is None:
             return
         try:
@@ -192,3 +215,13 @@ class MailboxService:
             self._storage.update_email_category(email.id, category)
         except Exception as exc:  # pylint: disable=broad-except
             logger.warning("Classification automatique échouée pour %s : %s", email.id, exc)
+
+    def _auto_draft_reply(self, email: Email) -> None:
+        if self._reply is None:
+            return
+        try:
+            result = self._reply.suggest_reply(email.id)
+            if result.get("important") and result.get("draft"):
+                self._storage.update_email_draft(email.id, result["draft"])
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.warning("Brouillon automatique échoué pour %s : %s", email.id, exc)

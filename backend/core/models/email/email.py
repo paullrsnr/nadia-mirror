@@ -24,3 +24,6 @@ class Email:
     labels: list[str] = field(default_factory=list)
     snippet: Optional[str] = None
     category: Optional[str] = None
+    draft_reply: Optional[str] = None
+    is_archived: bool = False
+    pending_archive: bool = False

@@ -22,6 +22,9 @@ def to_domain(model: EmailModel) -> Email:
         snippet=model.snippet,
         provider=Provider(model.provider) if model.provider else Provider.ALL,
         category=model.category,
+        draft_reply=model.draft_reply,
+        is_archived=model.is_archived or False,
+        pending_archive=model.pending_archive or False,
     )
 
 
@@ -49,6 +52,9 @@ def to_model(email: Email, provider: str) -> EmailModel:
         snippet=email.snippet,
         provider=provider.lower(),
         category=email.category,
+        draft_reply=email.draft_reply,
+        is_archived=email.is_archived,
+        pending_archive=email.pending_archive,
     )
 
 

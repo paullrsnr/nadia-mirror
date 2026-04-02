@@ -17,4 +17,7 @@ export interface Email {
   /** Boîte d'origine (gmail | outlook) pour archivage en vue "Toutes les boîtes" */
   provider?: string;
   category?: string;
+  draft_reply?: string;
+  is_archived?: boolean;
+  pending_archive?: boolean;
 }
