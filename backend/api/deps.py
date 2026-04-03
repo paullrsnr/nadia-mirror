@@ -7,9 +7,11 @@ from backend.core.services.emailsService import EmailsService
 from backend.core.services.classificationService import ClassificationService
 from backend.core.services.replyService import ReplyService
 from backend.core.services.autoArchiveService import AutoArchiveService
+from backend.core.services.enrichmentService import EnrichmentService
 from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
-from backend.config.settings import storage_settings
+
 from backend.adapters.llm.llmGatewayAdapter import LlmGatewayAdapter
+from backend.config.settings import storage_settings
 from backend.core.services.llm.service import LlmService
 
 
@@ -33,7 +35,13 @@ _reply_service = ReplyService(
 _auto_archive_service = AutoArchiveService(
     llm_service=_llm_service,
     storage=_storage_adapter,
-    data_dir=storage_settings.DATA_DIR,
+    settings=_storage_adapter,
+)
+
+_enrichment_service = EnrichmentService(
+    classification_service=_classification_service,
+    reply_service=_reply_service,
+    auto_archive_service=_auto_archive_service,
 )
 
 _mailbox_service = MailboxService(
@@ -41,9 +49,7 @@ _mailbox_service = MailboxService(
     email_provider_gateway=_email_provider_gateway,
     credential_gateway=_credential_gateway,
     sync_min_interval_minutes=storage_settings.SYNC_MIN_INTERVAL_MINUTES,
-    llm_service=_llm_service,
-    reply_service=_reply_service,
-    auto_archive_service=_auto_archive_service,
+    enrichment_service=_enrichment_service,
 )
 
 _emails_service = EmailsService(

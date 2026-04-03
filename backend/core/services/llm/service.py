@@ -4,7 +4,9 @@ from pathlib import Path
 from backend.core.models.llm import LLMStatusResponse, InstalledModelResponse, CatalogModelResponse, SummarizeRequest, SummarizeResponse, SummarizeThreadRequest, ClassifyEmailRequest
 from backend.core.services.llm.download import get_models_dir
 from backend.core.services.llm.catalog import CATALOG, get_catalog_model
-from backend.core.services.llm.prompts import EMAIL_SUMMARIZER, THREAD_SUMMARIZER, EMAIL_CLASSIFIER, CATEGORIES, EMAIL_IMPORTANCE_SCORER, REPLY_DRAFTER, AUTO_ARCHIVE_EVALUATOR
+from backend.core.categories import EMAIL_CATEGORIES
+from backend.core.archiveDecision import ArchiveDecision
+from backend.core.services.llm.prompts import EMAIL_SUMMARIZER, THREAD_SUMMARIZER, EMAIL_CLASSIFIER, EMAIL_IMPORTANCE_SCORER, REPLY_DRAFTER, AUTO_ARCHIVE_EVALUATOR
 from backend.ports.llm import LlmPort
 from backend.core.models.llm import ChatMessage, ChatRole
 
@@ -99,11 +101,13 @@ class LlmService:
             ),
         ]
 
-        summary = self._adapter.get_short_answer(messages)
+        try:
+            summary = self._adapter.get_short_answer(messages)
+        except Exception as exc:
+            raise ValueError(f"Erreur lors du résumé : {exc}") from exc
         return SummarizeResponse(summary=summary)
 
-    def classify_email(self, payload: ClassifyEmailRequest) -> str:
-        """Retourne la catégorie de l'email (ex: 'travail', 'personnel', ...)."""
+    def analyze_email_category(self, payload: ClassifyEmailRequest) -> str:
         if not self._adapter.is_loaded():
             raise ValueError("Aucun modèle LLM chargé")
 
@@ -118,9 +122,11 @@ class LlmService:
             ChatMessage(role=ChatRole.USER, content=content),
         ]
 
-        raw = self._adapter.get_short_answer(messages).strip().lower()
-        # Valide que la réponse est bien une catégorie connue
-        for cat in CATEGORIES:
+        try:
+            raw = self._adapter.get_short_answer(messages).strip().lower()
+        except Exception as exc:
+            raise ValueError(f"Erreur lors de la classification : {exc}") from exc
+        for cat in EMAIL_CATEGORIES:
             if cat in raw:
                 return cat
         return "autre"
@@ -146,11 +152,13 @@ class LlmService:
             ),
         ]
 
-        summary = self._adapter.get_short_answer(messages)
+        try:
+            summary = self._adapter.get_short_answer(messages)
+        except Exception as exc:
+            raise ValueError(f"Erreur lors du résumé de fil : {exc}") from exc
         return SummarizeResponse(summary=summary)
 
     def is_important(self, subject: str, snippet: str, from_address: str) -> bool:
-        """Retourne True si l'email nécessite une réponse."""
         if not self._adapter.is_loaded():
             raise ValueError("Aucun modèle LLM chargé")
 
@@ -163,11 +171,13 @@ class LlmService:
             EMAIL_IMPORTANCE_SCORER,
             ChatMessage(role=ChatRole.USER, content=content),
         ]
-        raw = self._adapter.get_short_answer(messages).strip().lower()
+        try:
+            raw = self._adapter.get_short_answer(messages).strip().lower()
+        except Exception as exc:
+            raise ValueError(f"Erreur lors du scoring d'importance : {exc}") from exc
         return "oui" in raw
 
     def draft_reply(self, subject: str, body: str, from_address: str) -> str:
-        """Génère un brouillon de réponse à l'email."""
         if not self._adapter.is_loaded():
             raise ValueError("Aucun modèle LLM chargé")
 
@@ -180,10 +190,12 @@ class LlmService:
             REPLY_DRAFTER,
             ChatMessage(role=ChatRole.USER, content=content),
         ]
-        return self._adapter.get_short_answer(messages).strip()
+        try:
+            return self._adapter.get_short_answer(messages).strip()
+        except Exception as exc:
+            raise ValueError(f"Erreur lors de la rédaction du brouillon : {exc}") from exc
 
-    def evaluate_archive_decision(self, rules: str, subject: str, snippet: str, from_address: str) -> str:
-        """Retourne 'oui', 'non' ou 'incertain' selon les règles d'archivage."""
+    def evaluate_archive_decision(self, rules: str, subject: str, snippet: str, from_address: str) -> ArchiveDecision:
         if not self._adapter.is_loaded():
             raise ValueError("Aucun modèle LLM chargé")
 
@@ -198,12 +210,15 @@ class LlmService:
             AUTO_ARCHIVE_EVALUATOR,
             ChatMessage(role=ChatRole.USER, content=content),
         ]
-        raw = self._adapter.get_short_answer(messages).strip().lower()
-        if "oui" in raw:
-            return "oui"
-        if "non" in raw:
-            return "non"
-        return "incertain"
+        try:
+            raw = self._adapter.get_short_answer(messages).strip().lower()
+        except Exception as exc:
+            raise ValueError(f"Erreur lors de l'évaluation d'archivage : {exc}") from exc
+        if ArchiveDecision.YES in raw:
+            return ArchiveDecision.YES
+        if ArchiveDecision.NO in raw:
+            return ArchiveDecision.NO
+        return ArchiveDecision.UNCERTAIN
 
     def _load_model_from_path(self, model_path: Path) -> bool:
         success = self._adapter.load_model(model_path)

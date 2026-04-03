@@ -8,7 +8,6 @@ EMAIL_SUMMARIZER = ChatMessage(
     ),
 )
 
-CATEGORIES = ["travail", "personnel", "finance", "shopping", "marketing", "notification", "autre"]
 
 EMAIL_CLASSIFIER = ChatMessage(
     role=ChatRole.SYSTEM,

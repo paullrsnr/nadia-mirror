@@ -8,8 +8,13 @@ from backend.core.models.email import Email
 class EmailStorage(ABC):
 
     @abstractmethod
-    def save_email(self, email: Email, provider: str) -> bool:
+    def upsert_email(self, email: Email, provider: str) -> bool:
         """Sauvegarde un email. Retourne True si créé, False si déjà présent."""
+
+    @abstractmethod
+    def upsert_emails_batch(self, emails: list[Email], provider: str) -> list[str]:
+        """Insère ou met à jour une liste d'emails en une seule transaction.
+        Retourne les IDs des emails nouvellement insérés."""
 
     @abstractmethod
     def find_emails(
@@ -46,6 +51,10 @@ class EmailStorage(ABC):
     @abstractmethod
     def find_uncategorized_emails(self, limit: int = 50) -> list[Email]:
         """Retourne les emails sans catégorie, les plus récents en premier."""
+
+    @abstractmethod
+    def get_categories(self) -> list[dict]:
+        """Retourne toutes les catégories sous forme [{id, name}]."""
 
     @abstractmethod
     def update_email_draft(self, email_id: str, draft: str) -> bool:

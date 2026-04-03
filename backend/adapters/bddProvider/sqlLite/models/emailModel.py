@@ -1,10 +1,15 @@
 # pylint: disable=too-few-public-methods
-from typing import Optional
+from __future__ import annotations
 
-from sqlalchemy import String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.adapters.bddProvider.sqlLite.models.base import Base
+
+if TYPE_CHECKING:
+    from backend.adapters.bddProvider.sqlLite.models.categoryModel import CategoryModel
 
 
 class EmailModel(Base):
@@ -25,7 +30,8 @@ class EmailModel(Base):
     labels: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     snippet: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     provider: Mapped[str] = mapped_column(String, nullable=False)
-    category: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    category_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("categories.id"), nullable=True)
+    category_rel: Mapped[Optional[CategoryModel]] = relationship("CategoryModel", lazy="select")
     draft_reply: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     is_archived: Mapped[bool] = mapped_column(default=False, nullable=False)
     pending_archive: Mapped[bool] = mapped_column(default=False, nullable=False)

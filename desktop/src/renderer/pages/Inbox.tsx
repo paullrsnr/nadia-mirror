@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import EmailCard from "../components/EmailCard";
-import { Email, getEmails, syncEmails, archiveEmail, getThreadEmails, classifyEmail, classifyAllEmails, suggestReply } from "../services/apis/emails.api";
+import { Email, getEmails, triggerSync, waitForSync, archiveEmail, getThreadEmails, classifyEmail, classifyAllEmails, suggestReply, getCategories } from "../services/apis/emails.api";
 import { getPendingArchive, confirmArchive, rejectArchive } from "../services/apis/autoArchive.api";
 import { getAuthStatus, type MailProvider } from "../services/apis/auth.api";
 import { summarizeEmail, summarizeThread } from "../services/apis/llm.api";
@@ -24,10 +24,15 @@ export default function Inbox() {
   const [draft, setDraft] = useState<string | null>(null);
   const [drafting, setDrafting] = useState(false);
   const [pendingArchive, setPendingArchive] = useState<Email[]>([]);
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
 
   useEffect(() => {
     checkAuthAndLoadEmails();
   }, [inboxFilter]);
+
+  useEffect(() => {
+    getCategories().then(setCategories).catch(() => {});
+  }, []);
 
   async function checkAuthAndLoadEmails() {
     try {
@@ -60,17 +65,21 @@ export default function Inbox() {
     setSyncing(true);
     setError(null);
     try {
-      const result = await syncEmails(100, inboxFilter);
-      if (result.status === "error") {
-        setError(result.message ?? "Erreur lors de la synchronisation");
-      } else {
-        await loadEmails();
-        const pending = await getPendingArchive();
-        setPendingArchive(pending.emails);
-      }
-    } catch (err) {
+      await triggerSync(100, inboxFilter);
+      waitForSync(
+        async () => {
+          await loadEmails();
+          const pending = await getPendingArchive();
+          setPendingArchive(pending.emails);
+          setSyncing(false);
+        },
+        (msg) => {
+          setError(msg);
+          setSyncing(false);
+        },
+      );
+    } catch {
       setError("Erreur lors de la synchronisation");
-    } finally {
       setSyncing(false);
     }
   }
@@ -278,13 +287,11 @@ export default function Inbox() {
                 style={{ marginLeft: spacing.sm }}
               >
                 <option value="all">Toutes</option>
-                <option value="travail">Travail</option>
-                <option value="personnel">Personnel</option>
-                <option value="finance">Finance</option>
-                <option value="shopping">Shopping</option>
-                <option value="marketing">Marketing</option>
-                <option value="notification">Notification</option>
-                <option value="autre">Autre</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.name}>
+                    {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
+                  </option>
+                ))}
               </select>
             </label>
           </div>

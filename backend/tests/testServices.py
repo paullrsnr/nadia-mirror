@@ -43,7 +43,7 @@ class TestMailboxServiceSync(unittest.TestCase):
         """La synchronisation réussit et retourne synced=1, saved=1."""
         storage = MagicMock(spec=EmailStorage)
         storage.get_last_sync_time.return_value = None
-        storage.save_email.return_value = True
+        storage.upsert_email.return_value = True
 
         page = EmailPage(emails=[_make_email()], next_page_token=None)
         email_provider_gateway = MagicMock(spec=EmailProviderGateway)

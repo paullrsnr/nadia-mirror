@@ -74,21 +74,21 @@ class TestSqliteStorageAdapter(unittest.TestCase):
         time.sleep(0.1)
         shutil.rmtree(self.temp_path, ignore_errors=True)
 
-    def test_save_email_returns_true_when_new(self):
-        """save_email retourne True si l'email est nouveau."""
-        result = self.storage.save_email(_make_email("new_1"), "gmail")
+    def test_upsert_email_returns_true_when_new(self):
+        """upsert_email retourne True si l'email est nouveau."""
+        result = self.storage.upsert_email(_make_email("new_1"), "gmail")
         self.assertTrue(result)
 
-    def test_save_email_returns_false_when_duplicate(self):
-        """save_email retourne False si l'email existe déjà."""
+    def test_upsert_email_returns_false_when_duplicate(self):
+        """upsert_email retourne False si l'email existe déjà."""
         email = _make_email("dup_1")
-        self.storage.save_email(email, "gmail")
-        result = self.storage.save_email(email, "gmail")
+        self.storage.upsert_email(email, "gmail")
+        result = self.storage.upsert_email(email, "gmail")
         self.assertFalse(result)
 
     def test_find_emails_returns_saved(self):
         """find_emails retourne les emails sauvegardés."""
-        self.storage.save_email(_make_email("find_1"), "gmail")
+        self.storage.upsert_email(_make_email("find_1"), "gmail")
         emails, total = self.storage.find_emails(max_results=10, offset=0, provider_filter="gmail")
         self.assertIsInstance(emails, list)
         self.assertGreater(len(emails), 0)
@@ -97,8 +97,8 @@ class TestSqliteStorageAdapter(unittest.TestCase):
 
     def test_find_emails_provider_filter(self):
         """find_emails filtre correctement par provider."""
-        self.storage.save_email(_make_email("gmail_1"), "gmail")
-        self.storage.save_email(_make_email("outlook_1"), "outlook")
+        self.storage.upsert_email(_make_email("gmail_1"), "gmail")
+        self.storage.upsert_email(_make_email("outlook_1"), "outlook")
         emails, _ = self.storage.find_emails(provider_filter="gmail")
         self.assertTrue(all(e.provider == Provider.GMAIL for e in emails))
 
