@@ -7,12 +7,13 @@ from typing import Optional
 from sqlalchemy import select, func
 
 from backend.core.models.email import Provider, Email
-from backend.core.categories import EMAIL_CATEGORIES
+from backend.core.models.email.category import Category
+from backend.core.exceptions import NotFoundError
 from backend.config.settings import storage_settings
 from backend.ports.emailStorage import EmailStorage
 from backend.ports.settingsStorage import SettingsStorage
-from backend.adapters.bddProvider.sqlLite.models import Base, CategoryModel, EmailModel, SettingModel, SyncMetadataModel
-from backend.adapters.bddProvider.sqlLite.session import init_engine, create_session, get_engine
+from backend.adapters.bddProvider.sqlLite.models import CategoryModel, EmailModel, SettingModel, SyncMetadataModel
+from backend.adapters.bddProvider.sqlLite.session import init_engine, create_session
 from backend.adapters.bddProvider.sqlLite import emailMapper
 
 logger = logging.getLogger(__name__)
@@ -33,30 +34,15 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
 
     def _init_db(self) -> None:
         init_engine(self.db_path)
-        Base.metadata.create_all(bind=get_engine())
-        self._seed_categories()
+        self._category_ids = self._load_category_ids()
 
-    def _seed_categories(self) -> None:
+    def _load_category_ids(self) -> dict[str, int]:
         session = create_session()
         try:
-            for name in EMAIL_CATEGORIES:
-                exists = session.execute(
-                    select(CategoryModel).where(CategoryModel.name == name)
-                ).scalar_one_or_none()
-                if not exists:
-                    session.add(CategoryModel(name=name))
-            session.commit()
-        except Exception:
-            session.rollback()
-            raise
+            rows = session.execute(select(CategoryModel)).scalars().all()
+            return {row.name: row.id for row in rows}
         finally:
             session.close()
-
-    def _resolve_category_id(self, session, category_name: str) -> Optional[int]:
-        row = session.execute(
-            select(CategoryModel).where(CategoryModel.name == category_name)
-        ).scalar_one_or_none()
-        return row.id if row else None
 
     # ------------------------------------------------------------------ emails
 
@@ -151,15 +137,14 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
         finally:
             session.close()
 
-    def update_email_category(self, email_id: str, category_name: str) -> bool:
+    def update_email_category(self, email_id: str, category_name: str) -> None:
         session = create_session()
         try:
             model = session.get(EmailModel, email_id)
             if model is None:
-                return False
-            model.category_id = self._resolve_category_id(session, category_name)
+                raise NotFoundError(f"Email introuvable : {email_id}")
+            model.category_id = self._category_ids.get(category_name)
             session.commit()
-            return True
         except Exception:
             session.rollback()
             raise
@@ -179,7 +164,7 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
         finally:
             session.close()
 
-    def find_emails_by_thread(self, thread_id: str) -> list[Email]:
+    def find_emails_by_thread_id(self, thread_id: str) -> list[Email]:
         session = create_session()
         try:
             query = (
@@ -191,45 +176,42 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
         finally:
             session.close()
 
-    def update_email_draft(self, email_id: str, draft: str) -> bool:
+    def update_email_draft(self, email_id: str, draft: str) -> None:
         session = create_session()
         try:
             model = session.get(EmailModel, email_id)
             if model is None:
-                return False
+                raise NotFoundError(f"Email introuvable : {email_id}")
             model.draft_reply = draft
             session.commit()
-            return True
         except Exception:
             session.rollback()
             raise
         finally:
             session.close()
 
-    def archive_email_locally(self, email_id: str) -> bool:
+    def archive_email_locally(self, email_id: str) -> None:
         session = create_session()
         try:
             model = session.get(EmailModel, email_id)
             if model is None:
-                return False
+                raise NotFoundError(f"Email introuvable : {email_id}")
             model.is_archived = True
             session.commit()
-            return True
         except Exception:
             session.rollback()
             raise
         finally:
             session.close()
 
-    def set_pending_archive(self, email_id: str, pending: bool) -> bool:
+    def update_pending_archive(self, email_id: str, pending: bool) -> None:
         session = create_session()
         try:
             model = session.get(EmailModel, email_id)
             if model is None:
-                return False
+                raise NotFoundError(f"Email introuvable : {email_id}")
             model.pending_archive = pending
             session.commit()
-            return True
         except Exception:
             session.rollback()
             raise
@@ -277,13 +259,8 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
 
     # ------------------------------------------------------------ categories
 
-    def get_categories(self) -> list[dict]:
-        session = create_session()
-        try:
-            rows = session.execute(select(CategoryModel).order_by(CategoryModel.id)).scalars().all()
-            return [{"id": r.id, "name": r.name} for r in rows]
-        finally:
-            session.close()
+    def get_categories(self) -> list[Category]:
+        return [Category(id=cid, name=name) for name, cid in sorted(self._category_ids.items(), key=lambda x: x[1])]
 
     # --------------------------------------------------------------- settings
 

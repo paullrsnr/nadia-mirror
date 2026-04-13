@@ -1,4 +1,4 @@
-from backend.adapters.bddProvider.sqlLite.models.email.suggestReplyResult import SuggestReplyResult
+from backend.core.models.email.suggestReplyResult import SuggestReplyResult
 from backend.core.exceptions import NotFoundError
 from backend.core.services.llm.service import LlmService
 from backend.ports.emailStorage import EmailStorage
@@ -10,7 +10,7 @@ class ReplyService:
         self._llm = llm_service
         self._storage = storage
 
-    def suggest_reply(self, email_id: str) -> SuggestReplyResult:
+    def suggest_reply_if_necessary(self, email_id: str) -> SuggestReplyResult:
         email = self._storage.find_email_by_id(email_id)
         if email is None:
             raise NotFoundError(f"Email introuvable : {email_id}")

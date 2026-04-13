@@ -1,16 +1,11 @@
-import json
-
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from backend.api.deps import get_auto_archive_service, get_storage
-from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
+from backend.api.deps import get_auto_archive_service
 from backend.adapters.bddProvider.sqlLite.models.autoArchiveConfig import AutoArchiveConfig
 from backend.core.services.autoArchiveService import AutoArchiveService
 
 router = APIRouter(prefix="/auto-archive", tags=["auto-archive"])
-
-_SETTING_KEY = "auto_archive_rules"
 
 
 class RulesPayload(BaseModel):
@@ -18,22 +13,13 @@ class RulesPayload(BaseModel):
 
 
 @router.get("/rules", response_model=AutoArchiveConfig)
-def get_rules(storage: SqliteStorageAdapter = Depends(get_storage)):
-    raw = storage.get_setting(_SETTING_KEY)
-    if raw is None:
-        return AutoArchiveConfig(rules="", enabled=False)
-    data = json.loads(raw)
-    return AutoArchiveConfig(rules=data["rules"], enabled=data["enabled"])
+def get_rules(service: AutoArchiveService = Depends(get_auto_archive_service)):
+    return service.get_rules()
 
 
 @router.post("/rules", response_model=AutoArchiveConfig)
-def save_rules(payload: RulesPayload, storage: SqliteStorageAdapter = Depends(get_storage)):
-    config = AutoArchiveConfig(rules=payload.rules, enabled=bool(payload.rules.strip()))
-    storage.set_setting(
-        _SETTING_KEY,
-        json.dumps({"rules": config.rules, "enabled": config.enabled}, ensure_ascii=False),
-    )
-    return config
+def save_rules(payload: RulesPayload, service: AutoArchiveService = Depends(get_auto_archive_service)):
+    return service.save_rules(payload.rules)
 
 
 @router.get("/pending")

@@ -1,5 +1,5 @@
-from backend.adapters.bddProvider.sqlLite.models.email.classifyAllResult import ClassifyAllResult
-from backend.adapters.bddProvider.sqlLite.models.email.classifyResult import ClassifyResult
+from backend.core.models.email.classifyAllResult import ClassifyAllResult
+from backend.core.models.email.classifyResult import ClassifyResult
 from backend.core.exceptions import NotFoundError
 from backend.core.models.llm import ClassifyEmailRequest
 from backend.core.services.llm.service import LlmService

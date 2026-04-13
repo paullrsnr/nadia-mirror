@@ -2,7 +2,6 @@ import json
 import logging
 
 from backend.core.archiveDecision import ArchiveDecision
-from backend.core.exceptions import NotFoundError
 from backend.adapters.bddProvider.sqlLite.models.autoArchiveConfig import AutoArchiveConfig
 from backend.core.models.email import Email
 from backend.core.services.llm.service import LlmService
@@ -33,24 +32,35 @@ class AutoArchiveService:
                 snippet=snippet,
                 from_address=email.from_address.email,
             )
-            if decision == ArchiveDecision.YES:
-                self._storage.archive_email_locally(email.id)
-            elif decision == ArchiveDecision.UNCERTAIN:
-                self._storage.set_pending_archive(email.id, pending=True)
-        except Exception as exc:  # pylint: disable=broad-except
+        except ValueError as exc:
             logger.warning("Auto-archivage échoué pour %s : %s", email.id, exc)
+            return
+
+        if decision == ArchiveDecision.YES:
+            self._storage.archive_email_locally(email.id)
+        elif decision == ArchiveDecision.UNCERTAIN:
+            self._storage.update_pending_archive(email.id, pending=True)
 
     def confirm_archive(self, email_id: str) -> None:
-        if not self._storage.set_pending_archive(email_id, pending=False):
-            raise NotFoundError(f"Email introuvable : {email_id}")
+        self._storage.update_pending_archive(email_id, pending=False)
         self._storage.archive_email_locally(email_id)
 
     def reject_archive(self, email_id: str) -> None:
-        if not self._storage.set_pending_archive(email_id, pending=False):
-            raise NotFoundError(f"Email introuvable : {email_id}")
+        self._storage.update_pending_archive(email_id, pending=False)
 
     def get_pending(self) -> list[Email]:
         return self._storage.find_pending_archive_emails()
+
+    def get_rules(self) -> AutoArchiveConfig:
+        return self._load_config()
+
+    def save_rules(self, rules: str) -> AutoArchiveConfig:
+        config = AutoArchiveConfig(rules=rules, enabled=bool(rules.strip()))
+        self._settings.set_setting(
+            _SETTING_KEY,
+            json.dumps({"rules": config.rules, "enabled": config.enabled}, ensure_ascii=False),
+        )
+        return config
 
     def _load_config(self) -> AutoArchiveConfig:
         raw = self._settings.get_setting(_SETTING_KEY)

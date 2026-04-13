@@ -60,7 +60,7 @@ def suggest_reply(
     email_id: str,
     service: ReplyService = Depends(get_reply_service),
 ):
-    return service.suggest_reply(email_id)
+    return service.suggest_reply_if_necessary(email_id)
 
 
 @router.get("/categories")
@@ -72,9 +72,10 @@ def list_categories(storage: SqliteStorageAdapter = Depends(get_storage)):
 def sync_emails(
     provider: str | None = Query(default=None, description="Provider (gmail, outlook, all)."),
     max_results: int = Query(default=100, ge=1, le=500),
+    full: bool = Query(default=False, description="Ignore le dernier sync et récupère les 30 derniers jours."),
     mailbox: MailboxService = Depends(get_mailbox_service),
 ):
-    return mailbox.sync_emails(provider=provider, max_results=max_results)
+    return mailbox.sync_emails(provider=provider, max_results=max_results, full_sync=full)
 
 
 @router.get("/sync/status")

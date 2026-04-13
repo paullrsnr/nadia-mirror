@@ -1,7 +1,8 @@
+from dataclasses import dataclass
 from typing import Optional
-from pydantic import BaseModel
 
 
-class SuggestReplyResult(BaseModel):
+@dataclass
+class SuggestReplyResult:
     important: bool
     draft: Optional[str]

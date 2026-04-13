@@ -87,42 +87,38 @@ class LlmService:
     def summarize_email(self, payload: SummarizeRequest) -> SummarizeResponse:
         if not self._adapter.is_loaded():
             raise ValueError("Aucun modèle LLM chargé")
-
-        messages = [
-            EMAIL_SUMMARIZER,
-            ChatMessage(
-                role=ChatRole.USER,
-                content=(
-                    f"Résume cet email en 2-3 phrases :\n\n"
-                    f"De : {payload.from_address}\n"
-                    f"Objet : {payload.subject}\n\n"
-                    f"{payload.body[:1200]}"
-                ),
-            ),
-        ]
-
         try:
-            summary = self._adapter.get_short_answer(messages)
+            messages = [
+                EMAIL_SUMMARIZER,
+                ChatMessage(
+                    role=ChatRole.USER,
+                    content=(
+                        f"Résume cet email en 2-3 phrases :\n\n"
+                        f"De : {payload.from_address}\n"
+                        f"Objet : {payload.subject}\n\n"
+                        f"{payload.body[:1200]}"
+                    ),
+                ),
+            ]
+            return SummarizeResponse(summary=self._adapter.get_short_answer(messages))
         except Exception as exc:
             raise ValueError(f"Erreur lors du résumé : {exc}") from exc
-        return SummarizeResponse(summary=summary)
 
     def analyze_email_category(self, payload: ClassifyEmailRequest) -> str:
         if not self._adapter.is_loaded():
             raise ValueError("Aucun modèle LLM chargé")
-
-        content = (
-            f"De : {payload.from_address}\n"
-            f"Objet : {payload.subject}\n\n"
-            f"{payload.snippet[:400]}"
-        )
-
-        messages = [
-            EMAIL_CLASSIFIER,
-            ChatMessage(role=ChatRole.USER, content=content),
-        ]
-
         try:
+            messages = [
+                EMAIL_CLASSIFIER,
+                ChatMessage(
+                    role=ChatRole.USER,
+                    content=(
+                        f"De : {payload.from_address}\n"
+                        f"Objet : {payload.subject}\n\n"
+                        f"{payload.snippet[:400]}"
+                    ),
+                ),
+            ]
             raw = self._adapter.get_short_answer(messages).strip().lower()
         except Exception as exc:
             raise ValueError(f"Erreur lors de la classification : {exc}") from exc
@@ -134,63 +130,52 @@ class LlmService:
     def summarize_thread(self, payload: SummarizeThreadRequest) -> SummarizeResponse:
         if not self._adapter.is_loaded():
             raise ValueError("Aucun modèle LLM chargé")
-
-        thread_text = "\n\n---\n\n".join(
-            f"De : {msg.from_address}\nDate : {msg.date}\n\n{msg.body[:600]}"
-            for msg in payload.messages
-        )
-
-        messages = [
-            THREAD_SUMMARIZER,
-            ChatMessage(
-                role=ChatRole.USER,
-                content=(
-                    f"Résume cette discussion email :\n\n"
-                    f"Objet : {payload.subject}\n\n"
-                    f"{thread_text}"
-                ),
-            ),
-        ]
-
         try:
-            summary = self._adapter.get_short_answer(messages)
+            thread_text = "\n\n---\n\n".join(
+                f"De : {msg.from_address}\nDate : {msg.date}\n\n{msg.body[:600]}"
+                for msg in payload.messages
+            )
+            messages = [
+                THREAD_SUMMARIZER,
+                ChatMessage(
+                    role=ChatRole.USER,
+                    content=(
+                        f"Résume cette discussion email :\n\n"
+                        f"Objet : {payload.subject}\n\n"
+                        f"{thread_text}"
+                    ),
+                ),
+            ]
+            return SummarizeResponse(summary=self._adapter.get_short_answer(messages))
         except Exception as exc:
             raise ValueError(f"Erreur lors du résumé de fil : {exc}") from exc
-        return SummarizeResponse(summary=summary)
 
     def is_important(self, subject: str, snippet: str, from_address: str) -> bool:
         if not self._adapter.is_loaded():
             raise ValueError("Aucun modèle LLM chargé")
-
-        content = (
-            f"De : {from_address}\n"
-            f"Objet : {subject}\n\n"
-            f"{snippet[:400]}"
-        )
-        messages = [
-            EMAIL_IMPORTANCE_SCORER,
-            ChatMessage(role=ChatRole.USER, content=content),
-        ]
         try:
-            raw = self._adapter.get_short_answer(messages).strip().lower()
+            messages = [
+                EMAIL_IMPORTANCE_SCORER,
+                ChatMessage(
+                    role=ChatRole.USER,
+                    content=f"De : {from_address}\nObjet : {subject}\n\n{snippet[:400]}",
+                ),
+            ]
+            return self._adapter.get_short_answer(messages).strip().lower() == "oui"
         except Exception as exc:
             raise ValueError(f"Erreur lors du scoring d'importance : {exc}") from exc
-        return "oui" in raw
 
     def draft_reply(self, subject: str, body: str, from_address: str) -> str:
         if not self._adapter.is_loaded():
             raise ValueError("Aucun modèle LLM chargé")
-
-        content = (
-            f"De : {from_address}\n"
-            f"Objet : {subject}\n\n"
-            f"{body[:1200]}"
-        )
-        messages = [
-            REPLY_DRAFTER,
-            ChatMessage(role=ChatRole.USER, content=content),
-        ]
         try:
+            messages = [
+                REPLY_DRAFTER,
+                ChatMessage(
+                    role=ChatRole.USER,
+                    content=f"De : {from_address}\nObjet : {subject}\n\n{body[:1200]}",
+                ),
+            ]
             return self._adapter.get_short_answer(messages).strip()
         except Exception as exc:
             raise ValueError(f"Erreur lors de la rédaction du brouillon : {exc}") from exc
@@ -198,25 +183,26 @@ class LlmService:
     def evaluate_archive_decision(self, rules: str, subject: str, snippet: str, from_address: str) -> ArchiveDecision:
         if not self._adapter.is_loaded():
             raise ValueError("Aucun modèle LLM chargé")
-
-        content = (
-            f"Règles d'archivage : {rules}\n\n"
-            f"Email à évaluer :\n"
-            f"De : {from_address}\n"
-            f"Objet : {subject}\n\n"
-            f"{snippet[:400]}"
-        )
-        messages = [
-            AUTO_ARCHIVE_EVALUATOR,
-            ChatMessage(role=ChatRole.USER, content=content),
-        ]
         try:
+            messages = [
+                AUTO_ARCHIVE_EVALUATOR,
+                ChatMessage(
+                    role=ChatRole.USER,
+                    content=(
+                        f"Règles d'archivage : {rules}\n\n"
+                        f"Email à évaluer :\n"
+                        f"De : {from_address}\n"
+                        f"Objet : {subject}\n\n"
+                        f"{snippet[:400]}"
+                    ),
+                ),
+            ]
             raw = self._adapter.get_short_answer(messages).strip().lower()
         except Exception as exc:
             raise ValueError(f"Erreur lors de l'évaluation d'archivage : {exc}") from exc
-        if ArchiveDecision.YES in raw:
+        if raw == ArchiveDecision.YES:
             return ArchiveDecision.YES
-        if ArchiveDecision.NO in raw:
+        if raw == ArchiveDecision.NO:
             return ArchiveDecision.NO
         return ArchiveDecision.UNCERTAIN
 

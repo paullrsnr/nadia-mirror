@@ -73,9 +73,11 @@ export async function suggestReply(emailId: string): Promise<{ important: boolea
 export async function triggerSync(
   maxResults: number = 100,
   provider?: MailProvider,
+  full: boolean = false,
 ): Promise<{ status: string }> {
   const params = new URLSearchParams({ max_results: maxResults.toString() });
   if (provider) params.set("provider", provider);
+  if (full) params.set("full", "true");
   const response = await fetch(`${API_BASE_URL}/emails/sync?${params}`, {
     method: "POST",
   });

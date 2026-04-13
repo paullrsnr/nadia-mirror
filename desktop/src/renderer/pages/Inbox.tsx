@@ -61,11 +61,11 @@ export default function Inbox() {
     }
   }
 
-  async function handleSync() {
+  async function handleSync(full: boolean = false) {
     setSyncing(true);
     setError(null);
     try {
-      await triggerSync(100, inboxFilter);
+      await triggerSync(100, inboxFilter, full);
       waitForSync(
         async () => {
           await loadEmails();
@@ -250,7 +250,7 @@ export default function Inbox() {
           </div>
           <div style={{ display: "flex", gap: spacing.sm, flexWrap: "wrap" }}>
             <button
-              onClick={handleSync}
+              onClick={() => handleSync(false)}
               disabled={syncing}
               style={{
                 padding: `${spacing.sm}px 16px`,
@@ -262,6 +262,20 @@ export default function Inbox() {
               }}
             >
               {syncing ? "Synchronisation..." : "Synchroniser"}
+            </button>
+            <button
+              onClick={() => handleSync(true)}
+              disabled={syncing}
+              style={{
+                padding: `${spacing.sm}px 16px`,
+                backgroundColor: colors.backgroundMuted,
+                color: colors.textSecondary,
+                border: `1px solid ${colors.borderStrong}`,
+                borderRadius: radius.sm,
+                cursor: syncing ? "not-allowed" : "pointer",
+              }}
+            >
+              {syncing ? "Synchronisation..." : "Sync. complète (30j)"}
             </button>
             <button
               onClick={handleClassifyAll}

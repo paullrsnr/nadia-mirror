@@ -1,6 +1,5 @@
 import logging
 import threading
-from dataclasses import asdict
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -17,6 +16,8 @@ from backend.ports.emailStorage import EmailStorage
 from backend.ports.credentialGateway import CredentialGateway
 from backend.core.models.email import Email, EmailListQuery, EmailListResult
 from backend.core.models.email import SyncResult, SyncAllResult, ProviderSyncResult
+from backend.core.models.email.sync.syncLaunchResult import SyncLaunchResult
+from backend.core.models.email.sync.syncStatusResult import SyncStatusResult
 from backend.core.models.email.emailThread import EmailThread
 from backend.core.exceptions import NotFoundError
 from backend.core.services.enrichmentService import EnrichmentService
@@ -34,8 +35,8 @@ class MailboxService:
         storage: EmailStorage,
         email_provider_gateway: EmailProviderGateway,
         credential_gateway: CredentialGateway,
+        enrichment_service: EnrichmentService,
         sync_min_interval_minutes: int = 5,
-        enrichment_service: Optional[EnrichmentService] = None,
     ) -> None:
         self._storage = storage
         self._email_provider_gateway = email_provider_gateway
@@ -71,7 +72,7 @@ class MailboxService:
         )
 
     def get_thread(self, thread_id: str) -> EmailThread:
-        emails = self._storage.find_emails_by_thread(thread_id)
+        emails = self._storage.find_emails_by_thread_id(thread_id)
         if not emails:
             raise NotFoundError(f"Discussion introuvable : {thread_id}")
         seen: set[str] = set()
@@ -91,28 +92,27 @@ class MailboxService:
         self,
         provider: str | None,
         max_results: int = 100,
-    ) -> dict:
+        full_sync: bool = False,
+    ) -> SyncLaunchResult:
         with self._sync_lock:
             if self._sync_running:
-                return {"status": "already_running"}
+                return SyncLaunchResult(status="already_running")
             self._sync_running = True
 
         threading.Thread(
             target=self._run_sync_background,
-            args=(provider, max_results),
+            args=(provider, max_results, full_sync),
             daemon=True,
         ).start()
 
-        return {"status": "started"}
+        return SyncLaunchResult(status="started")
 
-    def get_sync_status(self) -> dict:
+    def get_sync_status(self) -> SyncStatusResult:
         if self._sync_running:
-            return {"status": "running"}
-        if self._last_sync_result is None:
-            return {"status": "idle"}
-        return {"status": "idle", "last_result": asdict(self._last_sync_result)}
+            return SyncStatusResult(status="running")
+        return SyncStatusResult(status="idle", last_result=self._last_sync_result)
 
-    def _run_sync_background(self, provider: str | None, max_results: int) -> None:
+    def _run_sync_background(self, provider: str | None, max_results: int, full_sync: bool = False) -> None:
         try:
             normalized = normalize_string(provider)
             if normalized not in LIST_PROVIDERS:
@@ -120,12 +120,12 @@ class MailboxService:
 
             if normalized == Provider.ALL.value:
                 try:
-                    result = self._sync_all_providers(max_results)
+                    result = self._sync_all_providers(max_results, full_sync)
                 except AuthError as e:
                     result = SyncResult(status="error", message=str(e))
             else:
                 try:
-                    result = self._sync_single_provider(normalized, max_results)
+                    result = self._sync_single_provider(normalized, max_results, full_sync)
                 except AuthError as e:
                     result = SyncResult(status="error", message=str(e))
 
@@ -137,9 +137,9 @@ class MailboxService:
             with self._sync_lock:
                 self._sync_running = False
 
-    def _sync_all_providers(self, max_results: int) -> SyncAllResult:
+    def _sync_all_providers(self, max_results: int, full_sync: bool = False) -> SyncAllResult:
         results = [
-            self._sync_provider_safely(provider_key, max_results)
+            self._sync_provider_safely(provider_key, max_results, full_sync)
             for provider_key in CONNECTABLE_PROVIDERS
             if self._credentials.load(provider_key)
         ]
@@ -150,9 +150,9 @@ class MailboxService:
         self._storage.update_last_sync_time()
         return SyncAllResult(status="success", results=results)
 
-    def _sync_provider_safely(self, provider_key: str, max_results: int) -> ProviderSyncResult:
+    def _sync_provider_safely(self, provider_key: str, max_results: int, full_sync: bool = False) -> ProviderSyncResult:
         try:
-            r = self._do_sync(provider_key, max_results, skip_cooldown=True)
+            r = self._do_sync(provider_key, max_results, skip_cooldown=True, full_sync=full_sync)
             return ProviderSyncResult(
                 provider=provider_key,
                 status=r.status,
@@ -164,20 +164,20 @@ class MailboxService:
         except Exception as e:  # pylint: disable=broad-except
             return ProviderSyncResult(provider=provider_key, status="error", message=str(e))
 
-    def _sync_single_provider(self, provider: str, max_results: int) -> SyncResult:
+    def _sync_single_provider(self, provider: str, max_results: int, full_sync: bool = False) -> SyncResult:
         if not self._credentials.load(provider):
             raise AuthError(MSG_UNAUTHENTICATED)
-        return self._do_sync(provider, max_results, skip_cooldown=False)
+        return self._do_sync(provider, max_results, skip_cooldown=False, full_sync=full_sync)
 
     def _do_sync(
-        self, provider_tag: str, max_results: int, skip_cooldown: bool
+        self, provider_tag: str, max_results: int, skip_cooldown: bool, full_sync: bool = False
     ) -> SyncResult:
         try:
-            skipped = self._check_cooldown(skip_cooldown)
+            skipped = self._check_cooldown(skip_cooldown or full_sync)
             if skipped:
                 return skipped
 
-            after = self._compute_after_date()
+            after = self._compute_after_date(full_sync)
             tag = provider_tag.lower()
 
             page_result = self._fetch_inbox_emails(provider_tag, max_results, after)
@@ -240,14 +240,13 @@ class MailboxService:
         except Exception as exc:  # pylint: disable=broad-except
             logger.warning("Sync emails envoyés échoué pour %s : %s", provider_tag, exc)
 
-    def _compute_after_date(self):
-        last_sync = self._storage.get_last_sync_time()
-        if last_sync:
-            return last_sync.date()
+    def _compute_after_date(self, full_sync: bool = False):
+        if not full_sync:
+            last_sync = self._storage.get_last_sync_time()
+            if last_sync:
+                return last_sync.date()
         return (datetime.now() - timedelta(days=_FIRST_SYNC_LOOKBACK_DAYS)).date()
 
     def _enrich_new_emails(self, emails: list[Email]) -> None:
-        if self._enrichment is None:
-            return
         for email in emails:
             self._enrichment.enrich(email)
