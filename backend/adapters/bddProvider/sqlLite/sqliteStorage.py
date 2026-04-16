@@ -8,6 +8,7 @@ from sqlalchemy import select, func
 
 from backend.core.models.email import Provider, Email
 from backend.core.models.email.category import Category
+from backend.core.models.idName import IdName
 from backend.core.exceptions import NotFoundError
 from backend.config.settings import storage_settings
 from backend.ports.emailStorage import EmailStorage
@@ -34,13 +35,13 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
 
     def _init_db(self) -> None:
         init_engine(self.db_path)
-        self._category_ids = self._load_category_ids()
+        self._category_ids = {c.name: c.id for c in self._load_category_ids()}
 
-    def _load_category_ids(self) -> dict[str, int]:
+    def _load_category_ids(self) -> list[IdName]:
         session = create_session()
         try:
             rows = session.execute(select(CategoryModel)).scalars().all()
-            return {row.name: row.id for row in rows}
+            return [IdName(id=row.id, name=row.name) for row in rows]
         finally:
             session.close()
 
