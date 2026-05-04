@@ -32,10 +32,11 @@ class OutlookAdapter:
     ) -> EmailPage:
         access_token = self._access_token()
         params = self._build_params(max_results, query)
+        folder = "SentItems" if (query and query.sent_only) else "inbox"
 
         with httpx.Client() as client:
             response = client.get(
-                f"{GRAPH_BASE}/me/messages",
+                f"{GRAPH_BASE}/me/mailFolders/{folder}/messages",
                 headers=graph_request_headers(access_token),
                 params=params,
             )

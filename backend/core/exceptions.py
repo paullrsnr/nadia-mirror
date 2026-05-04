@@ -7,3 +7,7 @@ class AuthError(Exception):
 
 class ProviderError(Exception):
     """Provider invalide ou non supporté."""
+
+
+class NotFoundError(Exception):
+    """Ressource introuvable."""

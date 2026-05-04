@@ -3,8 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.api.routers import auth_router, emails_router, llm_router
+from backend.api.routers import auto_archive_router
 from backend.config.settings import api_settings
-from backend.core.exceptions import AuthError, ProviderError
+from backend.core.exceptions import AuthError, NotFoundError, ProviderError
 
 app = FastAPI(title="Nadia API")
 
@@ -18,9 +19,15 @@ def provider_error_handler(_, exc: ProviderError):
 def auth_error_handler(_, exc: AuthError):
     return JSONResponse(status_code=401, content={"detail": str(exc)})
 
+
+@app.exception_handler(NotFoundError)
+def not_found_error_handler(_, exc: NotFoundError):
+    return JSONResponse(status_code=404, content={"detail": str(exc)})
+
 app.include_router(auth_router.router)
 app.include_router(emails_router.router, tags=["emails"])
 app.include_router(llm_router.router)
+app.include_router(auto_archive_router.router)
 
 app.add_middleware(
     CORSMiddleware,

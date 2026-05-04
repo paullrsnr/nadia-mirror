@@ -1,13 +1,13 @@
-from typing import Union
+from fastapi import APIRouter, Depends, Query
 
-from fastapi import APIRouter, Depends, Query, HTTPException
+from backend.api.deps import get_mailbox_service, get_emails_service, get_storage, get_classification_service, get_reply_service
+from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 
-from backend.api.deps import get_mailbox_service, get_emails_service
-from backend.api.schemas import EmailListResponse, ArchiveEmailResponse, SyncEmailsResponse
-from backend.core.exceptions import AuthError, ProviderError
+from backend.core.services.classificationService import ClassificationService
+from backend.core.services.replyService import ReplyService
+from backend.api.schemas import EmailListResponse, ArchiveEmailResponse
 from backend.core.mailboxService import MailboxService
 from backend.core.services.emailsService import EmailsService
-from backend.core.models.email import SyncResult, SyncAllResult
 
 router = APIRouter(prefix="/emails")
 
@@ -31,10 +31,53 @@ def archive_email(
     return service.archive_email(email_id, provider)
 
 
-@router.post("/sync", response_model=Union[SyncResult, SyncAllResult])
+@router.get("/thread/{thread_id}")
+def get_thread(
+    thread_id: str,
+    mailbox: MailboxService = Depends(get_mailbox_service),
+):
+    return mailbox.get_thread(thread_id)
+
+
+@router.post("/classify/{email_id}")
+def classify_email(
+    email_id: str,
+    service: ClassificationService = Depends(get_classification_service),
+):
+    return service.classify_one(email_id)
+
+
+@router.post("/classify-all")
+def classify_all_emails(
+    limit: int = Query(default=20, ge=1, le=100),
+    service: ClassificationService = Depends(get_classification_service),
+):
+    return service.classify_all_uncategorized(limit=limit)
+
+
+@router.post("/suggest-reply/{email_id}")
+def suggest_reply(
+    email_id: str,
+    service: ReplyService = Depends(get_reply_service),
+):
+    return service.suggest_reply_if_necessary(email_id)
+
+
+@router.get("/categories")
+def list_categories(storage: SqliteStorageAdapter = Depends(get_storage)):
+    return storage.get_categories()
+
+
+@router.post("/sync")
 def sync_emails(
     provider: str | None = Query(default=None, description="Provider (gmail, outlook, all)."),
     max_results: int = Query(default=100, ge=1, le=500),
+    full: bool = Query(default=False, description="Ignore le dernier sync et récupère les 30 derniers jours."),
     mailbox: MailboxService = Depends(get_mailbox_service),
 ):
-    return mailbox.sync_emails(provider=provider, max_results=max_results)
+    return mailbox.sync_emails(provider=provider, max_results=max_results, full_sync=full)
+
+
+@router.get("/sync/status")
+def sync_status(mailbox: MailboxService = Depends(get_mailbox_service)):
+    return mailbox.get_sync_status()

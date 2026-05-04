@@ -166,7 +166,7 @@ class TestSqliteStorageAdapter(unittest.TestCase):
         self.assertIsNotNone(sync_time)
         self.assertIsInstance(sync_time, datetime)
 
-    def test_save_email(self):
+    def test_upsert_email(self):
         """Test sauvegarde d'un email."""
         from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 
@@ -183,7 +183,7 @@ class TestSqliteStorageAdapter(unittest.TestCase):
             provider=Provider.GMAIL,
         )
 
-        result = storage.save_email(email, provider="gmail")
+        result = storage.upsert_email(email, provider="gmail")
 
         self.assertTrue(result)
 
