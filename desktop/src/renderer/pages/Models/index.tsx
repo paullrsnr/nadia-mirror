@@ -1,15 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
-import { colors, spacing, radius, shadow } from "../theme";
-import ModelCard from "../components/ModelCard";
-import type { LlmStatus } from "../models/LlmStatus";
-import type { CatalogModel } from "../models/CatalogModel";
-import {
-  getLlmStatus,
-  getCatalog,
-  downloadModel,
-  loadModel,
-  type DownloadProgress,
-} from "../services/apis/llm.api";
+import ModelCard from "../../components/domain/ModelCard";
+import Loader from "../../components/ui/Loader";
+import ErrorMessage from "../../components/ui/ErrorMessage";
+import { colors, spacing, radius, shadow } from "../../theme";
+import { useModels } from "./hooks/useModels";
 
 const spinnerKeyframes = `
 @keyframes spin {
@@ -23,140 +16,33 @@ const spinnerKeyframes = `
 `;
 
 export default function Models() {
-  const [status, setStatus] = useState<LlmStatus | null>(null);
-  const [catalog, setCatalog] = useState<CatalogModel[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [downloading, setDownloading] = useState<Record<string, boolean>>({});
-  const [downloadProgress, setDownloadProgress] = useState<Record<string, string>>({});
-  const [loadingModel, setLoadingModel] = useState<string | null>(null);
-  const [initialDownload, setInitialDownload] = useState<CatalogModel | null>(null);
-
-  const refreshStatus = useCallback(async () => {
-    try {
-      const newStatus = await getLlmStatus();
-      setStatus(newStatus);
-      return newStatus;
-    } catch (err) {
-      console.error("Erreur statut LLM:", err);
-      return null;
-    }
-  }, []);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [statusData, catalogData] = await Promise.all([getLlmStatus(), getCatalog()]);
-      setStatus(statusData);
-      setCatalog(catalogData);
-    } catch (err) {
-      setError("Impossible de charger les données LLM");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const findCatalogModel = (modelId: string): CatalogModel | undefined => {
-    return catalog.find((m) => {
-      const filenameWithoutExt = m.filename.replace(/\.gguf$/i, "");
-      return m.id === modelId || filenameWithoutExt === modelId;
-    });
-  };
-
-  const isModelInstalled = (model: CatalogModel): boolean => {
-    if (!status) return false;
-    const filenameWithoutExt = model.filename.replace(/\.gguf$/i, "");
-    return status.installed_models.some(
-      (m) => m.id === model.id || m.id === filenameWithoutExt || m.name === model.filename
-    );
-  };
-
-  const handleDownload = async (model: CatalogModel, isInitial: boolean = false) => {
-    if (isInitial) {
-      setInitialDownload(model);
-    }
-    setDownloading((prev) => ({ ...prev, [model.id]: true }));
-    setDownloadProgress((prev) => ({ ...prev, [model.id]: "Connexion au serveur..." }));
-    setError(null);
-
-    try {
-      await downloadModel(model.repo, model.filename, (progress: DownloadProgress) => {
-        if (progress.status === "starting") {
-          setDownloadProgress((prev) => ({ ...prev, [model.id]: "Téléchargement en cours..." }));
-        } else if (progress.status === "progress" && progress.progress !== undefined) {
-          const pct = progress.progress;
-          setDownloadProgress((prev) => ({
-            ...prev,
-            [model.id]: `${Math.round(pct)}%`,
-          }));
-        } else if (progress.status === "completed" || progress.status === "exists") {
-          setDownloadProgress((prev) => ({ ...prev, [model.id]: "Terminé !" }));
-        } else if (progress.status === "error") {
-          setError(progress.error || "Erreur de téléchargement");
-        }
-      });
-
-      const newStatus = await refreshStatus();
-      
-      if (isInitial && newStatus && newStatus.installed_models.length > 0) {
-        await handleLoad(model.id);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur de téléchargement");
-    } finally {
-      setDownloading((prev) => ({ ...prev, [model.id]: false }));
-      setDownloadProgress((prev) => {
-        const copy = { ...prev };
-        delete copy[model.id];
-        return copy;
-      });
-      setInitialDownload(null);
-    }
-  };
-
-  const handleLoad = async (modelId: string) => {
-    setLoadingModel(modelId);
-    setError(null);
-
-    try {
-      await loadModel(modelId);
-      await refreshStatus();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur de chargement");
-    } finally {
-      setLoadingModel(null);
-    }
-  };
-
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const modelId = e.target.value;
-    if (modelId && modelId !== status?.selected_model_id) {
-      handleLoad(modelId);
-    }
-  };
+  const {
+    status,
+    catalog,
+    loading,
+    error,
+    downloading,
+    downloadProgress,
+    loadingModel,
+    initialDownload,
+    installedModels,
+    availableCatalog,
+    isDownloadingAny,
+    findCatalogModel,
+    handleDownload,
+    handleLoad,
+  } = useModels();
 
   if (loading) {
-    return (
-      <div style={{ padding: spacing.page, textAlign: "center" }}>
-        <p style={{ color: colors.textMuted }}>Chargement...</p>
-      </div>
-    );
+    return <Loader fullPage label="Chargement des modèles..." />;
   }
 
-  const installedModels = status?.installed_models || [];
   const hasInstalledModels = installedModels.length > 0;
-  const availableCatalog = catalog.filter((model) => !isModelInstalled(model));
-  const isDownloadingAny = Object.values(downloading).some(Boolean);
 
+  /* ── Téléchargement initial en cours ── */
   if (!hasInstalledModels && initialDownload) {
     const progress = downloadProgress[initialDownload.id] || "Préparation...";
-    
+
     return (
       <div
         style={{
@@ -170,7 +56,6 @@ export default function Models() {
         }}
       >
         <style>{spinnerKeyframes}</style>
-        
         <div
           style={{
             width: 80,
@@ -182,23 +67,12 @@ export default function Models() {
             marginBottom: spacing.lg,
           }}
         />
-        
-        <h2 style={{ margin: 0, marginBottom: spacing.sm, color: colors.textPrimary }}>
+        <h2 style={{ margin: 0, marginBottom: spacing.sm }}>
           Téléchargement de {initialDownload.name}
         </h2>
-        
-        <p
-          style={{
-            margin: 0,
-            marginBottom: spacing.page,
-            color: colors.textSecondary,
-            fontSize: "14px",
-            maxWidth: 400,
-          }}
-        >
+        <p style={{ margin: 0, marginBottom: spacing.page, color: colors.textSecondary, fontSize: "14px", maxWidth: 400 }}>
           {initialDownload.description}
         </p>
-        
         <div
           style={{
             width: "100%",
@@ -220,59 +94,25 @@ export default function Models() {
             }}
           />
         </div>
-        
-        <p
-          style={{
-            margin: 0,
-            color: colors.textMuted,
-            fontSize: "16px",
-            fontWeight: "bold",
-          }}
-        >
+        <p style={{ margin: 0, color: colors.textMuted, fontSize: "16px", fontWeight: "bold" }}>
           {progress}
         </p>
-        
-        <p
-          style={{
-            margin: 0,
-            marginTop: spacing.lg,
-            color: colors.textMuted,
-            fontSize: "12px",
-          }}
-        >
+        <p style={{ margin: 0, marginTop: spacing.lg, color: colors.textMuted, fontSize: "12px" }}>
           Le modèle sera chargé automatiquement une fois le téléchargement terminé
         </p>
-
         {error && (
-          <div
-            style={{
-              marginTop: spacing.page,
-              padding: spacing.card,
-              backgroundColor: "#ffebee",
-              color: colors.error,
-              borderRadius: 8,
-              maxWidth: 400,
-            }}
-          >
-            {error}
-          </div>
+          <ErrorMessage message={error} style={{ marginTop: spacing.page, maxWidth: 400 }} />
         )}
       </div>
     );
   }
 
+  /* ── Aucun modèle installé — choix initial ── */
   if (!hasInstalledModels) {
     return (
       <div style={{ padding: spacing.page }}>
         <style>{spinnerKeyframes}</style>
-        
-        <div
-          style={{
-            textAlign: "center",
-            padding: spacing.lg,
-            marginBottom: spacing.page,
-          }}
-        >
+        <div style={{ textAlign: "center", padding: spacing.lg, marginBottom: spacing.page }}>
           <div style={{ fontSize: 48, marginBottom: spacing.md }}>🤖</div>
           <h1 style={{ margin: 0, marginBottom: spacing.sm }}>Bienvenue dans Nadia IA</h1>
           <p style={{ margin: 0, color: colors.textSecondary, fontSize: "15px" }}>
@@ -280,19 +120,7 @@ export default function Models() {
           </p>
         </div>
 
-        {error && (
-          <div
-            style={{
-              marginBottom: spacing.card,
-              padding: spacing.card,
-              backgroundColor: "#ffebee",
-              color: colors.error,
-              borderRadius: 8,
-            }}
-          >
-            {error}
-          </div>
-        )}
+        {error && <ErrorMessage message={error} style={{ marginBottom: spacing.card }} />}
 
         <h2 style={{ fontSize: "16px", marginBottom: spacing.card, color: colors.textSecondary }}>
           Choisissez un modèle pour démarrer
@@ -314,18 +142,15 @@ export default function Models() {
               backgroundColor: colors.background,
               boxShadow: shadow.card,
               cursor: isDownloadingAny ? "default" : "pointer",
-              transition: "border-color 0.2s, box-shadow 0.2s",
               textAlign: "left",
             }}
             onMouseEnter={(e) => {
               if (!isDownloadingAny) {
                 e.currentTarget.style.borderColor = colors.buttonPrimary;
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,123,255,0.15)";
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.borderColor = colors.border;
-              e.currentTarget.style.boxShadow = shadow.card;
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -355,24 +180,15 @@ export default function Models() {
     );
   }
 
+  /* ── Vue principale ── */
   return (
     <div style={{ padding: spacing.page }}>
+      <style>{spinnerKeyframes}</style>
       <h1 style={{ marginBottom: spacing.sm }}>Modèles LLM</h1>
 
-      {error && (
-        <div
-          style={{
-            marginBottom: spacing.card,
-            padding: spacing.card,
-            backgroundColor: "#ffebee",
-            color: colors.error,
-            borderRadius: 8,
-          }}
-        >
-          {error}
-        </div>
-      )}
+      {error && <ErrorMessage message={error} style={{ marginBottom: spacing.card }} />}
 
+      {/* Modèle actif */}
       <div
         style={{
           marginBottom: spacing.page,
@@ -383,14 +199,14 @@ export default function Models() {
           boxShadow: shadow.card,
         }}
       >
-        <h2 style={{ fontSize: "16px", margin: 0, marginBottom: spacing.md, color: colors.textPrimary }}>
-          Modèle actif
-        </h2>
-
+        <h2 style={{ fontSize: "16px", margin: 0, marginBottom: spacing.md }}>Modèle actif</h2>
         <div style={{ display: "flex", alignItems: "center", gap: spacing.md }}>
           <select
             value={status?.selected_model_id || ""}
-            onChange={handleSelectChange}
+            onChange={(e) => {
+              const id = e.target.value;
+              if (id && id !== status?.selected_model_id) handleLoad(id);
+            }}
             disabled={loadingModel !== null}
             style={{
               flex: 1,
@@ -405,25 +221,17 @@ export default function Models() {
           >
             <option value="">-- Sélectionner un modèle --</option>
             {installedModels.map((model) => {
-              const catalogInfo = findCatalogModel(model.id);
+              const info = findCatalogModel(model.id);
               return (
                 <option key={model.id} value={model.id}>
-                  {catalogInfo?.name || model.name}
+                  {info?.name || model.name}
                 </option>
               );
             })}
           </select>
 
           {status?.selected_model_id && (
-            <span
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: spacing.xs,
-                color: colors.success,
-                fontSize: "13px",
-              }}
-            >
+            <span style={{ display: "flex", alignItems: "center", gap: spacing.xs, color: colors.success, fontSize: "13px" }}>
               <span style={{ fontSize: "16px" }}>✓</span> Chargé
             </span>
           )}
@@ -436,12 +244,12 @@ export default function Models() {
         )}
       </div>
 
+      {/* Catalogue */}
       {availableCatalog.length > 0 && (
         <>
           <h2 style={{ fontSize: "18px", marginBottom: spacing.card, color: colors.textSecondary }}>
             Télécharger d'autres modèles
           </h2>
-
           {availableCatalog.map((model) => (
             <ModelCard
               key={model.id}
@@ -457,14 +265,12 @@ export default function Models() {
         </>
       )}
 
+      {/* Overlay chargement modèle */}
       {loadingModel && (
         <div
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            inset: 0,
             backgroundColor: "rgba(0,0,0,0.5)",
             display: "flex",
             alignItems: "center",
@@ -476,11 +282,10 @@ export default function Models() {
             style={{
               backgroundColor: colors.background,
               padding: spacing.lg,
-              borderRadius: 8,
+              borderRadius: radius.md,
               textAlign: "center",
             }}
           >
-            <style>{spinnerKeyframes}</style>
             <div
               style={{
                 width: 40,

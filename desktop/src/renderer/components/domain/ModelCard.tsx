@@ -1,6 +1,6 @@
-import { colors, spacing, radius, shadow } from "../theme";
-import type { CatalogModel } from "../models/CatalogModel";
-import type { InstalledModel } from "../models/InstalledModel";
+import { colors, spacing, radius, shadow } from "../../theme";
+import type { CatalogModel, InstalledModel } from "../../types";
+import Button from "../ui/Button";
 
 interface ModelCardProps {
   model: CatalogModel;
@@ -39,14 +39,7 @@ export default function ModelCard({
           <h3 style={{ margin: 0, marginBottom: spacing.xs, color: colors.textPrimary }}>
             {model.name}
             {isSelected && (
-              <span
-                style={{
-                  marginLeft: spacing.sm,
-                  fontSize: "12px",
-                  color: colors.success,
-                  fontWeight: "normal",
-                }}
-              >
+              <span style={{ marginLeft: spacing.sm, fontSize: "12px", color: colors.success, fontWeight: "normal" }}>
                 ● Actif
               </span>
             )}
@@ -59,45 +52,27 @@ export default function ModelCard({
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: spacing.sm, marginLeft: spacing.md }}>
+        <div style={{ display: "flex", gap: spacing.sm, marginLeft: spacing.md, alignItems: "center" }}>
           {!isInstalled && !isDownloading && (
-            <button
-              onClick={onDownload}
-              style={{
-                padding: `${spacing.sm}px ${spacing.card}px`,
-                backgroundColor: colors.buttonPrimary,
-                color: "white",
-                border: "none",
-                borderRadius: radius.sm,
-                cursor: "pointer",
-                fontSize: "13px",
-              }}
-            >
+            <Button variant="primary" size="sm" onClick={onDownload}>
               Télécharger
-            </button>
+            </Button>
           )}
 
           {isDownloading && (
-            <span style={{ color: colors.textMuted, fontSize: "13px", padding: `${spacing.sm}px 0` }}>
+            <span style={{ color: colors.textMuted, fontSize: "13px" }}>
               {downloadProgress || "Téléchargement..."}
             </span>
           )}
 
           {isInstalled && !isSelected && (
-            <button
+            <Button
+              size="sm"
               onClick={onLoad}
-              style={{
-                padding: `${spacing.sm}px ${spacing.card}px`,
-                backgroundColor: colors.success,
-                color: "white",
-                border: "none",
-                borderRadius: radius.sm,
-                cursor: "pointer",
-                fontSize: "13px",
-              }}
+              style={{ backgroundColor: colors.success, color: "white", border: "none" }}
             >
               Charger
-            </button>
+            </Button>
           )}
 
           {isInstalled && (
