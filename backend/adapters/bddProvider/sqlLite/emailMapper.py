@@ -21,10 +21,15 @@ def to_domain(model: EmailModel) -> Email:
         labels=json.loads(model.labels) if model.labels and model.labels != "null" else [],
         snippet=model.snippet,
         provider=Provider(model.provider) if model.provider else Provider.ALL,
+        category=model.category_rel.name if model.category_rel else None,
+        draft_reply=model.draft_reply,
+        is_archived=model.is_archived or False,
+        pending_archive=model.pending_archive or False,
     )
 
 
 def to_model(email: Email, provider: str) -> EmailModel:
+    # category_id is NOT set here — it is preserved by upsert_email or set via update_email_category
     return EmailModel(
         id=email.id,
         thread_id=email.thread_id,
@@ -47,6 +52,9 @@ def to_model(email: Email, provider: str) -> EmailModel:
         labels=json.dumps(email.labels),
         snippet=email.snippet,
         provider=provider.lower(),
+        draft_reply=email.draft_reply,
+        is_archived=email.is_archived,
+        pending_archive=email.pending_archive,
     )
 
 
