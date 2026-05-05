@@ -1,1 +1,0 @@
-// EmailDetail page - À implémenter
