@@ -1,1 +1,0 @@
-// Loader component - À implémenter
