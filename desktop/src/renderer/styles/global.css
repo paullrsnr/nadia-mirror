@@ -1,0 +1,104 @@
+/**
+ * Variables (miroir du thème) + classes communes réutilisables.
+ */
+
+:root {
+  /* Couleurs */
+  --color-background: #ffffff;
+  --color-background-muted: #f9f9f9;
+  --color-background-unread: #f0f7ff;
+  --color-background-hover: #f5f5f5;
+  --color-background-overlay: #f5f5f5;
+  --color-border: #eee;
+  --color-border-strong: #ddd;
+  --color-border-button: #ccc;
+  --color-text-primary: #333333;
+  --color-text-secondary: #666666;
+  --color-text-muted: #888888;
+  --color-success: #4CAF50;
+  --color-error: #f44336;
+  --color-button-primary: #007bff;
+  --color-button-secondary: #ffffff;
+
+  /* Espacements */
+  --space-xs: 5px;
+  --space-sm: 8px;
+  --space-md: 10px;
+  --space-card: 15px;
+  --space-page: 20px;
+  --space-lg: 40px;
+
+  /* Typo */
+  --font-family: Arial, sans-serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-weight-normal: normal;
+  --font-weight-bold: bold;
+
+  /* Rayons */
+  --radius-sm: 3px;
+  --radius-md: 8px;
+
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* —— Layout (flex) —— */
+.flex-row {
+  display: flex;
+  align-items: center;
+}
+.flex-row--between {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+.flex-col--end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.gap-xs { gap: var(--space-xs); }
+.gap-md { gap: var(--space-md); }
+.flex-1 { flex: 1; }
+
+/* —— Typographie —— */
+.text-primary {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+}
+.text-secondary {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+}
+.text-muted {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.text-muted--xs {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+.font-bold { font-weight: var(--font-weight-bold); }
+.font-normal { font-weight: var(--font-weight-normal); }
+
+/* —— Texte tronqué une ligne —— */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* —— Bouton secondaire (bordures, fond blanc) —— */
+.btn-secondary {
+  padding: 4px 8px;
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--color-border-button);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background-color: var(--color-button-secondary);
+}
