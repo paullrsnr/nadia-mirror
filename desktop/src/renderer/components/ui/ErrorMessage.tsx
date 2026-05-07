@@ -1,10 +1,6 @@
-import React from "react";
-import { colors, spacing, radius } from "../../theme";
+﻿import type { ErrorMessageProps } from "../../types/ui/ErrorMessageProps";
+import { colors, spacing, radius } from "../../styles";
 
-interface ErrorMessageProps {
-  message: string;
-  style?: React.CSSProperties;
-}
 
 export default function ErrorMessage({ message, style }: ErrorMessageProps) {
   return (
@@ -12,7 +8,7 @@ export default function ErrorMessage({ message, style }: ErrorMessageProps) {
       role="alert"
       style={{
         padding: spacing.card,
-        backgroundColor: "#ffebee",
+        backgroundColor: colors.errorLight,
         color: colors.error,
         borderRadius: radius.sm,
         fontSize: "13px",

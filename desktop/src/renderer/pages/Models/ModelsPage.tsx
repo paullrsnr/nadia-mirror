@@ -1,37 +1,35 @@
-import ModelCard from "../../components/domain/ModelCard";
+import ModelCard from "../../components/domain/LlmModelCard";
 import Loader from "../../components/ui/Loader";
 import ErrorMessage from "../../components/ui/ErrorMessage";
-import { colors, spacing, radius, shadow } from "../../theme";
-import { useModels } from "./hooks/useModels";
+import { colors, spacing, radius, shadow } from "../../styles";
+import { useModelsData } from "./hooks/useModelsData";
+import { useModelLoader } from "./hooks/useModelLoader";
+import { useModelDownload } from "./hooks/useModelDownload";
 
-const spinnerKeyframes = `
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-`;
-
-export default function Models() {
+export default function ModelsPage() {
   const {
     status,
     catalog,
     loading,
-    error,
-    downloading,
-    downloadProgress,
-    loadingModel,
-    initialDownload,
+    error: dataError,
     installedModels,
     availableCatalog,
-    isDownloadingAny,
     findCatalogModel,
+    refreshStatus,
+  } = useModelsData();
+
+  const { loadingModel, loadError, handleLoad } = useModelLoader(refreshStatus);
+
+  const {
+    downloading,
+    downloadProgress,
+    initialDownload,
+    isDownloadingAny,
+    downloadError,
     handleDownload,
-    handleLoad,
-  } = useModels();
+  } = useModelDownload({ refreshStatus, handleLoad });
+
+  const error = dataError ?? loadError ?? downloadError;
 
   if (loading) {
     return <Loader fullPage label="Chargement des modèles..." />;
@@ -55,7 +53,6 @@ export default function Models() {
           textAlign: "center",
         }}
       >
-        <style>{spinnerKeyframes}</style>
         <div
           style={{
             width: 80,
@@ -111,7 +108,6 @@ export default function Models() {
   if (!hasInstalledModels) {
     return (
       <div style={{ padding: spacing.page }}>
-        <style>{spinnerKeyframes}</style>
         <div style={{ textAlign: "center", padding: spacing.lg, marginBottom: spacing.page }}>
           <div style={{ fontSize: 48, marginBottom: spacing.md }}>🤖</div>
           <h1 style={{ margin: 0, marginBottom: spacing.sm }}>Bienvenue dans Nadia IA</h1>
@@ -132,26 +128,7 @@ export default function Models() {
             type="button"
             disabled={isDownloadingAny}
             onClick={() => handleDownload(model, true)}
-            style={{
-              display: "block",
-              width: "100%",
-              padding: spacing.card,
-              marginBottom: spacing.md,
-              border: `1px solid ${colors.border}`,
-              borderRadius: radius.md,
-              backgroundColor: colors.background,
-              boxShadow: shadow.card,
-              cursor: isDownloadingAny ? "default" : "pointer",
-              textAlign: "left",
-            }}
-            onMouseEnter={(e) => {
-              if (!isDownloadingAny) {
-                e.currentTarget.style.borderColor = colors.buttonPrimary;
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = colors.border;
-            }}
+            className="model-download-btn"
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
@@ -164,7 +141,7 @@ export default function Models() {
               </div>
               <span
                 style={{
-                  padding: `${spacing.sm}px ${spacing.card}px`,
+                  padding: `${spacing.sm} ${spacing.card}`,
                   backgroundColor: colors.buttonPrimary,
                   color: "white",
                   borderRadius: radius.sm,
@@ -183,7 +160,6 @@ export default function Models() {
   /* ── Vue principale ── */
   return (
     <div style={{ padding: spacing.page }}>
-      <style>{spinnerKeyframes}</style>
       <h1 style={{ marginBottom: spacing.sm }}>Modèles LLM</h1>
 
       {error && <ErrorMessage message={error} style={{ marginBottom: spacing.card }} />}
@@ -211,7 +187,7 @@ export default function Models() {
             style={{
               flex: 1,
               maxWidth: 400,
-              padding: `${spacing.sm}px ${spacing.md}px`,
+              padding: `${spacing.sm} ${spacing.md}`,
               fontSize: "14px",
               border: `1px solid ${colors.borderStrong}`,
               borderRadius: radius.sm,

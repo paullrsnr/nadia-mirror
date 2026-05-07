@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useComputed } from "@preact/signals-react";
 import {
   getAllAuthStatuses,
   getAuthStatus,
@@ -6,16 +7,15 @@ import {
   logout,
   CONNECTABLE_PROVIDERS,
 } from "../../../services/api/auth.api";
-import type { ConnectableProvider, AuthStateByProvider, ApiError } from "../../../types";
+import { authSignal } from "../../../state";
+import type { ConnectableProvider, ApiError, UseAuthResult } from "../../../types";
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 300_000;
 
-export function useAuth() {
-  const [authByProvider, setAuthByProvider] = useState<AuthStateByProvider>({
-    gmail: null,
-    outlook: null,
-  });
+export function useAuth(): UseAuthResult {
+  const authByProviderComputed = useComputed(() => authSignal.value);
+  const authByProvider = authByProviderComputed.value;
   const [loading, setLoading] = useState<Record<ConnectableProvider, boolean>>({
     gmail: false,
     outlook: false,
@@ -28,7 +28,7 @@ export function useAuth() {
 
   const refreshAll = useCallback(async () => {
     const state = await getAllAuthStatuses();
-    setAuthByProvider(state);
+    authSignal.value = state;
   }, []);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export function useAuth() {
         const interval = setInterval(async () => {
           try {
             const status = await getAuthStatus(provider);
-            setAuthByProvider((prev) => ({ ...prev, [provider]: status }));
+            authSignal.value = { ...authSignal.value, [provider]: status };
             if (status.is_authenticated) {
               clearInterval(interval);
               setProviderLoading(provider, false);
@@ -79,10 +79,10 @@ export function useAuth() {
       setError(null);
       try {
         await logout(provider);
-        setAuthByProvider((prev) => ({
-          ...prev,
+        authSignal.value = {
+          ...authSignal.value,
           [provider]: { is_authenticated: false, email: null },
-        }));
+        };
       } catch {
         setError("Erreur lors de la déconnexion");
       } finally {

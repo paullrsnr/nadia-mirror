@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { colors, spacing, typography, radius, shadow } from "../../theme";
+﻿import { useEffect } from "react";
+import { colors, spacing, typography, radius, shadow } from "../../styles";
 
 export default function AuthCallback() {
   const params = new URLSearchParams(window.location.search);

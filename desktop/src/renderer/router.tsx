@@ -1,9 +1,9 @@
 import { createHashRouter } from "react-router-dom";
-import App from "../App";
-import Inbox from "../pages/Inbox";
-import Settings from "../pages/Settings";
-import Models from "../pages/Models";
-import AuthCallback from "../pages/AuthCallback";
+import App from "./App";
+import Inbox from "./pages/inbox";
+import Settings from "./pages/settings";
+import Models from "./pages/Models/ModelsPage";
+import AuthCallback from "./pages/authCallback";
 
 /**
  * Hash router — compatible Electron (file:// protocol) et ouverture de popup OAuth.

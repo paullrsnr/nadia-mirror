@@ -1,7 +1,4 @@
-interface BadgeProps {
-  label: string;
-  className?: string;
-}
+import type { BadgeProps } from "../../types/ui/BadgeProps";
 
 /**
  * Badge générique — le style visuel est piloté via la classe CSS (global.css).

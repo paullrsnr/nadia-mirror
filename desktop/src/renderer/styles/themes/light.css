@@ -1,0 +1,52 @@
+:root {
+  /* Couleurs de surface */
+  --color-background:          #ffffff;
+  --color-background-muted:    #f9f9f9;
+  --color-background-unread:   #f0f7ff;
+  --color-background-hover:    #f5f5f5;
+  --color-background-overlay:  #f5f5f5;
+  --color-background-selected: #f0fff0;
+  --color-background-nav-active: #e8f0fe;
+
+  /* Bordures */
+  --color-border:        #eeeeee;
+  --color-border-strong: #dddddd;
+  --color-border-button: #cccccc;
+
+  /* Texte */
+  --color-text-primary:   #333333;
+  --color-text-secondary: #666666;
+  --color-text-muted:     #888888;
+
+  /* Statuts */
+  --color-success:     #4CAF50;
+  --color-error:       #f44336;
+  --color-error-light: #ffebee;
+
+  /* Actions */
+  --color-button-primary:   #007bff;
+  --color-button-secondary: #ffffff;
+
+  /* Espacements */
+  --space-xs:   5px;
+  --space-sm:   8px;
+  --space-md:   10px;
+  --space-card: 15px;
+  --space-page: 20px;
+  --space-lg:   40px;
+
+  /* Typographie */
+  --font-family:        Arial, sans-serif;
+  --font-size-xs:       11px;
+  --font-size-sm:       12px;
+  --font-size-base:     14px;
+  --font-weight-normal: normal;
+  --font-weight-bold:   bold;
+
+  /* Rayons */
+  --radius-sm: 3px;
+  --radius-md: 8px;
+
+  /* Ombres */
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.1);
+}

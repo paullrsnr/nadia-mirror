@@ -1,18 +1,8 @@
-import { colors, spacing, radius, shadow } from "../../theme";
-import type { CatalogModel, InstalledModel } from "../../types";
+﻿import { colors, spacing, radius, shadow } from "../../styles";
+import type { ModelCardProps } from "../../types/llm";
 import Button from "../ui/Button";
 
-interface ModelCardProps {
-  model: CatalogModel;
-  installed: InstalledModel | null;
-  isSelected: boolean;
-  isDownloading: boolean;
-  downloadProgress: string | null;
-  onDownload: () => void;
-  onLoad: () => void;
-}
-
-export default function ModelCard({
+export default function LlmModelCard({
   model,
   installed,
   isSelected,
@@ -30,7 +20,7 @@ export default function ModelCard({
         marginBottom: spacing.md,
         border: `1px solid ${isSelected ? colors.success : colors.border}`,
         borderRadius: radius.md,
-        backgroundColor: isSelected ? "#f0fff0" : colors.background,
+        backgroundColor: isSelected ? colors.backgroundSelected : colors.background,
         boxShadow: shadow.card,
       }}
     >
@@ -78,7 +68,7 @@ export default function ModelCard({
           {isInstalled && (
             <span
               style={{
-                padding: `${spacing.sm}px ${spacing.card}px`,
+                padding: `${spacing.sm} ${spacing.card}`,
                 backgroundColor: colors.backgroundMuted,
                 color: colors.textSecondary,
                 borderRadius: radius.sm,

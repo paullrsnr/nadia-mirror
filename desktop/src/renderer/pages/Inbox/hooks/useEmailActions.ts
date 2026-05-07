@@ -8,7 +8,7 @@ import {
 } from "../../../services/api/emails.api";
 import { summarizeEmail, summarizeThread } from "../../../services/api/llm.api";
 import { confirmArchive, rejectArchive } from "../../../services/api/autoArchive.api";
-import type { Email, MailProvider } from "../../../types";
+import type { Email, MailProvider, UseEmailActionsResult } from "../../../types";
 
 interface UseEmailActionsOptions {
   provider: MailProvider;
@@ -24,7 +24,7 @@ export function useEmailActions({
   onEmailRemove,
   onPendingArchiveRemove,
   onEmailsReload,
-}: UseEmailActionsOptions) {
+}: UseEmailActionsOptions): UseEmailActionsResult {
   const [classifying, setClassifying] = useState(false);
   const [summarizing, setSummarizing] = useState(false);
   const [drafting, setDrafting] = useState(false);

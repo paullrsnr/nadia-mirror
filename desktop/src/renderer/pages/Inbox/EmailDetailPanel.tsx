@@ -1,5 +1,5 @@
-import Button from "../../components/ui/Button";
-import { colors, spacing, radius } from "../../theme";
+﻿import Button from "../../components/ui/Button";
+import { colors, spacing, radius } from "../../styles";
 import type { Email } from "../../types";
 
 interface EmailDetailPanelProps {
@@ -97,7 +97,7 @@ export default function EmailDetailPanel({
           }}
         >
           <strong style={{ fontSize: "12px", color: colors.textSecondary }}>RÉSUMÉ IA</strong>
-          <p style={{ margin: `${spacing.xs}px 0 0`, whiteSpace: "pre-wrap" }}>{summary}</p>
+          <p style={{ margin: `${spacing.xs} 0 0`, whiteSpace: "pre-wrap" }}>{summary}</p>
         </div>
       )}
 
@@ -115,7 +115,7 @@ export default function EmailDetailPanel({
           <strong style={{ fontSize: "12px", color: colors.textSecondary }}>
             BROUILLON DE RÉPONSE
           </strong>
-          <p style={{ margin: `${spacing.xs}px 0 0`, whiteSpace: "pre-wrap" }}>
+          <p style={{ margin: `${spacing.xs} 0 0`, whiteSpace: "pre-wrap" }}>
             {draft ?? email.draft_reply}
           </p>
         </div>

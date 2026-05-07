@@ -6,6 +6,9 @@ export type {
   SyncResponse,
   ThreadMessage,
   Category,
+  UseEmailsResult,
+  UseEmailActionsResult,
+  UseSyncResult,
 } from "./email";
 
 export type {
@@ -15,6 +18,7 @@ export type {
   AuthStateByProvider,
   AuthUrl,
   ApiError,
+  UseAuthResult,
 } from "./auth";
 
 export type {
@@ -23,4 +27,9 @@ export type {
   CatalogModel,
   DownloadProgress,
   SummarizeResponse,
+  UseModelsDataResult,
+  UseModelLoaderResult,
+  UseModelDownloadResult,
 } from "./llm";
+
+export type { ButtonVariant, ButtonSize, ButtonProps, BadgeProps } from "./ui";

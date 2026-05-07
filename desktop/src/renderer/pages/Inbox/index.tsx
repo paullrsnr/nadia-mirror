@@ -1,10 +1,10 @@
-import { useState, useCallback } from "react";
+﻿import { useState, useCallback } from "react";
 import EmailList from "./EmailList";
 import EmailDetailPanel from "./EmailDetailPanel";
 import { useEmails } from "./hooks/useEmails";
 import { useSync } from "./hooks/useSync";
 import { useEmailActions } from "./hooks/useEmailActions";
-import { spacing } from "../../theme";
+import { spacing } from "../../styles";
 import type { Email, MailProvider } from "../../types";
 
 const DEFAULT_PROVIDER: MailProvider = "all";

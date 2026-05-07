@@ -5,3 +5,7 @@ export type { EmailListResponse } from "./EmailListResponse";
 export type { SyncResponse } from "./SyncResponse";
 export type { ThreadMessage } from "./ThreadMessage";
 export type { Category } from "./Category";
+export type { EmailCardProps } from "./EmailCardProps";
+export type { UseEmailsResult } from "./UseEmailsResult";
+export type { UseEmailActionsResult } from "./UseEmailActionsResult";
+export type { UseSyncResult } from "./UseSyncResult";

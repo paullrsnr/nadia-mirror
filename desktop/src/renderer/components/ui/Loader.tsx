@@ -1,11 +1,6 @@
-import React from "react";
-import { colors } from "../../theme";
-
-interface LoaderProps {
-  size?: number;
-  label?: string;
-  fullPage?: boolean;
-}
+﻿import React from "react";
+import type { LoaderProps } from "../../types/ui/LoaderProps";
+import { colors } from "../../styles";
 
 const spinStyle: React.CSSProperties = {
   display: "inline-block",

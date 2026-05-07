@@ -1,11 +1,5 @@
-import type { Email } from "../../types";
+import { EmailCardProps } from "@/types/email";
 import "./EmailCard.css";
-
-interface EmailCardProps {
-  email: Email;
-  onClick: () => void;
-  onArchive?: () => void;
-}
 
 export default function EmailCard({ email, onClick, onArchive }: EmailCardProps) {
   const isUnread = email.labels.includes("UNREAD");

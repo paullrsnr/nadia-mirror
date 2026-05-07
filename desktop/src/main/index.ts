@@ -24,15 +24,6 @@ function createWindow() {
   }
 }
 
-async function logoutBeforeQuit(): Promise<void> {
-  try {
-    // Déconnexion pour gmail (provider par défaut)
-    await fetch(`${API_BASE_URL}/auth/logout/gmail`, { method: "POST" });
-  } catch (error) {
-    // Ignorer les erreurs (le backend peut déjà être arrêté)
-  }
-}
-
 app.whenReady().then(async () => {
   launchBackend();
   createWindow();

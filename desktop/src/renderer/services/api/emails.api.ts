@@ -37,10 +37,10 @@ export async function triggerSync(
   provider?: MailProvider,
   full = false,
 ): Promise<{ status: string }> {
-  const params: Record<string, string> = { max_results: maxResults.toString() };
-  if (provider) params.provider = provider;
-  if (full) params.full = "true";
-  return apiPost(`/emails/sync?${new URLSearchParams(params)}`);
+  const params = new URLSearchParams({ max_results: maxResults.toString() });
+  if (provider) params.set("provider", provider);
+  if (full) params.set("full", "true");
+  return apiPost(`/emails/sync?${params}`);
 }
 
 export async function getSyncStatus(): Promise<{ status: string; last_result?: SyncResponse }> {

@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import AuthProviderCard from "../../components/domain/AuthProviderCard";
 import Button from "../../components/ui/Button";
 import ErrorMessage from "../../components/ui/ErrorMessage";
 import { getAutoArchiveRules, saveAutoArchiveRules } from "../../services/api/autoArchive.api";
-import { colors, spacing, radius } from "../../theme";
+import { colors, spacing, radius } from "../../styles";
 import { useAuth } from "./hooks/useAuth";
 
 const PROVIDER_LABELS: Record<string, string> = {

@@ -1,17 +1,6 @@
-import React from "react";
-import { colors, spacing, radius } from "../../theme";
-import type { AuthStatus, ConnectableProvider } from "../../types";
+﻿import { colors, spacing, radius } from "../../styles";
 import Button from "../ui/Button";
-
-interface AuthProviderCardProps {
-  readonly provider: ConnectableProvider;
-  readonly label: string;
-  readonly status: AuthStatus | null;
-  readonly loading: boolean;
-  readonly onConnect: () => void;
-  readonly onDisconnect: () => void;
-  readonly children?: React.ReactNode;
-}
+import type { AuthProviderCardProps } from "../../types/auth/AuthProviderCardProps";
 
 export default function AuthProviderCard({
   provider,

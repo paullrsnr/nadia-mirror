@@ -1,15 +1,8 @@
-import React from "react";
-import { colors, spacing, radius } from "../../theme";
+﻿import React from "react";
+import { colors, spacing, radius, typography } from "../../styles";
+import type { ButtonProps, ButtonVariant, ButtonSize } from "../../types";
 
-type Variant = "primary" | "secondary" | "ghost";
-type Size = "sm" | "md";
-
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
-}
-
-const variantStyles: Record<Variant, React.CSSProperties> = {
+const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
   primary: {
     backgroundColor: colors.buttonPrimary,
     color: colors.background,
@@ -20,16 +13,16 @@ const variantStyles: Record<Variant, React.CSSProperties> = {
     color: colors.textSecondary,
     border: `1px solid ${colors.borderStrong}`,
   },
-  ghost: {
+  tertiary: {
     backgroundColor: "transparent",
     color: colors.textSecondary,
     border: `1px solid ${colors.borderStrong}`,
   },
 };
 
-const sizeStyles: Record<Size, React.CSSProperties> = {
-  sm: { padding: "4px 10px", fontSize: "12px" },
-  md: { padding: `${spacing.sm}px 16px`, fontSize: "14px" },
+const sizeStyles: Record<ButtonSize, React.CSSProperties> = {
+  sm: { padding: `${spacing.xs} ${spacing.md}`, fontSize: typography.fontSizeSm },
+  md: { padding: `${spacing.sm} 16px`, fontSize: typography.fontSizeBase },
 };
 
 export default function Button({

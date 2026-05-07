@@ -17,9 +17,11 @@
     "start": "electron .",
     "pack:win": "electron-builder --win --publish=never",
     "pack:mac": "electron-builder --mac --publish=never",
-    "pack": "electron-builder --publish=never"
+    "pack": "electron-builder --publish=never",
+    "lint": "eslint \"src/renderer/**/*.{ts,tsx}\""
   },
   "dependencies": {
+    "@preact/signals-react": "^3.10.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-router-dom": "^7.14.2"
@@ -33,7 +35,10 @@
     "concurrently": "^9.2.1",
     "electron": "^40.0.0",
     "electron-builder": "^26.4.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.59.2",
     "vite": "^7.3.1",
     "wait-on": "^9.0.3"
   },

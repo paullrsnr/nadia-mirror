@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { getEmails, getCategories } from "../../../services/api/emails.api";
 import { getAuthStatus } from "../../../services/api/auth.api";
 import { getPendingArchive } from "../../../services/api/autoArchive.api";
-import type { Email, Category, MailProvider } from "../../../types";
+import type { Email, Category, MailProvider, UseEmailsResult } from "../../../types";
 
 interface UseEmailsState {
   emails: Email[];
@@ -13,7 +13,7 @@ interface UseEmailsState {
   isAuthenticated: boolean;
 }
 
-export function useEmails(provider: MailProvider) {
+export function useEmails(provider: MailProvider): UseEmailsResult {
   const [state, setState] = useState<UseEmailsState>({
     emails: [],
     pendingArchive: [],

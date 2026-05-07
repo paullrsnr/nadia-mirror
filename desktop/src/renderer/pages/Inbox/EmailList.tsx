@@ -1,7 +1,7 @@
-import EmailCard from "../../components/domain/EmailCard";
+﻿import EmailCard from "../../components/domain/EmailCard";
 import Button from "../../components/ui/Button";
 import ErrorMessage from "../../components/ui/ErrorMessage";
-import { colors, spacing } from "../../theme";
+import { colors, spacing } from "../../styles";
 import type { Email, Category, MailProvider } from "../../types";
 
 interface EmailListProps {
@@ -127,7 +127,7 @@ export default function EmailList({
         >
           <div
             style={{
-              padding: `${spacing.sm}px ${spacing.page}px`,
+              padding: `${spacing.sm} ${spacing.page}`,
               fontSize: "12px",
               color: colors.textSecondary,
               fontWeight: 600,
@@ -140,7 +140,7 @@ export default function EmailList({
             <div
               key={email.id}
               style={{
-                padding: `${spacing.sm}px ${spacing.page}px`,
+                padding: `${spacing.sm} ${spacing.page}`,
                 borderTop: `1px solid ${colors.borderStrong}`,
                 display: "flex",
                 justifyContent: "space-between",
