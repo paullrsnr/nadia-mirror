@@ -1,7 +1,7 @@
-﻿import { useEffect } from "react";
+import { useEffect } from "react";
 import { colors, spacing, typography, radius, shadow } from "../../styles";
 
-export default function AuthCallback() {
+export default function AuthCallbackPage() {
   const params = new URLSearchParams(window.location.search);
   const success = params.get("success") === "1";
   const errorMsg = params.get("error");

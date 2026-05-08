@@ -1,4 +1,4 @@
-﻿import { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import EmailList from "./EmailList";
 import EmailDetailPanel from "./EmailDetailPanel";
 import { useEmails } from "./hooks/useEmails";
@@ -9,7 +9,7 @@ import type { Email, MailProvider } from "../../types";
 
 const DEFAULT_PROVIDER: MailProvider = "all";
 
-export default function Inbox() {
+export default function InboxPage() {
   const [provider, setProvider] = useState<MailProvider>(DEFAULT_PROVIDER);
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);

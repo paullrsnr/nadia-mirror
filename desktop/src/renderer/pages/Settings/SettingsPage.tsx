@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import AuthProviderCard from "../../components/domain/AuthProviderCard";
 import Button from "../../components/ui/Button";
 import ErrorMessage from "../../components/ui/ErrorMessage";
@@ -11,7 +11,7 @@ const PROVIDER_LABELS: Record<string, string> = {
   outlook: "Outlook",
 };
 
-export default function Settings() {
+export default function SettingsPage() {
   const { authByProvider, loading, error, providers, connect, disconnect } = useAuth();
   const [archiveRules, setArchiveRules] = useState("");
   const [archiveRulesSaved, setArchiveRulesSaved] = useState(false);
