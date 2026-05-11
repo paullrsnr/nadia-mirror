@@ -1,19 +1,12 @@
-﻿import type { ErrorMessageProps } from "../../types/ui/ErrorMessageProps";
-import { colors, spacing, radius } from "../../styles";
+import "./ErrorMessage.css";
+import type { ErrorMessageProps } from "../../models/ui/ErrorMessageProps";
 
-
-export default function ErrorMessage({ message, style }: ErrorMessageProps) {
+export default function ErrorMessage({ message, className = "", style }: ErrorMessageProps) {
   return (
     <div
       role="alert"
-      style={{
-        padding: spacing.card,
-        backgroundColor: colors.errorLight,
-        color: colors.error,
-        borderRadius: radius.sm,
-        fontSize: "13px",
-        ...style,
-      }}
+      className={`error-message ${className}`.trim()}
+      style={style}
     >
       {message}
     </div>

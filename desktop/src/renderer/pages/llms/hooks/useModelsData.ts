@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useComputed } from "@preact/signals-react";
 import { getLlmStatus, getCatalog } from "../../../services/api/llm.api";
 import { llmStatusSignal } from "../../../state";
-import type { LlmStatus, CatalogModel, InstalledModel, UseModelsDataResult } from "../../../types";
+import type { LlmStatus, CatalogModel, InstalledModel, UseModelsDataResult } from "../../../models";
 
 export function useModelsData(): UseModelsDataResult {
   const statusComputed = useComputed(() => llmStatusSignal.value);

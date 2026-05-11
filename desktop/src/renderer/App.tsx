@@ -1,66 +1,49 @@
-﻿import { NavLink, Outlet } from "react-router-dom";
-import { colors, spacing, radius } from "./styles";
+import "./App.css";
+import { NavLink, Outlet } from "react-router-dom";
 import { useTheme } from "./hooks/useTheme";
-
-const navLinkStyle = ({ isActive }: { isActive: boolean }): React.CSSProperties => ({
-  marginRight: spacing.md,
-  fontWeight: isActive ? "bold" : "normal",
-  textDecoration: "none",
-  color: isActive ? colors.buttonPrimary : colors.textPrimary,
-  cursor: "pointer",
-  background: "none",
-  border: "none",
-  fontSize: "14px",
-  padding: `${spacing.sm} ${spacing.card}`,
-  borderRadius: radius.sm,
-  backgroundColor: isActive ? colors.backgroundNavActive : "transparent",
-});
 
 export default function App() {
   const { theme, toggle } = useTheme();
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <nav
-        style={{
-          padding: `${spacing.sm} ${spacing.page}`,
-          borderBottom: `1px solid ${colors.borderStrong}`,
-          backgroundColor: colors.backgroundMuted,
-          display: "flex",
-          alignItems: "center",
-          gap: spacing.xs,
-          flexShrink: 0,
-        }}
-      >
-        <NavLink to="/" end style={navLinkStyle}>
+    <div className="app-layout">
+      <nav className="app-nav">
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) =>
+            `app-nav__link${isActive ? " app-nav__link--active" : ""}`
+          }
+        >
           Boîte de réception
         </NavLink>
-        <NavLink to="/models" style={navLinkStyle}>
+        <NavLink
+          to="/models"
+          className={({ isActive }) =>
+            `app-nav__link${isActive ? " app-nav__link--active" : ""}`
+          }
+        >
           Modèles IA
         </NavLink>
-        <NavLink to="/settings" style={navLinkStyle}>
+        <NavLink
+          to="/settings"
+          className={({ isActive }) =>
+            `app-nav__link${isActive ? " app-nav__link--active" : ""}`
+          }
+        >
           Paramètres
         </NavLink>
 
         <button
           onClick={toggle}
           aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
-          style={{
-            marginLeft: "auto",
-            background: "none",
-            border: `1px solid ${colors.border}`,
-            borderRadius: radius.sm,
-            cursor: "pointer",
-            padding: `${spacing.xs} ${spacing.sm}`,
-            color: colors.textSecondary,
-            fontSize: "14px",
-          }}
+          className="app-nav__theme-toggle"
         >
           {theme === "dark" ? "☀" : "☾"}
         </button>
       </nav>
 
-      <main style={{ flex: 1, overflow: "hidden" }}>
+      <main className="app-main">
         <Outlet />
       </main>
     </div>

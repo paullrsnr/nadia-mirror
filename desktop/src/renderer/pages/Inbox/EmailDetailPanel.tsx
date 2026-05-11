@@ -1,20 +1,6 @@
-﻿import Button from "../../components/ui/Button";
-import { colors, spacing, radius } from "../../styles";
-import type { Email } from "../../types";
-
-interface EmailDetailPanelProps {
-  email: Email | null;
-  summary: string | null;
-  draft: string | null;
-  threadCount: number;
-  classifying: boolean;
-  summarizing: boolean;
-  drafting: boolean;
-  onClassify: (email: Email) => void;
-  onSummarize: (email: Email) => void;
-  onSummarizeThread: (email: Email) => void;
-  onSuggestReply: (email: Email) => void;
-}
+import "./EmailDetailPanel.css";
+import Button from "../../components/ui/Button";
+import type { EmailDetailPanelProps } from "../../models/email";
 
 export default function EmailDetailPanel({
   email,
@@ -31,27 +17,24 @@ export default function EmailDetailPanel({
 }: EmailDetailPanelProps) {
   if (!email) {
     return (
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ color: colors.textMuted }}>Sélectionnez un email pour voir les détails</p>
+      <div className="email-detail__empty">
+        <p className="email-detail__empty-text">
+          Sélectionnez un email pour voir les détails
+        </p>
       </div>
     );
   }
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", padding: spacing.page }}>
+    <div className="email-detail">
       <h2>{email.subject || "[Sans objet]"}</h2>
 
-      <div style={{ color: colors.textSecondary, marginBottom: spacing.md }}>
-        <div>
-          <strong>De :</strong> {email.from_address.name || email.from_address.email}
-        </div>
-        <div>
-          <strong>Date :</strong> {new Date(email.date).toLocaleString("fr-FR")}
-        </div>
+      <div className="email-detail__meta">
+        <div><strong>De :</strong> {email.from_address.name || email.from_address.email}</div>
+        <div><strong>Date :</strong> {new Date(email.date).toLocaleString("fr-FR")}</div>
       </div>
 
-      {/* Actions IA */}
-      <div style={{ display: "flex", gap: spacing.sm, marginBottom: spacing.md, flexWrap: "wrap" }}>
+      <div className="email-detail__actions">
         <Button
           variant="secondary"
           onClick={() => onClassify(email)}
@@ -85,44 +68,21 @@ export default function EmailDetailPanel({
         </Button>
       </div>
 
-      {/* Résumé IA */}
       {summary && (
-        <div
-          style={{
-            padding: spacing.card,
-            backgroundColor: colors.backgroundMuted,
-            borderRadius: radius.sm,
-            marginBottom: spacing.md,
-            borderLeft: `3px solid ${colors.buttonPrimary}`,
-          }}
-        >
-          <strong style={{ fontSize: "12px", color: colors.textSecondary }}>RÉSUMÉ IA</strong>
-          <p style={{ margin: `${spacing.xs} 0 0`, whiteSpace: "pre-wrap" }}>{summary}</p>
+        <div className="email-detail__ai-box">
+          <strong className="email-detail__ai-label">RÉSUMÉ IA</strong>
+          <p className="email-detail__ai-body">{summary}</p>
         </div>
       )}
 
-      {/* Brouillon */}
       {(draft ?? email.draft_reply) && (
-        <div
-          style={{
-            padding: spacing.card,
-            backgroundColor: colors.backgroundMuted,
-            borderRadius: radius.sm,
-            marginBottom: spacing.md,
-            borderLeft: `3px solid ${colors.textSecondary}`,
-          }}
-        >
-          <strong style={{ fontSize: "12px", color: colors.textSecondary }}>
-            BROUILLON DE RÉPONSE
-          </strong>
-          <p style={{ margin: `${spacing.xs} 0 0`, whiteSpace: "pre-wrap" }}>
-            {draft ?? email.draft_reply}
-          </p>
+        <div className="email-detail__ai-box email-detail__ai-box--draft">
+          <strong className="email-detail__ai-label">BROUILLON DE RÉPONSE</strong>
+          <p className="email-detail__ai-body">{draft ?? email.draft_reply}</p>
         </div>
       )}
 
-      {/* Corps */}
-      <div style={{ marginTop: spacing.page, whiteSpace: "pre-wrap" }}>{email.body_text}</div>
+      <div className="email-detail__body">{email.body_text}</div>
     </div>
   );
 }

@@ -6,6 +6,9 @@ export type {
   SyncResponse,
   ThreadMessage,
   Category,
+  EmailCardProps,
+  EmailDetailPanelProps,
+  EmailListProps,
   UseEmailsResult,
   UseEmailActionsResult,
   UseSyncResult,
@@ -30,6 +33,7 @@ export type {
   UseModelsDataResult,
   UseModelLoaderResult,
   UseModelDownloadResult,
+  UseModelDownloadOptions,
 } from "./llm";
 
 export type { ButtonVariant, ButtonSize, ButtonProps, BadgeProps } from "./ui";

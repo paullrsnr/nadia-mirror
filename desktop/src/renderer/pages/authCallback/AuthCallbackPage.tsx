@@ -1,5 +1,5 @@
+import "./AuthCallbackPage.css";
 import { useEffect } from "react";
-import { colors, spacing, typography, radius, shadow } from "../../styles";
 
 export default function AuthCallbackPage() {
   const params = new URLSearchParams(window.location.search);
@@ -12,33 +12,16 @@ export default function AuthCallbackPage() {
   }, []);
 
   return (
-    <div
-      style={{
-        fontFamily: typography.fontFamily,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        background: colors.backgroundOverlay,
-      }}
-    >
-      <div
-        style={{
-          textAlign: "center",
-          padding: spacing.lg,
-          background: colors.background,
-          borderRadius: radius.md,
-          boxShadow: shadow.card,
-        }}
-      >
+    <div className="auth-callback">
+      <div className="auth-callback__card">
         {success ? (
           <>
-            <h1 style={{ color: colors.success }}>✓ Authentification réussie !</h1>
+            <h1 className="auth-callback__title--success">✓ Authentification réussie !</h1>
             <p>Vous pouvez fermer cette fenêtre et retourner à l'application.</p>
           </>
         ) : (
           <>
-            <h1 style={{ color: colors.error }}>✗ Erreur d'authentification</h1>
+            <h1 className="auth-callback__title--error">✗ Erreur d'authentification</h1>
             <p>{errorMsg || "Une erreur est survenue."}</p>
             <p>Veuillez réessayer.</p>
           </>

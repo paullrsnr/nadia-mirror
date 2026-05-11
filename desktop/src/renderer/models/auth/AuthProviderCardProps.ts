@@ -1,4 +1,5 @@
-import type { AuthStatus, ConnectableProvider } from "../../types";
+import type { AuthStatus } from "./AuthStatus";
+import type { ConnectableProvider } from "./ConnectableProvider";
 
 export interface AuthProviderCardProps {
   readonly provider: ConnectableProvider;

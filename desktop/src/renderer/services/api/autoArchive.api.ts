@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from "./client";
-import type { Email } from "../../types";
+import type { Email } from "../../models";
 
 export async function getAutoArchiveRules(): Promise<{ rules: string; enabled: boolean }> {
   return apiGet("/auto-archive/rules");

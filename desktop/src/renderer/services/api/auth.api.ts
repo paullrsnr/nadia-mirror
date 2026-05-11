@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from "./client";
-import type { AuthStatus, AuthUrl, ConnectableProvider, MailProvider, ApiError } from "../../types";
+import type { AuthStatus, AuthUrl, ConnectableProvider, MailProvider, ApiError } from "../../models";
 
 export type { ConnectableProvider, MailProvider, ApiError };
 

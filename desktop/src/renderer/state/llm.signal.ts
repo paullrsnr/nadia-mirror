@@ -1,5 +1,5 @@
 import { signal, computed } from "@preact/signals-react";
-import type { LlmStatus } from "../types";
+import type { LlmStatus } from "../models";
 
 export const llmStatusSignal = signal<LlmStatus | null>(null);
 

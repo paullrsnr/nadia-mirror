@@ -1,4 +1,4 @@
-import { EmailCardProps } from "@/types/email";
+import type { EmailCardProps } from "../../models/email";
 import "./EmailCard.css";
 
 export default function EmailCard({ email, onClick, onArchive }: EmailCardProps) {

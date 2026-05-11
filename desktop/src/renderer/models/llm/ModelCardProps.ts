@@ -1,4 +1,5 @@
-import type { CatalogModel, InstalledModel } from "../../types";
+import type { CatalogModel } from "./CatalogModel";
+import type { InstalledModel } from "./InstalledModel";
 
 export interface ModelCardProps {
   model: CatalogModel;

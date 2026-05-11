@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { getEmails, getCategories } from "../../../services/api/emails.api";
 import { getAuthStatus } from "../../../services/api/auth.api";
 import { getPendingArchive } from "../../../services/api/autoArchive.api";
-import type { Email, Category, MailProvider, UseEmailsResult } from "../../../types";
+import type { Email, Category, MailProvider, UseEmailsResult } from "../../../models";
 
 interface UseEmailsState {
   emails: Email[];

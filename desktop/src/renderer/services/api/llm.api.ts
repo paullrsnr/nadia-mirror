@@ -1,5 +1,5 @@
 import { apiGet, apiPost, apiPostStream } from "./client";
-import type { LlmStatus, CatalogModel, DownloadProgress, SummarizeResponse, ThreadMessage } from "../../types";
+import type { LlmStatus, CatalogModel, DownloadProgress, SummarizeResponse, ThreadMessage } from "../../models";
 
 export async function getLlmStatus(): Promise<LlmStatus> {
   return apiGet("/llm/status");

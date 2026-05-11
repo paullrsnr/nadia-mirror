@@ -1,4 +1,4 @@
-import type { Email } from "../../types";
+import type { Email } from "./Email";
 
 export interface EmailCardProps {
   email: Email;

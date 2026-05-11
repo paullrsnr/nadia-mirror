@@ -1,4 +1,4 @@
-import type { BadgeProps } from "../../types/ui/BadgeProps";
+import type { BadgeProps } from "../../models/ui/BadgeProps";
 
 /**
  * Badge générique — le style visuel est piloté via la classe CSS (global.css).

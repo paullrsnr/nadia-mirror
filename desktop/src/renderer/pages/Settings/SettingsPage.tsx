@@ -1,12 +1,13 @@
+import "./SettingsPage.css";
 import { useState, useEffect } from "react";
 import AuthProviderCard from "../../components/domain/AuthProviderCard";
 import Button from "../../components/ui/Button";
 import ErrorMessage from "../../components/ui/ErrorMessage";
 import { getAutoArchiveRules, saveAutoArchiveRules } from "../../services/api/autoArchive.api";
-import { colors, spacing, radius } from "../../styles";
 import { useAuth } from "./hooks/useAuth";
+import type { ConnectableProvider } from "../../models/auth";
 
-const PROVIDER_LABELS: Record<string, string> = {
+const PROVIDER_LABELS: Record<ConnectableProvider, string> = {
   gmail: "Gmail",
   outlook: "Outlook",
 };
@@ -29,10 +30,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div style={{ padding: spacing.page }}>
+    <div className="settings-page">
       <h1>Paramètres</h1>
 
-      {error && <ErrorMessage message={error} style={{ marginBottom: spacing.md }} />}
+      {error && <ErrorMessage message={error} className="settings-section__save" />}
 
       {providers.map((provider) => (
         <AuthProviderCard
@@ -46,20 +47,13 @@ export default function SettingsPage() {
         />
       ))}
 
-      <div
-        style={{
-          marginTop: spacing.page,
-          padding: spacing.page,
-          border: `1px solid ${colors.borderStrong}`,
-          borderRadius: radius.sm,
-        }}
-      >
-        <h2 style={{ margin: `0 0 ${spacing.sm}px` }}>Archivage automatique (IA)</h2>
-        <p style={{ margin: `0 0 ${spacing.sm}px`, color: colors.textSecondary, fontSize: "13px" }}>
+      <div className="settings-section">
+        <h2 className="settings-section__title">Archivage automatique (IA)</h2>
+        <p className="settings-section__desc">
           Décrivez les emails à archiver automatiquement. L'IA archivera directement les emails
           correspondants et vous demandera confirmation pour les cas incertains.
         </p>
-        <p style={{ margin: `0 0 ${spacing.sm}px`, color: colors.textMuted, fontSize: "12px" }}>
+        <p className="settings-section__examples">
           Exemples : "emails marketing et newsletters", "promotions Amazon et Spotify",
           "notifications automatiques sans action requise"
         </p>
@@ -68,19 +62,9 @@ export default function SettingsPage() {
           onChange={(e) => setArchiveRules(e.target.value)}
           placeholder="Ex : Archiver les newsletters, les emails promotionnels, et les notifications automatiques des réseaux sociaux."
           rows={4}
-          style={{
-            width: "100%",
-            padding: spacing.sm,
-            borderRadius: radius.sm,
-            border: `1px solid ${colors.borderStrong}`,
-            backgroundColor: colors.backgroundMuted,
-            color: colors.textPrimary,
-            fontSize: "13px",
-            resize: "vertical",
-            boxSizing: "border-box",
-          }}
+          className="settings-section__textarea"
         />
-        <Button onClick={handleSaveArchiveRules} style={{ marginTop: spacing.sm }}>
+        <Button onClick={handleSaveArchiveRules} className="settings-section__save">
           {archiveRulesSaved ? "Enregistré ✓" : "Enregistrer les règles"}
         </Button>
       </div>

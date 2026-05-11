@@ -2,7 +2,7 @@ import { createHashRouter } from "react-router-dom";
 import App from "./App";
 import InboxPage from "./pages/inbox/InboxPage";
 import SettingsPage from "./pages/settings/SettingsPage";
-import ModelsPage from "./pages/Models/ModelsPage";
+import LlmsPage from "./pages/llms/LlmsPage";
 import AuthCallbackPage from "./pages/authCallback/AuthCallbackPage";
 
 /**
@@ -23,7 +23,7 @@ export const router = createHashRouter([
     element: <App />,
     children: [
       { index: true, element: <InboxPage /> },
-      { path: "models", element: <ModelsPage /> },
+      { path: "models", element: <LlmsPage /> },
       { path: "settings", element: <SettingsPage /> },
     ],
   },

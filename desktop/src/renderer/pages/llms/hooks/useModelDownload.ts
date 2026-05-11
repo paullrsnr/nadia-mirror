@@ -1,18 +1,13 @@
 import { useState, useCallback } from "react";
 import { downloadModel } from "../../../services/api/llm.api";
-import type { CatalogModel, LlmStatus, DownloadProgress, UseModelDownloadResult } from "../../../types";
-
-interface UseModelDownloadOptions {
-  refreshStatus: () => Promise<LlmStatus | null>;
-  handleLoad: (modelId: string) => Promise<void>;
-}
+import type { CatalogModel, DownloadProgress, UseModelDownloadResult, UseModelDownloadOptions } from "../../../models";
 
 export function useModelDownload({
   refreshStatus,
   handleLoad,
 }: UseModelDownloadOptions): UseModelDownloadResult {
-  const [downloading, setDownloading] = useState<Record<string, boolean>>({});
-  const [downloadProgress, setDownloadProgress] = useState<Record<string, string>>({});
+  const [downloading, setDownloading] = useState<Partial<Record<string, boolean>>>({});
+  const [downloadProgress, setDownloadProgress] = useState<Partial<Record<string, string>>>({});
   const [initialDownload, setInitialDownload] = useState<CatalogModel | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 

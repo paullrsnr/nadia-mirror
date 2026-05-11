@@ -1,25 +1,13 @@
-﻿import React from "react";
-import type { LoaderProps } from "../../types/ui/LoaderProps";
-import { colors } from "../../styles";
-
-const spinStyle: React.CSSProperties = {
-  display: "inline-block",
-  borderRadius: "50%",
-  borderStyle: "solid",
-  borderColor: colors.border,
-  animation: "spin 1s linear infinite",
-};
+import "./Loader.css";
+import type { LoaderProps } from "../../models/ui/LoaderProps";
 
 export default function Loader({ size = 32, label, fullPage = false }: LoaderProps) {
+  const borderWidth = size >= 48 ? 4 : 3;
+
   const spinner = (
     <div
-      style={{
-        ...spinStyle,
-        width: size,
-        height: size,
-        borderWidth: size >= 48 ? 4 : 3,
-        borderTopColor: colors.buttonPrimary,
-      }}
+      className="loader-spinner"
+      style={{ width: size, height: size, borderWidth }}
       role="status"
       aria-label={label ?? "Chargement..."}
     />
@@ -27,26 +15,17 @@ export default function Loader({ size = 32, label, fullPage = false }: LoaderPro
 
   if (fullPage) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "60vh",
-          gap: 16,
-        }}
-      >
+      <div className="loader-fullpage">
         {spinner}
-        {label && <p style={{ color: colors.textMuted, margin: 0 }}>{label}</p>}
+        {label && <p className="loader__label">{label}</p>}
       </div>
     );
   }
 
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+    <div className="loader-inline">
       {spinner}
-      {label && <span style={{ color: colors.textMuted }}>{label}</span>}
+      {label && <span className="loader__label">{label}</span>}
     </div>
   );
 }

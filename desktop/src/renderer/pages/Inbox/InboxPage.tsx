@@ -1,11 +1,11 @@
+import "./InboxPage.css";
 import { useState, useCallback } from "react";
 import EmailList from "./EmailList";
 import EmailDetailPanel from "./EmailDetailPanel";
 import { useEmails } from "./hooks/useEmails";
 import { useSync } from "./hooks/useSync";
 import { useEmailActions } from "./hooks/useEmailActions";
-import { spacing } from "../../styles";
-import type { Email, MailProvider } from "../../types";
+import type { Email, MailProvider } from "../../models";
 
 const DEFAULT_PROVIDER: MailProvider = "all";
 
@@ -78,19 +78,16 @@ export default function InboxPage() {
     [resetDetail, loadThread],
   );
 
-  const handleProviderChange = useCallback(
-    (p: MailProvider) => {
-      setSelectedEmail(null);
-      setProvider(p);
-    },
-    [],
-  );
+  const handleProviderChange = useCallback((p: MailProvider) => {
+    setSelectedEmail(null);
+    setProvider(p);
+  }, []);
 
   const error = emailsError ?? syncError ?? actionError;
 
   if (!isAuthenticated) {
     return (
-      <div style={{ padding: spacing.page, textAlign: "center" }}>
+      <div className="inbox-unauthenticated">
         <h1>Nadia</h1>
         <p>Veuillez vous connecter à votre boîte mail dans les paramètres.</p>
       </div>
@@ -98,7 +95,7 @@ export default function InboxPage() {
   }
 
   return (
-    <div style={{ display: "flex", height: "calc(100vh - 41px)" }}>
+    <div className="inbox-layout">
       <EmailList
         emails={emails}
         pendingArchive={pendingArchive}

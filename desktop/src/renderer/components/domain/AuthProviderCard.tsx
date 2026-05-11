@@ -1,6 +1,6 @@
-﻿import { colors, spacing, radius } from "../../styles";
+import "./AuthProviderCard.css";
 import Button from "../ui/Button";
-import type { AuthProviderCardProps } from "../../types/auth/AuthProviderCardProps";
+import type { AuthProviderCardProps } from "../../models/auth/AuthProviderCardProps";
 
 export default function AuthProviderCard({
   provider,
@@ -14,62 +14,32 @@ export default function AuthProviderCard({
   const isConnected = status?.is_authenticated ?? false;
 
   return (
-    <section
-      aria-labelledby={`auth-${provider}-title`}
-      style={{
-        padding: spacing.page,
-        marginTop: spacing.lg,
-        backgroundColor: colors.backgroundMuted,
-        border: `1px solid ${colors.borderStrong}`,
-        borderRadius: radius.md,
-      }}
-    >
-      <h2
-        id={`auth-${provider}-title`}
-        style={{ margin: 0, marginBottom: spacing.md, fontSize: "1.1rem" }}
-      >
+    <section aria-labelledby={`auth-${provider}-title`} className="auth-card">
+      <h2 id={`auth-${provider}-title`} className="auth-card__title">
         Connexion {label}
       </h2>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: spacing.md }}>
+      <div className="auth-card__body">
         {isConnected ? (
           <>
-            <p style={{ margin: 0, color: colors.success }}>
+            <p className="auth-card__status--connected">
               Connecté {status?.email ? `— ${status.email}` : ""}
             </p>
-            <Button
-              variant="secondary"
-              onClick={onDisconnect}
-              disabled={loading}
-              style={{ alignSelf: "flex-start" }}
-            >
+            <Button variant="secondary" onClick={onDisconnect} disabled={loading} className="self-start">
               {loading ? "Déconnexion..." : "Déconnecter"}
             </Button>
           </>
         ) : (
           <>
-            <p style={{ margin: 0, color: colors.textMuted }}>Non connecté</p>
-            <Button
-              variant="primary"
-              onClick={onConnect}
-              disabled={loading}
-              style={{ alignSelf: "flex-start" }}
-            >
+            <p className="auth-card__status--disconnected">Non connecté</p>
+            <Button variant="primary" onClick={onConnect} disabled={loading} className="self-start">
               {loading ? "Connexion..." : `Se connecter à ${label}`}
             </Button>
           </>
         )}
 
         {children != null && (
-          <div
-            style={{
-              marginTop: spacing.sm,
-              paddingTop: spacing.md,
-              borderTop: `1px solid ${colors.border}`,
-            }}
-          >
-            {children}
-          </div>
+          <div className="auth-card__children">{children}</div>
         )}
       </div>
     </section>

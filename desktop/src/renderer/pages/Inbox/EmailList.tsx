@@ -1,28 +1,9 @@
-﻿import EmailCard from "../../components/domain/EmailCard";
+import "./EmailList.css";
+import EmailCard from "../../components/domain/EmailCard";
 import Button from "../../components/ui/Button";
 import ErrorMessage from "../../components/ui/ErrorMessage";
-import { colors, spacing } from "../../styles";
-import type { Email, Category, MailProvider } from "../../types";
-
-interface EmailListProps {
-  emails: Email[];
-  pendingArchive: Email[];
-  categories: Category[];
-  loading: boolean;
-  syncing: boolean;
-  classifying: boolean;
-  error: string | null;
-  provider: MailProvider;
-  categoryFilter: string;
-  onProviderChange: (p: MailProvider) => void;
-  onCategoryFilterChange: (cat: string) => void;
-  onSync: (full: boolean) => void;
-  onClassifyAll: () => void;
-  onEmailClick: (email: Email) => void;
-  onArchive: (email: Email) => void;
-  onConfirmArchive: (email: Email) => void;
-  onRejectArchive: (email: Email) => void;
-}
+import type { EmailListProps } from "../../models/email";
+import type { MailProvider } from "../../models/auth";
 
 export default function EmailList({
   emails,
@@ -48,32 +29,16 @@ export default function EmailList({
   );
 
   return (
-    <div
-      style={{
-        width: "40%",
-        borderRight: `1px solid ${colors.borderStrong}`,
-        overflowY: "auto",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* Toolbar */}
-      <div
-        style={{
-          padding: spacing.page,
-          borderBottom: `1px solid ${colors.borderStrong}`,
-          backgroundColor: colors.backgroundMuted,
-        }}
-      >
-        <h1 style={{ margin: 0, marginBottom: spacing.md }}>Nadia</h1>
+    <div className="email-list">
+      <div className="email-list__toolbar">
+        <h1 className="email-list__toolbar-title">Nadia</h1>
 
-        <div style={{ marginBottom: spacing.sm }}>
+        <div className="email-list__filter-row">
           <label>
             Boîte mail :
             <select
               value={provider}
               onChange={(e) => onProviderChange(e.target.value as MailProvider)}
-              style={{ marginLeft: spacing.sm }}
             >
               <option value="all">Toutes les boîtes</option>
               <option value="gmail">Gmail</option>
@@ -82,29 +47,24 @@ export default function EmailList({
           </label>
         </div>
 
-        <div style={{ display: "flex", gap: spacing.sm, flexWrap: "wrap" }}>
+        <div className="email-list__actions">
           <Button onClick={() => onSync(false)} disabled={syncing}>
             {syncing ? "Synchronisation..." : "Synchroniser"}
           </Button>
           <Button variant="secondary" onClick={() => onSync(true)} disabled={syncing}>
             {syncing ? "Synchronisation..." : "Sync. complète (30j)"}
           </Button>
-          <Button
-            variant="secondary"
-            onClick={onClassifyAll}
-            disabled={classifying || syncing}
-          >
+          <Button variant="secondary" onClick={onClassifyAll} disabled={classifying || syncing}>
             {classifying ? "Classification..." : "Classifier (IA)"}
           </Button>
         </div>
 
-        <div style={{ marginTop: spacing.sm }}>
+        <div className="email-list__category-filter">
           <label>
             Catégorie :
             <select
               value={categoryFilter}
               onChange={(e) => onCategoryFilterChange(e.target.value)}
-              style={{ marginLeft: spacing.sm }}
             >
               <option value="all">Toutes</option>
               {categories.map((c) => (
@@ -117,54 +77,23 @@ export default function EmailList({
         </div>
       </div>
 
-      {/* Suggestions d'archivage */}
       {pendingArchive.length > 0 && (
-        <div
-          style={{
-            borderBottom: `1px solid ${colors.borderStrong}`,
-            backgroundColor: colors.backgroundMuted,
-          }}
-        >
-          <div
-            style={{
-              padding: `${spacing.sm} ${spacing.page}`,
-              fontSize: "12px",
-              color: colors.textSecondary,
-              fontWeight: 600,
-            }}
-          >
+        <div className="email-list__pending">
+          <div className="email-list__pending-header">
             L'IA suggère d'archiver {pendingArchive.length} email
             {pendingArchive.length > 1 ? "s" : ""}
           </div>
           {pendingArchive.map((email) => (
-            <div
-              key={email.id}
-              style={{
-                padding: `${spacing.sm} ${spacing.page}`,
-                borderTop: `1px solid ${colors.borderStrong}`,
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: spacing.sm,
-              }}
-            >
-              <div style={{ flex: 1, overflow: "hidden" }}>
-                <div
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: 500,
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
+            <div key={email.id} className="email-list__pending-item">
+              <div className="email-list__pending-info">
+                <div className="email-list__pending-subject">
                   {email.subject || "[Sans objet]"}
                 </div>
-                <div style={{ fontSize: "11px", color: colors.textMuted }}>
+                <div className="email-list__pending-from">
                   {email.from_address.name || email.from_address.email}
                 </div>
               </div>
-              <div style={{ display: "flex", gap: spacing.sm, flexShrink: 0 }}>
+              <div className="email-list__pending-actions">
                 <Button size="sm" onClick={() => onConfirmArchive(email)}>
                   Archiver
                 </Button>
@@ -177,15 +106,10 @@ export default function EmailList({
         </div>
       )}
 
-      {/* Liste */}
       {loading ? (
-        <div style={{ padding: spacing.page, textAlign: "center", color: colors.textMuted }}>
-          Chargement...
-        </div>
+        <div className="email-list__empty">Chargement...</div>
       ) : filtered.length === 0 ? (
-        <div style={{ padding: spacing.page, textAlign: "center", color: colors.textMuted }}>
-          Aucun email
-        </div>
+        <div className="email-list__empty">Aucun email</div>
       ) : (
         filtered.map((email) => (
           <EmailCard
@@ -197,12 +121,7 @@ export default function EmailList({
         ))
       )}
 
-      {error && (
-        <ErrorMessage
-          message={error}
-          style={{ margin: spacing.page }}
-        />
-      )}
+      {error && <ErrorMessage message={error} className="email-list__error" />}
     </div>
   );
 }

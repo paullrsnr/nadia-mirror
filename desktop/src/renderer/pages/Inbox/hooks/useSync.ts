@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { triggerSync, waitForSync } from "../../../services/api/emails.api";
-import type { MailProvider, UseSyncResult } from "../../../types";
+import type { MailProvider, UseSyncResult } from "../../../models";
 
 export function useSync(provider: MailProvider, onSyncComplete: () => void): UseSyncResult {
   const [syncing, setSyncing] = useState(false);

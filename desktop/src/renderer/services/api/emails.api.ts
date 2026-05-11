@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from "./client";
-import type { Email, EmailListResponse, SyncResponse, Category, MailProvider } from "../../types";
+import type { Email, EmailListResponse, SyncResponse, Category, MailProvider } from "../../models";
 
 export async function getEmails(maxResults = 50, provider?: MailProvider): Promise<EmailListResponse> {
   const params: Record<string, string> = { max_results: maxResults.toString() };

@@ -1,5 +1,5 @@
 import { signal, computed } from "@preact/signals-react";
-import type { AuthStateByProvider } from "../types";
+import type { AuthStateByProvider } from "../models";
 
 export const authSignal = signal<AuthStateByProvider>({
   gmail: null,

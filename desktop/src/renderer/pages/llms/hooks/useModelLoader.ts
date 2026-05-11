@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { loadModel } from "../../../services/api/llm.api";
-import type { LlmStatus, UseModelLoaderResult } from "../../../types";
+import type { LlmStatus, UseModelLoaderResult } from "../../../models";
 
 export function useModelLoader(
   refreshStatus: () => Promise<LlmStatus | null>,
