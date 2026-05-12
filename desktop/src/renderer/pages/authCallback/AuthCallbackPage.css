@@ -1,0 +1,19 @@
+.auth-callback {
+  font-family: var(--font-family);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: var(--color-background-overlay);
+}
+
+.auth-callback__card {
+  text-align: center;
+  padding: var(--space-lg);
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.auth-callback__title--success { color: var(--color-success); }
+.auth-callback__title--error   { color: var(--color-error); }

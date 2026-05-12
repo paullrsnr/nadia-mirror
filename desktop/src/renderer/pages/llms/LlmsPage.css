@@ -1,0 +1,188 @@
+/* ── Écran de téléchargement initial ── */
+.models-download-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: var(--space-page);
+  text-align: center;
+}
+
+.models-download-spinner {
+  border-style: solid;
+  border-color: var(--color-border);
+  border-top-color: var(--color-button-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--space-lg);
+}
+
+.models-download-title { margin: 0; margin-bottom: var(--space-sm); }
+
+.models-download-desc {
+  margin: 0;
+  margin-bottom: var(--space-page);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  max-width: 400px;
+}
+
+/* Barre de progression */
+.models-progress {
+  width: 100%;
+  max-width: 400px;
+  height: 8px;
+  background-color: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: var(--space-md);
+}
+
+.models-progress__fill {
+  height: 100%;
+  background-color: var(--color-button-primary);
+  transition: width 0.3s ease;
+}
+
+.models-progress__text {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.models-download-footer {
+  margin: 0;
+  margin-top: var(--space-lg);
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+/* ── Choix initial (aucun modèle) ── */
+.models-no-models { padding: var(--space-page); }
+
+.models-welcome {
+  text-align: center;
+  padding: var(--space-lg);
+  margin-bottom: var(--space-page);
+}
+
+.models-welcome__emoji { font-size: 48px; margin-bottom: var(--space-md); }
+.models-welcome__title { margin: 0; margin-bottom: var(--space-sm); }
+
+.models-welcome__desc {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+}
+
+.models-catalog-heading {
+  font-size: 16px;
+  margin-bottom: var(--space-card);
+  color: var(--color-text-secondary);
+}
+
+/* Bouton de téléchargement catalogue */
+.model-download-btn__row    { display: flex; justify-content: space-between; align-items: center; }
+.model-download-btn__title  { margin: 0; margin-bottom: var(--space-xs); color: var(--color-text-primary); }
+.model-download-btn__desc   { margin: 0; color: var(--color-text-secondary); font-size: 13px; }
+
+.model-download-btn__badge {
+  padding: var(--space-sm) var(--space-card);
+  background-color: var(--color-button-primary);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+/* ── Vue principale ── */
+.models-page        { padding: var(--space-page); }
+.models-page__title { margin-bottom: var(--space-sm); }
+
+.models-active-section {
+  margin-bottom: var(--space-page);
+  padding: var(--space-card);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.models-active-section__title { font-size: 16px; margin: 0; margin-bottom: var(--space-md); }
+
+.models-active-section__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.models-active-section__select {
+  flex: 1;
+  max-width: 400px;
+  padding: var(--space-sm) var(--space-md);
+  font-size: 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-background);
+}
+
+.models-active-section__status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-success);
+  font-size: 13px;
+}
+
+.models-active-section__status-icon { font-size: 16px; }
+
+.models-active-section__desc {
+  margin: 0;
+  margin-top: var(--space-sm);
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.models-catalog-title {
+  font-size: 18px;
+  margin-bottom: var(--space-card);
+  color: var(--color-text-secondary);
+}
+
+/* ── Overlay chargement modèle ── */
+.models-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.models-overlay__modal {
+  background-color: var(--color-background);
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.models-overlay__spinner {
+  border-style: solid;
+  border-color: var(--color-border);
+  border-top-color: var(--color-button-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+  margin-bottom: var(--space-md);
+}
+
+.models-overlay__text    { margin: 0; font-size: 16px; }
+
+.models-overlay__subtext {
+  margin: 0;
+  margin-top: var(--space-sm);
+  color: var(--color-text-muted);
+  font-size: 13px;
+}

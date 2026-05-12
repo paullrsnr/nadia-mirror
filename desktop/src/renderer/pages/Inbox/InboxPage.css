@@ -1,0 +1,2 @@
+.inbox-layout          { display: flex; height: calc(100vh - 41px); }
+.inbox-unauthenticated { padding: var(--space-page); text-align: center; }
