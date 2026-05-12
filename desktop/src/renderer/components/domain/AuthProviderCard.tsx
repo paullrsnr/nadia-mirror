@@ -14,10 +14,11 @@ export default function AuthProviderCard({
   const isConnected = status?.is_authenticated ?? false;
 
   return (
-    <section aria-labelledby={`auth-${provider}-title`} className="auth-card">
-      <h2 id={`auth-${provider}-title`} className="auth-card__title">
+    <section aria-label={`Connexion ${label}`} className="auth-card">
+      <h2 className="auth-card__title">
         Connexion {label}
       </h2>
+
 
       <div className="auth-card__body">
         {isConnected ? (

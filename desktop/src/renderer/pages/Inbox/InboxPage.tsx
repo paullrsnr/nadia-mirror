@@ -1,5 +1,5 @@
 import "./InboxPage.css";
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import EmailList from "./EmailList";
 import EmailDetailPanel from "./EmailDetailPanel";
 import { useEmails } from "./hooks/useEmails";
@@ -22,18 +22,20 @@ export default function InboxPage() {
     error: emailsError,
     isAuthenticated,
     loadEmails,
-    loadPendingArchive,
-    updateEmail,
+    loadAll,
     removeEmail,
     removePendingArchive,
   } = useEmails(provider);
 
-  const onSyncComplete = useCallback(async () => {
-    await loadEmails();
-    await loadPendingArchive();
-  }, [loadEmails, loadPendingArchive]);
+  // Synchronise l'email sélectionné quand la liste se recharge (ex: après classify)
+  useEffect(() => {
+    setSelectedEmail((prev) => {
+      if (!prev) return prev;
+      return emails.find((e) => e.id === prev.id) ?? prev;
+    });
+  }, [emails]);
 
-  const { syncing, syncError, sync } = useSync(provider, onSyncComplete);
+  const { syncing, syncError, sync } = useSync(provider, loadAll);
 
   const {
     classifying,
@@ -55,12 +57,6 @@ export default function InboxPage() {
     handleRejectArchive,
   } = useEmailActions({
     provider,
-    onEmailUpdate: (id, patch) => {
-      updateEmail(id, patch);
-      if (selectedEmail?.id === id) {
-        setSelectedEmail((prev) => (prev ? { ...prev, ...patch } : prev));
-      }
-    },
     onEmailRemove: (id) => {
       removeEmail(id);
       if (selectedEmail?.id === id) setSelectedEmail(null);

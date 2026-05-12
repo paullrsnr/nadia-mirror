@@ -1,5 +1,6 @@
 import type { EmailAddress } from "./EmailAddress";
 import type { EmailAttachment } from "./EmailAttachment";
+import type { Category } from "./Category";
 
 export interface Email {
   id: string;
@@ -15,7 +16,7 @@ export interface Email {
   labels: string[];
   snippet?: string;
   provider?: string;
-  category?: string;
+  category?: Category['name'];
   draft_reply?: string;
   is_archived?: boolean;
   pending_archive?: boolean;

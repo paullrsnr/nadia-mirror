@@ -1,4 +1,5 @@
 import type { EmailCardProps } from "../../models/email";
+import Button from "../ui/Button";
 import "./EmailCard.css";
 
 export default function EmailCard({ email, onClick, onArchive }: EmailCardProps) {
@@ -42,16 +43,16 @@ export default function EmailCard({ email, onClick, onArchive }: EmailCardProps)
         <div className="aside">
           <span className="text-muted">{date}</span>
           {onArchive && (
-            <button
-              type="button"
-              className="btn-secondary"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={(e) => {
                 e.stopPropagation();
                 onArchive();
               }}
             >
               Archiver
-            </button>
+            </Button>
           )}
         </div>
       </div>

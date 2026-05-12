@@ -8,8 +8,7 @@ export interface UseEmailsResult {
   error: string | null;
   isAuthenticated: boolean;
   loadEmails: () => Promise<void>;
-  loadPendingArchive: () => Promise<void>;
-  updateEmail: (emailId: string, patch: Partial<Email>) => void;
+  loadAll: () => Promise<void>;
   removeEmail: (emailId: string) => void;
   removePendingArchive: (emailId: string) => void;
 }

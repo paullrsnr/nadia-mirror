@@ -11,6 +11,7 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
+      type="button"
       disabled={disabled}
       className={`btn btn--${variant} btn--${size} ${className}`.trim()}
       {...props}

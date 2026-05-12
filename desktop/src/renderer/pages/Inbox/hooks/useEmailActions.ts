@@ -12,7 +12,6 @@ import type { Email, MailProvider, UseEmailActionsResult } from "../../../models
 
 interface UseEmailActionsOptions {
   provider: MailProvider;
-  onEmailUpdate: (emailId: string, patch: Partial<Email>) => void;
   onEmailRemove: (emailId: string) => void;
   onPendingArchiveRemove: (emailId: string) => void;
   onEmailsReload: () => void;
@@ -20,7 +19,6 @@ interface UseEmailActionsOptions {
 
 export function useEmailActions({
   provider,
-  onEmailUpdate,
   onEmailRemove,
   onPendingArchiveRemove,
   onEmailsReload,
@@ -56,15 +54,15 @@ export function useEmailActions({
       setClassifying(true);
       setError(null);
       try {
-        const result = await classifyEmail(email.id);
-        onEmailUpdate(email.id, { category: result.category });
+        await classifyEmail(email.id);
+        onEmailsReload();
       } catch {
         setError("Erreur lors de la classification. Vérifiez qu'un modèle LLM est chargé.");
       } finally {
         setClassifying(false);
       }
     },
-    [onEmailUpdate],
+    [onEmailsReload],
   );
 
   const handleClassifyAll = useCallback(async () => {

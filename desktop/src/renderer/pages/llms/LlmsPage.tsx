@@ -1,5 +1,6 @@
 import "./LlmsPage.css";
 import ModelCard from "../../components/domain/LlmModelCard";
+import Button from "../../components/ui/Button";
 import Loader from "../../components/ui/Loader";
 import ErrorMessage from "../../components/ui/ErrorMessage";
 import { useModelsData } from "./hooks/useModelsData";
@@ -89,9 +90,10 @@ export default function LlmsPage() {
         <h2 className="models-catalog-heading">Choisissez un modèle pour démarrer</h2>
 
         {catalog.map((model) => (
-          <button
-            key={model.id}
+          <Button
             type="button"
+            key={model.id}
+            variant="ghost"
             disabled={isDownloadingAny}
             onClick={() => handleDownload(model, true)}
             className="model-download-btn"
@@ -103,7 +105,7 @@ export default function LlmsPage() {
               </div>
               <span className="model-download-btn__badge">Télécharger</span>
             </div>
-          </button>
+          </Button>
         ))}
       </div>
     );

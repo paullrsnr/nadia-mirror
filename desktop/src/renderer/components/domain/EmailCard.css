@@ -67,10 +67,10 @@
   color: var(--color-text-secondary);
 }
 
-.category-badge--travail      { background-color: #dbeafe; color: #1d4ed8; }
-.category-badge--personnel    { background-color: #dcfce7; color: #15803d; }
-.category-badge--finance      { background-color: #fef9c3; color: #a16207; }
-.category-badge--shopping     { background-color: #f3e8ff; color: #7e22ce; }
-.category-badge--marketing    { background-color: #ffe4e6; color: #be123c; }
-.category-badge--notification { background-color: #f1f5f9; color: #475569; }
-.category-badge--autre        { background-color: #f1f5f9; color: #64748b; }
+.category-badge--travail      { background-color: var(--color-category-travail-bg);      color: var(--color-category-travail-text); }
+.category-badge--personnel    { background-color: var(--color-category-personnel-bg);    color: var(--color-category-personnel-text); }
+.category-badge--finance      { background-color: var(--color-category-finance-bg);      color: var(--color-category-finance-text); }
+.category-badge--shopping     { background-color: var(--color-category-shopping-bg);     color: var(--color-category-shopping-text); }
+.category-badge--marketing    { background-color: var(--color-category-marketing-bg);    color: var(--color-category-marketing-text); }
+.category-badge--notification { background-color: var(--color-category-notification-bg); color: var(--color-category-notification-text); }
+.category-badge--autre        { background-color: var(--color-category-autre-bg);        color: var(--color-category-autre-text); }

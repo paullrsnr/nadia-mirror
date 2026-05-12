@@ -26,4 +26,20 @@
   /* Actions */
   --color-button-primary:   #4a9eff;
   --color-button-secondary: #242424;
+
+  /* Badges de catégorie */
+  --color-category-travail-bg:      #1e3a5f;
+  --color-category-travail-text:    #93c5fd;
+  --color-category-personnel-bg:    #14532d;
+  --color-category-personnel-text:  #86efac;
+  --color-category-finance-bg:      #422006;
+  --color-category-finance-text:    #fde68a;
+  --color-category-shopping-bg:     #3b0764;
+  --color-category-shopping-text:   #d8b4fe;
+  --color-category-marketing-bg:    #4c0519;
+  --color-category-marketing-text:  #fda4af;
+  --color-category-notification-bg:   #1e293b;
+  --color-category-notification-text: #94a3b8;
+  --color-category-autre-bg:        #1e293b;
+  --color-category-autre-text:      #94a3b8;
 }

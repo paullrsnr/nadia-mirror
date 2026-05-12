@@ -1,6 +1,7 @@
 import "./App.css";
 import { NavLink, Outlet } from "react-router-dom";
 import { useTheme } from "./hooks/useTheme";
+import Button from "./components/ui/Button";
 
 export default function App() {
   const { theme, toggle } = useTheme();
@@ -34,13 +35,15 @@ export default function App() {
           Paramètres
         </NavLink>
 
-        <button
+        <Button
+          type="button"
+          variant="ghost"
           onClick={toggle}
           aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
           className="app-nav__theme-toggle"
         >
           {theme === "dark" ? "☀" : "☾"}
-        </button>
+        </Button>
       </nav>
 
       <main className="app-main">

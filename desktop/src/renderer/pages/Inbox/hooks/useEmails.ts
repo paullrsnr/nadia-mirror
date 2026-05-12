@@ -4,100 +4,79 @@ import { getAuthStatus } from "../../../services/api/auth.api";
 import { getPendingArchive } from "../../../services/api/autoArchive.api";
 import type { Email, Category, MailProvider, UseEmailsResult } from "../../../models";
 
-interface UseEmailsState {
-  emails: Email[];
-  pendingArchive: Email[];
-  categories: Category[];
-  loading: boolean;
-  error: string | null;
-  isAuthenticated: boolean;
-}
-
 export function useEmails(provider: MailProvider): UseEmailsResult {
-  const [state, setState] = useState<UseEmailsState>({
-    emails: [],
-    pendingArchive: [],
-    categories: [],
-    loading: false,
-    error: null,
-    isAuthenticated: false,
-  });
+  const [emails, setEmails] = useState<Email[]>([]);
+  const [pendingArchive, setPendingArchive] = useState<Email[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const loadEmails = useCallback(async () => {
-    setState((s) => ({ ...s, loading: true, error: null }));
+    setLoading(true);
+    setError(null);
     try {
       const response = await getEmails(50, provider);
-      setState((s) => ({ ...s, emails: response.emails, loading: false }));
+      setEmails(response.emails);
     } catch {
-      setState((s) => ({ ...s, error: "Erreur lors du chargement des emails", loading: false }));
+      setError("Erreur lors du chargement des emails");
+    } finally {
+      setLoading(false);
     }
   }, [provider]);
 
   const loadPendingArchive = useCallback(async () => {
     try {
       const pending = await getPendingArchive();
-      setState((s) => ({ ...s, pendingArchive: pending.emails }));
+      setPendingArchive(pending.emails);
     } catch {
       // silencieux
     }
   }, []);
 
+  const loadAll = useCallback(async () => {
+    await Promise.all([loadEmails(), loadPendingArchive()]);
+  }, [loadEmails, loadPendingArchive]);
+
   const initialize = useCallback(async () => {
     try {
       const authStatus = await getAuthStatus(provider);
-      setState((s) => ({ ...s, isAuthenticated: authStatus.is_authenticated }));
-      if (authStatus.is_authenticated) {
-        await loadEmails();
-        await loadPendingArchive();
-      }
+      setIsAuthenticated(authStatus.is_authenticated);
+      if (authStatus.is_authenticated) await loadAll();
     } catch {
-      setState((s) => ({ ...s, error: "Erreur de connexion" }));
+      setError("Erreur de connexion");
     }
-  }, [provider, loadEmails, loadPendingArchive]);
+  }, [provider, loadAll]);
 
   useEffect(() => {
-    setState((s) => ({
-      ...s,
-      emails: [],
-      isAuthenticated: false,
-      error: null,
-    }));
+    setEmails([]);
+    setIsAuthenticated(false);
+    setError(null);
     initialize();
   }, [initialize]);
 
   useEffect(() => {
-    getCategories()
-      .then((cats) => setState((s) => ({ ...s, categories: cats })))
-      .catch(() => {});
-  }, []);
-
-  const updateEmail = useCallback((emailId: string, patch: Partial<Email>) => {
-    setState((s) => ({
-      ...s,
-      emails: s.emails.map((e) => (e.id === emailId ? { ...e, ...patch } : e)),
-    }));
+    getCategories().then(setCategories).catch(() => {});
   }, []);
 
   const removeEmail = useCallback((emailId: string) => {
-    setState((s) => ({
-      ...s,
-      emails: s.emails.filter((e) => e.id !== emailId),
-      pendingArchive: s.pendingArchive.filter((e) => e.id !== emailId),
-    }));
+    setEmails((prev) => prev.filter((e) => e.id !== emailId));
+    setPendingArchive((prev) => prev.filter((e) => e.id !== emailId));
   }, []);
 
   const removePendingArchive = useCallback((emailId: string) => {
-    setState((s) => ({
-      ...s,
-      pendingArchive: s.pendingArchive.filter((e) => e.id !== emailId),
-    }));
+    setPendingArchive((prev) => prev.filter((e) => e.id !== emailId));
   }, []);
 
   return {
-    ...state,
+    emails,
+    pendingArchive,
+    categories,
+    loading,
+    error,
+    isAuthenticated,
     loadEmails,
-    loadPendingArchive,
-    updateEmail,
+    loadAll,
     removeEmail,
     removePendingArchive,
   };
