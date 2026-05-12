@@ -1,0 +1,45 @@
+:root {
+  /* Couleurs de surface */
+  --color-background:          #ffffff;
+  --color-background-muted:    #f9f9f9;
+  --color-background-unread:   #f0f7ff;
+  --color-background-hover:    #f5f5f5;
+  --color-background-overlay:  #f5f5f5;
+  --color-background-selected: #f0fff0;
+  --color-background-nav-active: #e8f0fe;
+
+  /* Bordures */
+  --color-border:        #eeeeee;
+  --color-border-strong: #dddddd;
+  --color-border-button: #cccccc;
+
+  /* Texte */
+  --color-text-primary:   #333333;
+  --color-text-secondary: #666666;
+  --color-text-muted:     #888888;
+
+  /* Statuts */
+  --color-success:     #4CAF50;
+  --color-error:       #f44336;
+  --color-error-light: #ffebee;
+
+  /* Actions */
+  --color-button-primary:   #007bff;
+  --color-button-secondary: #ffffff;
+
+  /* Badges de catégorie */
+  --color-category-travail-bg:      #dbeafe;
+  --color-category-travail-text:    #1d4ed8;
+  --color-category-personnel-bg:    #dcfce7;
+  --color-category-personnel-text:  #15803d;
+  --color-category-finance-bg:      #fef9c3;
+  --color-category-finance-text:    #a16207;
+  --color-category-shopping-bg:     #f3e8ff;
+  --color-category-shopping-text:   #7e22ce;
+  --color-category-marketing-bg:    #ffe4e6;
+  --color-category-marketing-text:  #be123c;
+  --color-category-notification-bg:   #f1f5f9;
+  --color-category-notification-text: #475569;
+  --color-category-autre-bg:        #f1f5f9;
+  --color-category-autre-text:      #64748b;
+}

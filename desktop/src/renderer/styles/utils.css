@@ -1,0 +1,75 @@
+/* —— Animations —— */
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* —— Layout (flex) —— */
+.flex-row          { display: flex; align-items: center; }
+.flex-row--between { display: flex; justify-content: space-between; align-items: flex-start; }
+.flex-row--center  { display: flex; align-items: center; justify-content: center; }
+.flex-col          { display: flex; flex-direction: column; }
+.flex-col--end     { display: flex; flex-direction: column; align-items: flex-end; }
+.flex-col--center  { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.flex-wrap         { flex-wrap: wrap; }
+.flex-shrink-0     { flex-shrink: 0; }
+.gap-xs   { gap: var(--space-xs); }
+.gap-sm   { gap: var(--space-sm); }
+.gap-md   { gap: var(--space-md); }
+.gap-card { gap: var(--space-card); }
+.gap-lg   { gap: var(--space-lg); }
+.flex-1   { flex: 1; }
+.self-start { align-self: flex-start; }
+
+/* —— Typographie —— */
+.text-primary   { color: var(--color-text-primary);   font-weight: var(--font-weight-bold); }
+.text-secondary { color: var(--color-text-secondary); font-size: var(--font-size-base); }
+.text-muted     { color: var(--color-text-muted);     font-size: var(--font-size-sm); }
+.text-muted--xs { color: var(--color-text-muted);     font-size: var(--font-size-xs); }
+.text-success   { color: var(--color-success); }
+.text-error     { color: var(--color-error); }
+.text-center    { text-align: center; }
+.font-bold      { font-weight: var(--font-weight-bold); }
+.font-normal    { font-weight: var(--font-weight-normal); }
+.font-medium    { font-weight: 500; }
+.whitespace-pre { white-space: pre-wrap; }
+
+/* —— Texte tronqué —— */
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* —— Overflow —— */
+.overflow-y-auto { overflow-y: auto; }
+.overflow-hidden  { overflow: hidden; }
+
+/* —— Dimensions —— */
+.w-full   { width: 100%; }
+.h-screen { height: 100vh; }
+
+/* —— Boutons utilitaires —— */
+.btn-secondary {
+  padding: 4px 8px;
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--color-border-button);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background-color: var(--color-button-secondary);
+}
+
+.model-download-btn {
+  display: block;
+  width: 100%;
+  padding: var(--space-card);
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  text-align: left;
+}
+.model-download-btn:hover:not(:disabled) { border-color: var(--color-button-primary); }
+.model-download-btn:disabled             { cursor: default; }

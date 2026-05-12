@@ -1,0 +1,24 @@
+:root {
+  /* Espacements */
+  --space-xs:   5px;
+  --space-sm:   8px;
+  --space-md:   10px;
+  --space-card: 15px;
+  --space-page: 20px;
+  --space-lg:   40px;
+
+  /* Typographie */
+  --font-family:        Arial, sans-serif;
+  --font-size-xs:       11px;
+  --font-size-sm:       12px;
+  --font-size-base:     14px;
+  --font-weight-normal: normal;
+  --font-weight-bold:   bold;
+
+  /* Rayons */
+  --radius-sm: 3px;
+  --radius-md: 8px;
+
+  /* Ombres */
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
