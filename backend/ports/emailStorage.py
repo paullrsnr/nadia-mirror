@@ -73,3 +73,11 @@ class EmailStorage(ABC):
     def find_pending_archive_emails(self) -> list[Email]:
         """Retourne les emails en attente de confirmation d'archivage."""
 
+    @abstractmethod
+    def set_starred(self, email_id: str, starred: bool) -> None:
+        """Marque/démarque un email comme favori. Lève NotFoundError si introuvable."""
+
+    @abstractmethod
+    def mark_email_read(self, email_id: str) -> None:
+        """Retire le label UNREAD d'un email en local. Lève NotFoundError si introuvable."""
+

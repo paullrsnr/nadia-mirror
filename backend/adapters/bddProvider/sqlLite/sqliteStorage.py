@@ -1,3 +1,4 @@
+import json
 import logging
 import shutil
 from datetime import datetime
@@ -59,6 +60,7 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
                     model.draft_reply = existing.draft_reply
                 model.is_archived = existing.is_archived
                 model.pending_archive = existing.pending_archive
+                model.is_starred = existing.is_starred
             session.merge(model)
             session.commit()
             return is_new
@@ -95,6 +97,7 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
                         model.draft_reply = existing.draft_reply
                     model.is_archived = existing.is_archived
                     model.pending_archive = existing.pending_archive
+                    model.is_starred = existing.is_starred
                 else:
                     new_ids.append(email.id)
                 session.merge(model)
@@ -212,6 +215,37 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
             if model is None:
                 raise NotFoundError(f"Email introuvable : {email_id}")
             model.pending_archive = pending
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def set_starred(self, email_id: str, starred: bool) -> None:
+        session = create_session()
+        try:
+            model = session.get(EmailModel, email_id)
+            if model is None:
+                raise NotFoundError(f"Email introuvable : {email_id}")
+            model.is_starred = starred
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def mark_email_read(self, email_id: str) -> None:
+        session = create_session()
+        try:
+            model = session.get(EmailModel, email_id)
+            if model is None:
+                raise NotFoundError(f"Email introuvable : {email_id}")
+            labels = json.loads(model.labels) if model.labels and model.labels != "null" else []
+            if "UNREAD" in labels:
+                labels.remove("UNREAD")
+                model.labels = json.dumps(labels)
             session.commit()
         except Exception:
             session.rollback()

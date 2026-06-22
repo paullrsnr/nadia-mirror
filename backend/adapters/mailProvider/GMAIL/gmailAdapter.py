@@ -1,3 +1,4 @@
+import base64
 from typing import Optional
 
 from backend.core.exceptions import AuthError
@@ -65,6 +66,19 @@ class GmailAdapter:
                 f"Erreur lors de la récupération des emails: {error_message}"
             ) from e
 
+    def get_attachment_gmail(self, email_id: str, attachment_id: str) -> bytes:
+        # pylint: disable=no-member
+        result = (
+            self.gmail_api.users()
+            .messages()
+            .attachments()
+            .get(userId="me", messageId=email_id, id=attachment_id)
+            .execute()
+        )
+        data = result.get("data", "")
+        padded = data + "=" * (-len(data) % 4)
+        return base64.urlsafe_b64decode(padded)
+
     def archive_email_gmail(self, email_id: str) -> bool:
         try:
             # pylint: disable=no-member
@@ -72,6 +86,18 @@ class GmailAdapter:
                 userId="me",
                 id=email_id,
                 body={"removeLabelIds": ["INBOX"]},
+            ).execute()
+            return True
+        except (OSError, ValueError, KeyError, TypeError):
+            return False
+
+    def mark_as_read_gmail(self, email_id: str) -> bool:
+        try:
+            # pylint: disable=no-member
+            self.gmail_api.users().messages().modify(
+                userId="me",
+                id=email_id,
+                body={"removeLabelIds": ["UNREAD"]},
             ).execute()
             return True
         except (OSError, ValueError, KeyError, TypeError):
@@ -108,3 +134,11 @@ def fetch_emails_gmail(max_results: int = 50, query: Optional[EmailListQuery] = 
 
 def archive_email_gmail(email_id: str) -> bool:
     return GmailAdapter().archive_email_gmail(email_id)
+
+
+def get_attachment_gmail(email_id: str, attachment_id: str) -> bytes:
+    return GmailAdapter().get_attachment_gmail(email_id, attachment_id)
+
+
+def mark_as_read_gmail(email_id: str) -> bool:
+    return GmailAdapter().mark_as_read_gmail(email_id)

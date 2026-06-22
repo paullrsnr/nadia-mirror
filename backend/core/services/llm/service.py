@@ -4,6 +4,8 @@ from pathlib import Path
 from backend.core.models.llm import LLMStatusResponse, InstalledModelResponse, CatalogModelResponse, SummarizeRequest, SummarizeResponse, SummarizeThreadRequest, ClassifyEmailRequest
 from backend.core.services.llm.download import get_models_dir
 from backend.core.services.llm.catalog import CATALOG, get_catalog_model
+from backend.core.services.llm.preferences import save_selected_model_id, load_selected_model_id
+from backend.config.settings import llm_settings
 from backend.core.categories import EMAIL_CATEGORIES
 from backend.core.archiveDecision import ArchiveDecision
 from backend.core.services.llm.prompts import EMAIL_SUMMARIZER, THREAD_SUMMARIZER, EMAIL_CLASSIFIER, EMAIL_IMPORTANCE_SCORER, REPLY_DRAFTER, AUTO_ARCHIVE_EVALUATOR
@@ -161,9 +163,16 @@ class LlmService:
                     content=f"De : {from_address}\nObjet : {subject}\n\n{snippet[:400]}",
                 ),
             ]
-            return self._adapter.get_short_answer(messages).strip().lower() == "oui"
+            raw = self._adapter.get_short_answer(messages).strip().lower()
         except Exception as exc:
             raise ValueError(f"Erreur lors du scoring d'importance : {exc}") from exc
+
+        first_word = raw.split()[0].strip(" .,!;:\"'()") if raw else ""
+        if first_word.startswith("oui"):
+            return True
+        if first_word.startswith("non"):
+            return False
+        return "oui" in raw and "non" not in raw
 
     def draft_reply(self, subject: str, body: str, from_address: str) -> str:
         if not self._adapter.is_loaded():
@@ -210,4 +219,14 @@ class LlmService:
         success = self._adapter.load_model(model_path)
         if success:
             self._selected_model_id = model_path.stem
+            save_selected_model_id(self._selected_model_id)
         return success
+
+    def auto_load_last_model(self) -> None:
+        model_id = load_selected_model_id() or llm_settings.DEFAULT_MODEL_ID
+        if not model_id:
+            return
+        try:
+            self.load_model_by_id(model_id)
+        except ValueError as exc:
+            logger.warning("Chargement automatique du modèle '%s' impossible: %s", model_id, exc)

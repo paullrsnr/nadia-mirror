@@ -12,6 +12,9 @@ export type {
   UseEmailsResult,
   UseEmailActionsResult,
   UseSyncResult,
+  ProviderCount,
+  UseProviderCountsResult,
+  InboxFolder,
 } from "./email";
 
 export type {
@@ -37,3 +40,5 @@ export type {
 } from "./llm";
 
 export type { ButtonVariant, ButtonSize, ButtonProps, BadgeProps } from "./ui";
+
+export type { SidebarProps, ToolbarProps } from "./layout";

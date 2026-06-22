@@ -17,3 +17,11 @@ class EmailProviderGateway(ABC):
     @abstractmethod
     def archive_email(self, provider: str, email_id: str) -> bool:
         """Archive un email pour le provider donné."""
+
+    @abstractmethod
+    def get_attachment_content(self, provider: str, email_id: str, attachment_id: str) -> bytes:
+        """Récupère le contenu binaire d'une pièce jointe pour le provider donné."""
+
+    @abstractmethod
+    def mark_as_read(self, provider: str, email_id: str) -> bool:
+        """Marque un email comme lu pour le provider donné."""

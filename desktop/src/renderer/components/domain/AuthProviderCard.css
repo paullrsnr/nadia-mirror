@@ -1,7 +1,7 @@
 .auth-card {
   padding: var(--space-page);
   margin-top: var(--space-lg);
-  background-color: var(--color-background-muted);
+  background-color: var(--color-base-muted);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
 }
@@ -19,7 +19,7 @@
 }
 
 .auth-card__status--connected    { margin: 0; color: var(--color-success); }
-.auth-card__status--disconnected { margin: 0; color: var(--color-text-muted); }
+.auth-card__status--disconnected { margin: 0; color: var(--color-content-muted); }
 
 .auth-card__children {
   margin-top: var(--space-sm);

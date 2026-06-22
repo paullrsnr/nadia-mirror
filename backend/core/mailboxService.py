@@ -185,11 +185,7 @@ class MailboxService:
             new_emails = [e for e in page_result.emails if e.id in set(new_ids)]
 
             if new_emails:
-                threading.Thread(
-                    target=self._enrich_new_emails,
-                    args=(new_emails[:_LLM_ENRICH_CAP],),
-                    daemon=True,
-                ).start()
+                self._enrich_new_emails(new_emails[:_LLM_ENRICH_CAP])
 
             self._sync_sent_emails(provider_tag, tag, after)
 

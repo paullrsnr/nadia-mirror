@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from backend.core.models.email import Email, EmailAddress
+from backend.core.models.email import Email, EmailAddress, EmailAttachment
 from backend.core.models.email.provider import Provider
 from backend.adapters.mailProvider.Outlook.models import GraphMessage, GraphRecipient
 
@@ -20,6 +20,17 @@ def parse_outlook_message(message: dict) -> Email:
     msg_id = graph_message.id or ""
     thread_id = graph_message.conversation_id or msg_id
 
+    attachments = [
+        EmailAttachment(
+            filename=a.name,
+            mime_type=a.content_type,
+            size=a.size,
+            attachment_id=a.id,
+        )
+        for a in graph_message.attachments
+        if a.id
+    ]
+
     return Email(
         id=msg_id,
         thread_id=thread_id,
@@ -31,6 +42,7 @@ def parse_outlook_message(message: dict) -> Email:
         date=_parse_graph_datetime(graph_message.received_date_time),
         body_text=body_text,
         body_html=body_html,
+        attachments=attachments,
         snippet=graph_message.body_preview,
         provider=Provider.OUTLOOK,
     )

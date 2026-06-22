@@ -6,9 +6,9 @@ import {
   getAuthUrl,
   logout,
   CONNECTABLE_PROVIDERS,
-} from "../../../services/api/auth.api";
-import { authSignal } from "../../../state";
-import type { ConnectableProvider, ApiError, UseAuthResult } from "../../../models";
+} from "../services/api/auth.api";
+import { authSignal } from "../state";
+import type { ConnectableProvider, ApiError, UseAuthResult } from "../models";
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 300_000;

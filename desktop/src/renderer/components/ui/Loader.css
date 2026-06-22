@@ -3,7 +3,7 @@
   border-radius: 50%;
   border-style: solid;
   border-color: var(--color-border);
-  border-top-color: var(--color-button-primary);
+  border-top-color: var(--color-marque-secondary);
   animation: spin 1s linear infinite;
 }
 
@@ -18,4 +18,4 @@
   gap: 16px;
 }
 
-.loader__label { color: var(--color-text-muted); margin: 0; }
+.loader__label { color: var(--color-content-muted); margin: 0; }

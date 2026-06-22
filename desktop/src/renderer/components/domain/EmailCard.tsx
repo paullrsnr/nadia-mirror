@@ -1,8 +1,9 @@
 import type { EmailCardProps } from "../../models/email";
+import { IconStar, IconAttachment } from "../ui/icons";
 import Button from "../ui/Button";
 import "./EmailCard.css";
 
-export default function EmailCard({ email, onClick, onArchive }: EmailCardProps) {
+export default function EmailCard({ email, isSelected, onClick, onArchive, onToggleStar }: EmailCardProps) {
   const isUnread = email.labels.includes("UNREAD");
   const fromName = email.from_address.name || email.from_address.email;
   const date = new Date(email.date).toLocaleDateString("fr-FR", {
@@ -12,9 +13,13 @@ export default function EmailCard({ email, onClick, onArchive }: EmailCardProps)
     minute: "2-digit",
   });
 
+  const classNames = ["root"];
+  if (isUnread) classNames.push("root--unread");
+  if (isSelected) classNames.push("root--selected");
+
   return (
     <div
-      className={isUnread ? "root root--unread" : "root"}
+      className={classNames.join(" ")}
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -26,33 +31,47 @@ export default function EmailCard({ email, onClick, onArchive }: EmailCardProps)
       }}
     >
       <div className="row">
+        <button
+          type="button"
+          className={`star-btn${email.is_starred ? " star-btn--active" : ""}`}
+          title={email.is_starred ? "Retirer des favoris" : "Ajouter aux favoris"}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleStar?.();
+          }}
+        >
+          <IconStar filled={email.is_starred} />
+        </button>
         <div className="main">
           <div className="meta">
-            <span className="text-primary">{fromName}</span>
-            {email.category && (
-              <span className={`category-badge category-badge--${email.category}`}>
-                {email.category}
-              </span>
-            )}
+            <span className="from">{fromName}</span>
+            <span className="date">{date}</span>
           </div>
-          <div className="text-secondary subject">{email.subject || "[Sans objet]"}</div>
-          {email.snippet && (
-            <div className="snippet text-muted truncate">{email.snippet}</div>
-          )}
-        </div>
-        <div className="aside">
-          <span className="text-muted">{date}</span>
-          {onArchive && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                onArchive();
-              }}
-            >
-              Archiver
-            </Button>
+          <div className="subject">
+            {email.subject || "[Sans objet]"}
+            {email.attachments.length > 0 && <IconAttachment className="attachment-indicator" />}
+          </div>
+          {email.snippet && <div className="snippet truncate">{email.snippet}</div>}
+          {(email.category || onArchive) && (
+            <div className="footer">
+              {email.category && (
+                <span className={`category-badge category-badge--${email.category}`}>
+                  {email.category}
+                </span>
+              )}
+              {onArchive && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onArchive();
+                  }}
+                >
+                  Archiver
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </div>

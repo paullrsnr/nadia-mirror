@@ -11,3 +11,6 @@ export type { EmailListProps } from "./EmailListProps";
 export type { UseEmailsResult } from "./UseEmailsResult";
 export type { UseEmailActionsResult } from "./UseEmailActionsResult";
 export type { UseSyncResult } from "./UseSyncResult";
+export type { ProviderCount } from "./ProviderCount";
+export type { InboxFolder } from "./InboxFolder";
+export type { UseProviderCountsResult } from "./UseProviderCountsResult";

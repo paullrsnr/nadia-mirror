@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
+import { useComputed } from "@preact/signals-react";
 import { getEmails, getCategories } from "../../../services/api/emails.api";
-import { getAuthStatus } from "../../../services/api/auth.api";
+import { getAllAuthStatuses } from "../../../services/api/auth.api";
 import { getPendingArchive } from "../../../services/api/autoArchive.api";
+import { authSignal } from "../../../state";
 import type { Email, Category, MailProvider, UseEmailsResult } from "../../../models";
 
 export function useEmails(provider: MailProvider): UseEmailsResult {
@@ -10,7 +12,13 @@ export function useEmails(provider: MailProvider): UseEmailsResult {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const isAuthenticated = useComputed(() => {
+    const statuses = authSignal.value;
+    return provider === "all"
+      ? statuses.gmail?.is_authenticated === true || statuses.outlook?.is_authenticated === true
+      : statuses[provider]?.is_authenticated === true;
+  }).value;
 
   const loadEmails = useCallback(async () => {
     setLoading(true);
@@ -38,22 +46,16 @@ export function useEmails(provider: MailProvider): UseEmailsResult {
     await Promise.all([loadEmails(), loadPendingArchive()]);
   }, [loadEmails, loadPendingArchive]);
 
-  const initialize = useCallback(async () => {
-    try {
-      const authStatus = await getAuthStatus(provider);
-      setIsAuthenticated(authStatus.is_authenticated);
-      if (authStatus.is_authenticated) await loadAll();
-    } catch {
-      setError("Erreur de connexion");
-    }
-  }, [provider, loadAll]);
+  useEffect(() => {
+    getAllAuthStatuses()
+      .then((statuses) => (authSignal.value = statuses))
+      .catch(() => setError("Erreur de connexion"));
+  }, []);
 
   useEffect(() => {
     setEmails([]);
-    setIsAuthenticated(false);
-    setError(null);
-    initialize();
-  }, [initialize]);
+    if (isAuthenticated) loadAll();
+  }, [provider, isAuthenticated, loadAll]);
 
   useEffect(() => {
     getCategories().then(setCategories).catch(() => {});
@@ -68,6 +70,16 @@ export function useEmails(provider: MailProvider): UseEmailsResult {
     setPendingArchive((prev) => prev.filter((e) => e.id !== emailId));
   }, []);
 
+  const setEmailStarred = useCallback((emailId: string, starred: boolean) => {
+    setEmails((prev) => prev.map((e) => (e.id === emailId ? { ...e, is_starred: starred } : e)));
+  }, []);
+
+  const setEmailRead = useCallback((emailId: string) => {
+    setEmails((prev) =>
+      prev.map((e) => (e.id === emailId ? { ...e, labels: e.labels.filter((l) => l !== "UNREAD") } : e)),
+    );
+  }, []);
+
   return {
     emails,
     pendingArchive,
@@ -79,5 +91,7 @@ export function useEmails(provider: MailProvider): UseEmailsResult {
     loadAll,
     removeEmail,
     removePendingArchive,
+    setEmailStarred,
+    setEmailRead,
   };
 }

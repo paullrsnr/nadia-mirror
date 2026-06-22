@@ -1,18 +1,27 @@
+.models-page-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--color-base);
+  color: var(--color-content);
+}
+
 /* ── Écran de téléchargement initial ── */
 .models-download-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 80vh;
+  flex: 1;
   padding: var(--space-page);
   text-align: center;
+  overflow-y: auto;
 }
 
 .models-download-spinner {
   border-style: solid;
   border-color: var(--color-border);
-  border-top-color: var(--color-button-primary);
+  border-top-color: var(--color-marque-secondary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: var(--space-lg);
@@ -23,7 +32,7 @@
 .models-download-desc {
   margin: 0;
   margin-bottom: var(--space-page);
-  color: var(--color-text-secondary);
+  color: var(--color-content-soft);
   font-size: 14px;
   max-width: 400px;
 }
@@ -41,13 +50,13 @@
 
 .models-progress__fill {
   height: 100%;
-  background-color: var(--color-button-primary);
+  background-color: var(--color-marque-secondary);
   transition: width 0.3s ease;
 }
 
 .models-progress__text {
   margin: 0;
-  color: var(--color-text-muted);
+  color: var(--color-content-muted);
   font-size: 16px;
   font-weight: bold;
 }
@@ -55,12 +64,12 @@
 .models-download-footer {
   margin: 0;
   margin-top: var(--space-lg);
-  color: var(--color-text-muted);
+  color: var(--color-content-muted);
   font-size: 12px;
 }
 
 /* ── Choix initial (aucun modèle) ── */
-.models-no-models { padding: var(--space-page); }
+.models-no-models { padding: var(--space-page); flex: 1; overflow-y: auto; }
 
 .models-welcome {
   text-align: center;
@@ -73,37 +82,37 @@
 
 .models-welcome__desc {
   margin: 0;
-  color: var(--color-text-secondary);
+  color: var(--color-content-soft);
   font-size: 15px;
 }
 
 .models-catalog-heading {
   font-size: 16px;
   margin-bottom: var(--space-card);
-  color: var(--color-text-secondary);
+  color: var(--color-content-soft);
 }
 
 /* Bouton de téléchargement catalogue */
 .model-download-btn__row    { display: flex; justify-content: space-between; align-items: center; }
-.model-download-btn__title  { margin: 0; margin-bottom: var(--space-xs); color: var(--color-text-primary); }
-.model-download-btn__desc   { margin: 0; color: var(--color-text-secondary); font-size: 13px; }
+.model-download-btn__title  { margin: 0; margin-bottom: var(--space-xs); color: var(--color-content); }
+.model-download-btn__desc   { margin: 0; color: var(--color-content-soft); font-size: 13px; }
 
 .model-download-btn__badge {
   padding: var(--space-sm) var(--space-card);
-  background-color: var(--color-button-primary);
+  background-color: var(--color-marque-secondary);
   color: #fff;
   border-radius: var(--radius-sm);
   font-size: 13px;
 }
 
 /* ── Vue principale ── */
-.models-page        { padding: var(--space-page); }
+.models-page        { padding: var(--space-page); flex: 1; overflow-y: auto; }
 .models-page__title { margin-bottom: var(--space-sm); }
 
 .models-active-section {
   margin-bottom: var(--space-page);
   padding: var(--space-card);
-  background-color: var(--color-background);
+  background-color: var(--color-base);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
@@ -124,7 +133,7 @@
   font-size: 14px;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
-  background-color: var(--color-background);
+  background-color: var(--color-base);
 }
 
 .models-active-section__status {
@@ -140,14 +149,14 @@
 .models-active-section__desc {
   margin: 0;
   margin-top: var(--space-sm);
-  color: var(--color-text-muted);
+  color: var(--color-content-muted);
   font-size: 12px;
 }
 
 .models-catalog-title {
   font-size: 18px;
   margin-bottom: var(--space-card);
-  color: var(--color-text-secondary);
+  color: var(--color-content-soft);
 }
 
 /* ── Overlay chargement modèle ── */
@@ -162,7 +171,7 @@
 }
 
 .models-overlay__modal {
-  background-color: var(--color-background);
+  background-color: var(--color-base);
   padding: var(--space-lg);
   border-radius: var(--radius-md);
   text-align: center;
@@ -171,7 +180,7 @@
 .models-overlay__spinner {
   border-style: solid;
   border-color: var(--color-border);
-  border-top-color: var(--color-button-primary);
+  border-top-color: var(--color-marque-secondary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto;
@@ -183,6 +192,6 @@
 .models-overlay__subtext {
   margin: 0;
   margin-top: var(--space-sm);
-  color: var(--color-text-muted);
+  color: var(--color-content-muted);
   font-size: 13px;
 }

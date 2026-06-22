@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import Response
 
 from backend.api.deps import get_mailbox_service, get_emails_service, get_storage, get_classification_service, get_reply_service
 from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
 
 from backend.core.services.classificationService import ClassificationService
 from backend.core.services.replyService import ReplyService
-from backend.api.schemas import EmailListResponse, ArchiveEmailResponse
+from backend.api.schemas import EmailListResponse, ArchiveEmailResponse, StarEmailResponse, MarkReadResponse
 from backend.core.mailboxService import MailboxService
 from backend.core.services.emailsService import EmailsService
 
@@ -29,6 +30,24 @@ def archive_email(
     service: EmailsService = Depends(get_emails_service),
 ):
     return service.archive_email(email_id, provider)
+
+
+@router.post("/star/{email_id}", response_model=StarEmailResponse)
+def star_email(
+    email_id: str,
+    starred: bool = Query(default=True, description="True pour ajouter aux favoris, False pour retirer."),
+    service: EmailsService = Depends(get_emails_service),
+):
+    return service.star_email(email_id, starred)
+
+
+@router.post("/read/{email_id}", response_model=MarkReadResponse)
+def mark_email_read(
+    email_id: str,
+    provider: str | None = Query(default=None, description="Provider (gmail, outlook)."),
+    service: EmailsService = Depends(get_emails_service),
+):
+    return service.mark_email_read(email_id, provider)
 
 
 @router.get("/thread/{thread_id}")
@@ -81,3 +100,17 @@ def sync_emails(
 @router.get("/sync/status")
 def sync_status(mailbox: MailboxService = Depends(get_mailbox_service)):
     return mailbox.get_sync_status()
+
+
+@router.get("/{email_id}/attachments/{attachment_id}")
+def download_attachment(
+    email_id: str,
+    attachment_id: str,
+    service: EmailsService = Depends(get_emails_service),
+):
+    attachment = service.get_attachment(email_id, attachment_id)
+    return Response(
+        content=attachment.content,
+        media_type=attachment.mime_type or "application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{attachment.filename}"'},
+    )

@@ -1,0 +1,7 @@
+.email-html-body {
+  display: block;
+  width: 100%;
+  border: none;
+  background-color: #ffffff;
+  border-radius: var(--radius-md);
+}

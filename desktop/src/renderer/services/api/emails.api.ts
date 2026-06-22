@@ -1,5 +1,9 @@
-import { apiGet, apiPost } from "./client";
+import { apiGet, apiPost, API_BASE_URL } from "./client";
 import type { Email, EmailListResponse, SyncResponse, Category, MailProvider } from "../../models";
+
+export function getAttachmentDownloadUrl(emailId: string, attachmentId: string): string {
+  return `${API_BASE_URL}/emails/${emailId}/attachments/${attachmentId}`;
+}
 
 export async function getEmails(maxResults = 50, provider?: MailProvider): Promise<EmailListResponse> {
   const params: Record<string, string> = { max_results: maxResults.toString() };
@@ -10,6 +14,21 @@ export async function getEmails(maxResults = 50, provider?: MailProvider): Promi
 export async function archiveEmail(emailId: string, provider?: MailProvider): Promise<void> {
   const params = provider ? `?provider=${provider}` : "";
   await apiPost(`/emails/archive/${emailId}${params}`);
+}
+
+export async function starEmail(
+  emailId: string,
+  starred: boolean,
+): Promise<{ status: string; email_id: string; is_starred: boolean }> {
+  return apiPost(`/emails/star/${emailId}?starred=${starred}`);
+}
+
+export async function markEmailRead(
+  emailId: string,
+  provider?: MailProvider,
+): Promise<{ status: string; email_id: string }> {
+  const params = provider ? `?provider=${provider}` : "";
+  return apiPost(`/emails/read/${emailId}${params}`);
 }
 
 export async function classifyEmail(emailId: string): Promise<{ email_id: string; category: string }> {
