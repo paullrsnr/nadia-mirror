@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from backend.core.models.email import EmailListQuery, EmailPage
+from backend.core.models.email import AttachmentContent, EmailListQuery, EmailPage, DraftEmail
 
 
 class EmailProviderGateway(ABC):
@@ -25,3 +25,7 @@ class EmailProviderGateway(ABC):
     @abstractmethod
     def mark_as_read(self, provider: str, email_id: str) -> bool:
         """Marque un email comme lu pour le provider donné."""
+
+    @abstractmethod
+    def send_email(self, provider: str, draft: DraftEmail, attachments: list[AttachmentContent]) -> bool:
+        """Envoie un email pour le provider donné."""

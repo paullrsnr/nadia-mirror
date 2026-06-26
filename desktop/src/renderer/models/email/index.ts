@@ -21,3 +21,8 @@ export type { ProviderCount } from "./ProviderCount";
 export type { InboxFolder } from "./InboxFolder";
 export type { UseProviderCountsResult } from "./UseProviderCountsResult";
 export type { EmailHtmlBodyProps } from "./EmailHtmlBodyProps";
+export type { DraftPayload } from "./DraftPayload";
+export type { DraftEmail } from "./DraftEmail";
+export type { UseComposeDraftResult } from "./UseComposeDraftResult";
+export type { UseDraftsResult } from "./UseDraftsResult";
+export type { ComposeMode, ComposeState } from "./ComposeState";

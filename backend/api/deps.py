@@ -6,9 +6,11 @@ from backend.core.services.authService import AuthService
 from backend.core.services.emailsService import EmailsService
 from backend.core.services.classificationService import ClassificationService
 from backend.core.services.replyService import ReplyService
+from backend.core.services.draftService import DraftService
 from backend.core.services.autoArchiveService import AutoArchiveService
 from backend.core.services.enrichmentService import EnrichmentService
 from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
+from backend.adapters.fileProvider.draftAttachmentFileStorage import DraftAttachmentFileStorage
 
 from backend.adapters.llm.llmGatewayAdapter import LlmGatewayAdapter
 from backend.config.settings import storage_settings
@@ -19,6 +21,7 @@ _credential_gateway = CredentialGatewayAdapter()
 _oauth_gateway = OAuthGatewayAdapter()
 _email_provider_gateway = EmailProviderGatewayAdapter()
 _storage_adapter = SqliteStorageAdapter()
+_attachment_storage = DraftAttachmentFileStorage()
 
 _llm_service = LlmService(LlmGatewayAdapter())
 
@@ -63,6 +66,13 @@ _auth_service = AuthService(
     credential_gateway=_credential_gateway,
 )
 
+_draft_service = DraftService(
+    email_provider_gateway=_email_provider_gateway,
+    credential_gateway=_credential_gateway,
+    storage=_storage_adapter,
+    attachment_storage=_attachment_storage,
+)
+
 
 def get_auth_service() -> AuthService:
     return _auth_service
@@ -94,3 +104,7 @@ def get_reply_service() -> ReplyService:
 
 def get_auto_archive_service() -> AutoArchiveService:
     return _auto_archive_service
+
+
+def get_draft_service() -> DraftService:
+    return _draft_service

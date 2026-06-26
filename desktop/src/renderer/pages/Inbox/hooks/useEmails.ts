@@ -5,9 +5,10 @@ import { getAllAuthStatuses } from "../../../services/api/auth.api";
 import { getPendingArchive } from "../../../services/api/autoArchive.api";
 import { authSignal } from "../../../state";
 import { UNREAD_LABEL } from "../../../constants/labels";
-import type { Email, Category, MailProvider, UseEmailsResult } from "../../../models";
+import type { Email, Category, MailProvider, InboxFolder, UseEmailsResult } from "../../../models";
 
-export function useEmails(provider: MailProvider): UseEmailsResult {
+export function useEmails(provider: MailProvider, folder: InboxFolder = "inbox"): UseEmailsResult {
+  const fetchFolder = folder === "sent" ? "sent" : "inbox";
   const [emails, setEmails] = useState<Email[]>([]);
   const [pendingArchive, setPendingArchive] = useState<Email[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -27,14 +28,14 @@ export function useEmails(provider: MailProvider): UseEmailsResult {
     setLoading(true);
     setError(null);
     try {
-      const response = await getEmails(50, provider);
+      const response = await getEmails(50, provider, fetchFolder);
       setEmails(response.emails);
     } catch {
       setError("Erreur lors du chargement des emails");
     } finally {
       setLoading(false);
     }
-  }, [provider]);
+  }, [provider, fetchFolder]);
 
   const loadPendingArchive = useCallback(async () => {
     try {

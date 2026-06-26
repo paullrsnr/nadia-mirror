@@ -28,6 +28,25 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+export async function apiPostForm<T>(path: string, formData: FormData): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!response.ok) {
+    throw new Error(await parseErrorMessage(response));
+  }
+  return response.json() as Promise<T>;
+}
+
+export async function apiDelete<T>(path: string): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, { method: "DELETE" });
+  if (!response.ok) {
+    throw new Error(await parseErrorMessage(response));
+  }
+  return response.json() as Promise<T>;
+}
+
 /** POST qui retourne un ReadableStream (téléchargement SSE). */
 export async function apiPostStream(path: string, body: unknown): Promise<ReadableStreamDefaultReader<Uint8Array>> {
   const response = await fetch(`${API_BASE_URL}${path}`, {

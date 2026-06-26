@@ -1,1 +1,1 @@
-export type InboxFolder = "inbox" | "favoris";
+export type InboxFolder = "inbox" | "favoris" | "sent" | "drafts";

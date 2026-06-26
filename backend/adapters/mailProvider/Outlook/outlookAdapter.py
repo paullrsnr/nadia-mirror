@@ -4,7 +4,7 @@ from typing import Optional
 import httpx
 
 from backend.core.exceptions import AuthError
-from backend.core.models.email import EmailListQuery, EmailPage
+from backend.core.models.email import AttachmentContent, EmailListQuery, EmailPage, DraftEmail
 from backend.adapters.authProvider.Outlook.outlookTokens import OutlookTokens
 from backend.adapters.authProvider.Outlook.outlookTokenStorage import load_outlook_credentials
 from backend.adapters.mailProvider.Outlook.outlookMessageParser import (
@@ -15,8 +15,6 @@ from backend.adapters.outlook_graph import GRAPH_BASE
 
 
 class OutlookAdapter:
-
-
     def __init__(self):
         tokens = load_outlook_credentials()
         if not tokens or not tokens.access_token:
@@ -71,7 +69,49 @@ class OutlookAdapter:
         except (httpx.HTTPError, ValueError, KeyError):
             return False
 
-    def mark_as_read(self, email_id: str) -> bool:
+    def send_email_outlook(self, draft: DraftEmail, attachments: list[AttachmentContent]) -> bool:
+        access_token = self._access_token()
+        url = f"{GRAPH_BASE}/me/sendMail"
+        body = {
+            "message": {
+                "subject": draft.subject,
+                "body": (
+                    {"contentType": "HTML", "content": draft.body_html}
+                    if draft.body_html
+                    else {"contentType": "Text", "content": draft.body_text}
+                ),
+                "toRecipients": self._to_graph_recipients(draft.to_addresses),
+                "ccRecipients": self._to_graph_recipients(draft.cc_addresses),
+                "bccRecipients": self._to_graph_recipients(draft.bcc_addresses),
+            }
+        }
+        if attachments:
+            body["message"]["attachments"] = [
+                {
+                    "@odata.type": "#microsoft.graph.fileAttachment",
+                    "name": attachment.filename,
+                    "contentType": attachment.mime_type,
+                    "contentBytes": base64.b64encode(attachment.content).decode(),
+                }
+                for attachment in attachments
+            ]
+        try:
+            with httpx.Client() as client:
+                response = client.post(
+                    url,
+                    headers=graph_request_headers(access_token),
+                    json=body,
+                )
+                response.raise_for_status()
+            return True
+        except (httpx.HTTPError, ValueError, KeyError):
+            return False
+
+    @staticmethod
+    def _to_graph_recipients(addresses) -> list[dict]:
+        return [{"emailAddress": {"address": a.email}} for a in addresses]
+
+    def mark_as_read_outlook(self, email_id: str) -> bool:
         access_token = self._access_token()
         url = f"{GRAPH_BASE}/me/messages/{email_id}"
         body = {"isRead": True}

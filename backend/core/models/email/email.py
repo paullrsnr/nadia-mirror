@@ -28,3 +28,4 @@ class Email:
     is_archived: bool = False
     pending_archive: bool = False
     is_starred: bool = False
+    folder: str = "inbox"

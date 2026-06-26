@@ -11,6 +11,9 @@ from backend.core.models.email.archiveResult import ArchiveResult
 from backend.core.models.email.starResult import StarResult
 from backend.core.models.email.markReadResult import MarkReadResult
 from backend.core.models.email.sync import SyncResult, ProviderSyncResult, SyncAllResult
+from backend.core.models.email.draftEmail import DraftEmail
+from backend.core.models.email.sendResult import SendResult
+from backend.core.models.email.saveDraftRequest import SaveDraftRequest
 
 __all__ = [
     "EmailListQuery",
@@ -28,4 +31,7 @@ __all__ = [
     "SyncResult",
     "ProviderSyncResult",
     "SyncAllResult",
+    "DraftEmail",
+    "SendResult",
+    "SaveDraftRequest",
 ]

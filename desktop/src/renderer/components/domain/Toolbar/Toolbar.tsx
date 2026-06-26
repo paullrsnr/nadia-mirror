@@ -3,12 +3,12 @@ import { useEffect, useState } from "react";
 import { useComputed } from "@preact/signals-react";
 import { getLlmStatus, loadModel } from "../../../services/api/llm.api";
 import { llmStatusSignal } from "../../../state";
-import { IconSearch, IconCompose, IconChevronDown } from "../../ui/icons";
+import { IconSearch, IconChevronDown } from "../../ui/icons";
+import ComposeActionButton from "../ComposeActionButton";
 import type { ToolbarProps } from "../../../models/layout";
-import { COMING_SOON_LABEL } from "../../../constants/labels";
 import { THEME_ICON, THEME_LABEL } from "../../../constants/theme";
 
-export default function Toolbar({ searchValue, onSearchChange, themePreference, onCycleTheme }: ToolbarProps) {
+export default function Toolbar({ searchValue, onSearchChange, themePreference, onCycleTheme, onComposeClick }: ToolbarProps) {
   const status = useComputed(() => llmStatusSignal.value).value;
   const [switching, setSwitching] = useState(false);
   const [modelError, setModelError] = useState<string | null>(null);
@@ -47,10 +47,7 @@ export default function Toolbar({ searchValue, onSearchChange, themePreference, 
         />
       </div>
 
-      <button type="button" className="toolbar__compose" disabled title={COMING_SOON_LABEL}>
-        <IconCompose />
-        Nouveau message
-      </button>
+      <ComposeActionButton mode="new" onClick={onComposeClick} className="toolbar__compose" />
 
       <div className="toolbar__right">
         <button

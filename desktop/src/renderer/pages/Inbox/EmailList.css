@@ -2,7 +2,7 @@
   width: clamp(380px, 28vw, 520px);
   flex-shrink: 0;
   border-right: 1px solid var(--color-border);
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   background-color: var(--color-base);
@@ -73,7 +73,18 @@
 
 .email-list__pending-actions { display: flex; gap: var(--space-sm); flex-shrink: 0; }
 
-.email-list__items { flex: 1; overflow-y: auto; }
+.email-list__items {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: auto;
+}
+.email-list__items::-webkit-scrollbar { display: block; width: 6px; background: transparent; }
+.email-list__items::-webkit-scrollbar-track { background: transparent; }
+.email-list__items::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-strong);
+  border-radius: var(--radius-pill);
+}
 
 .email-list__empty {
   padding: var(--space-page);

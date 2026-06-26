@@ -6,16 +6,28 @@ import AuthProviderCard from "../../components/domain/AuthProviderCard";
 import ErrorMessage from "../../components/ui/ErrorMessage";
 import EmailList from "./EmailList";
 import EmailDetailPanel from "./EmailDetailPanel";
+import ComposeModal from "./ComposeModal";
+import DraftsList from "./DraftsList";
 import { useEmails } from "./hooks/useEmails";
 import { useSync } from "./hooks/useSync";
 import { useEmailActions } from "./hooks/useEmailActions";
 import { useProviderCounts } from "./hooks/useProviderCounts";
+import { useDrafts } from "./hooks/useDrafts";
 import { useTheme } from "../../hooks/useTheme";
 import { useAuth } from "../../hooks/useAuth";
 import { starEmail, markEmailRead } from "../../services/api/emails.api";
 import { PROVIDER_LABELS } from "../../constants/providers";
 import { UNREAD_LABEL } from "../../constants/labels";
-import type { Email, MailProvider, InboxFolder } from "../../models";
+import { deleteDraft, sendDraft } from "../../services/api/drafts.api";
+import type { DraftEmail, Email, MailProvider, InboxFolder, ComposeState } from "../../models";
+
+const SEND_DELAY_MS = 2000;
+
+interface PendingSend {
+  draftId: string;
+  subject: string;
+  timeoutId: number;
+}
 
 export default function InboxPage() {
   const [provider, setProvider] = useState<MailProvider>("all");
@@ -24,7 +36,9 @@ export default function InboxPage() {
   const [searchValue, setSearchValue] = useState("");
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [markReadError, setMarkReadError] = useState<string | null>(null);
-  const { themePreference, cycleTheme } = useTheme();
+  const { themePreference, cycleTheme, theme, toggle } = useTheme();
+  const [composeState, setComposeState] = useState<ComposeState | null>(null);
+  const [pendingSend, setPendingSend] = useState<PendingSend | null>(null);
   const {
     authByProvider,
     loading: authLoading,
@@ -54,7 +68,13 @@ export default function InboxPage() {
     removePendingArchive,
     setEmailStarred,
     setEmailRead,
-  } = useEmails(provider);
+  } = useEmails(provider, folder);
+
+  const { drafts, loading: draftsLoading, error: draftsError, loadDrafts, removeDraft } = useDrafts(provider);
+
+  useEffect(() => {
+    if (folder === "drafts") loadDrafts();
+  }, [folder, loadDrafts]);
 
   useEffect(() => {
     setSelectedEmail((prev) => {
@@ -123,6 +143,69 @@ export default function InboxPage() {
     [provider, resetDetail, loadThread, handleSuggestReply, setEmailRead, refreshProviderCounts],
   );
 
+  const handleComposeClick = useCallback(() => {
+    setComposeState({ open: true, mode: "new" });
+  }, []);
+
+  const handleReply = useCallback((email: Email) => {
+    setComposeState({ open: true, mode: "reply", replyTo: email });
+  }, []);
+
+  const handleForward = useCallback((email: Email) => {
+    setComposeState({ open: true, mode: "forward", replyTo: email });
+  }, []);
+
+  const handleOpenDraft = useCallback((draft: DraftEmail) => {
+    setComposeState({ open: true, mode: "draft", draft });
+  }, []);
+
+  const handleDeleteDraft = useCallback(
+    (draft: DraftEmail) => {
+      removeDraft(draft.id);
+      deleteDraft(draft.id)
+        .then(refreshProviderCounts)
+        .catch(() => loadDrafts());
+    },
+    [removeDraft, loadDrafts, refreshProviderCounts],
+  );
+
+  const handleComposeClose = useCallback(() => {
+    setComposeState(null);
+    refreshProviderCounts();
+    if (folder === "drafts") loadDrafts();
+    if (folder === "sent") loadEmails();
+  }, [folder, loadDrafts, loadEmails, refreshProviderCounts]);
+
+  const handleSendRequested = useCallback(
+    (draftId: string, subject: string) => {
+      setComposeState(null);
+      if (folder === "drafts") loadDrafts();
+      const timeoutId = window.setTimeout(() => {
+        setPendingSend(null);
+        sendDraft(draftId).finally(() => {
+          refreshProviderCounts();
+          if (folder === "drafts") loadDrafts();
+          if (folder === "sent") loadEmails();
+        });
+      }, SEND_DELAY_MS);
+      setPendingSend({ draftId, subject, timeoutId });
+    },
+    [folder, loadDrafts, loadEmails, refreshProviderCounts],
+  );
+
+  const handleCancelSend = useCallback(() => {
+    if (!pendingSend) return;
+    window.clearTimeout(pendingSend.timeoutId);
+    setPendingSend(null);
+  }, [pendingSend]);
+
+  useEffect(() => {
+    return () => {
+      if (pendingSend) window.clearTimeout(pendingSend.timeoutId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleProviderChange = useCallback((p: MailProvider) => {
     setSelectedEmail(null);
     setFolder("inbox");
@@ -179,6 +262,9 @@ export default function InboxPage() {
         onSearchChange={setSearchValue}
         themePreference={themePreference}
         onCycleTheme={cycleTheme}
+        theme={theme}
+        onToggleTheme={toggle}
+        onComposeClick={handleComposeClick}
       />
       <div className="inbox-layout">
         <Sidebar
@@ -191,41 +277,84 @@ export default function InboxPage() {
           onFolderSelect={handleFolderSelect}
           onCategoryFilterChange={setCategoryFilter}
         />
-        <EmailList
-          emails={emails}
-          pendingArchive={pendingArchive}
-          loading={loading}
-          syncing={syncing}
-          classifying={classifying}
-          error={error}
-          provider={provider}
-          folder={folder}
-          categoryFilter={categoryFilter}
-          searchValue={searchValue}
-          selectedEmailId={selectedEmail?.id ?? null}
-          onSync={sync}
-          onClassifyAll={handleClassifyAll}
-          onEmailClick={handleEmailClick}
-          onArchive={handleArchive}
-          onToggleStar={handleToggleStar}
-          onConfirmArchive={handleConfirmArchive}
-          onRejectArchive={handleRejectArchive}
-        />
-        <EmailDetailPanel
-          email={selectedEmail}
-          summary={summary}
-          draft={draft}
-          threadCount={threadCount}
-          classifying={classifying}
-          summarizing={summarizing}
-          drafting={drafting}
-          onClassify={handleClassify}
-          onSummarize={handleSummarize}
-          onSummarizeThread={handleSummarizeThread}
-          onSuggestReply={handleSuggestReply}
-          onToggleStar={handleToggleStar}
-        />
+        {folder === "drafts" ? (
+          <DraftsList
+            drafts={drafts}
+            loading={draftsLoading}
+            error={draftsError}
+            onDraftClick={handleOpenDraft}
+            onDraftDelete={handleDeleteDraft}
+          />
+        ) : (
+          <EmailList
+            emails={emails}
+            pendingArchive={pendingArchive}
+            loading={loading}
+            syncing={syncing}
+            classifying={classifying}
+            error={error}
+            provider={provider}
+            folder={folder}
+            categoryFilter={categoryFilter}
+            searchValue={searchValue}
+            selectedEmailId={selectedEmail?.id ?? null}
+            onSync={sync}
+            onClassifyAll={handleClassifyAll}
+            onEmailClick={handleEmailClick}
+            onArchive={handleArchive}
+            onToggleStar={handleToggleStar}
+            onConfirmArchive={handleConfirmArchive}
+            onRejectArchive={handleRejectArchive}
+          />
+        )}
+        {folder !== "drafts" && (
+          <EmailDetailPanel
+            email={selectedEmail}
+            folder={folder}
+            summary={summary}
+            draft={draft}
+            threadCount={threadCount}
+            classifying={classifying}
+            summarizing={summarizing}
+            drafting={drafting}
+            onClassify={handleClassify}
+            onSummarize={handleSummarize}
+            onSummarizeThread={handleSummarizeThread}
+            onSuggestReply={handleSuggestReply}
+            onToggleStar={handleToggleStar}
+            onReply={handleReply}
+            onForward={handleForward}
+          />
+        )}
       </div>
+      {composeState?.open && (
+        <ComposeModal
+          provider={
+            composeState.draft
+              ? (composeState.draft.provider as MailProvider)
+              : composeState.replyTo
+                ? ((composeState.replyTo.provider ?? "gmail") as MailProvider)
+                : provider === "all"
+                  ? "gmail"
+                  : provider
+          }
+          mode={composeState.mode}
+          replyTo={composeState.replyTo}
+          existingDraft={composeState.draft}
+          onClose={handleComposeClose}
+          onSendRequested={handleSendRequested}
+        />
+      )}
+      {pendingSend && (
+        <div className="send-toast">
+          <span className="send-toast__text">
+            Envoi en cours{pendingSend.subject ? ` : ${pendingSend.subject}` : ""}...
+          </span>
+          <button type="button" className="send-toast__cancel" onClick={handleCancelSend}>
+            Annuler
+          </button>
+        </div>
+      )}
     </div>
   );
 }

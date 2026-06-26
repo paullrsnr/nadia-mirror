@@ -1,3 +1,4 @@
+import dataclasses
 import logging
 import threading
 from datetime import datetime, timedelta
@@ -52,6 +53,7 @@ class MailboxService:
         provider: str | None,
         max_results: int = 50,
         page: int = 1,
+        folder: str = "inbox",
     ) -> EmailListResult:
         normalized = normalize_string(provider)
         if normalized not in LIST_PROVIDERS:
@@ -63,6 +65,7 @@ class MailboxService:
             max_results=max_results,
             offset=offset,
             provider_filter=provider_filter,
+            folder=folder,
         )
         return EmailListResult(
             emails=emails,
@@ -232,7 +235,8 @@ class MailboxService:
                 max_results=50,
                 query=EmailListQuery(unread_only=False, after_date=after, sent_only=True),
             )
-            self._storage.upsert_emails_batch(sent.emails, provider=tag)
+            sent_emails = [dataclasses.replace(e, folder="sent") for e in sent.emails]
+            self._storage.upsert_emails_batch(sent_emails, provider=tag)
         except Exception as exc:  # pylint: disable=broad-except
             logger.warning("Sync emails envoyés échoué pour %s : %s", provider_tag, exc)
 

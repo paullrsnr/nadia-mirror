@@ -2,9 +2,8 @@
 from pathlib import Path
 from typing import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
 
 
 _engine = None
@@ -17,10 +16,17 @@ def init_engine(db_path: Path | str) -> None:
     database_url = f"sqlite:///{db_path}"
     _engine = create_engine(
         database_url,
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
+        connect_args={"check_same_thread": False, "timeout": 30},
         echo=False,
     )
+
+    @event.listens_for(_engine, "connect")
+    def _set_sqlite_pragma(dbapi_connection, _):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA busy_timeout=30000")
+        cursor.close()
+
     _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
 
 

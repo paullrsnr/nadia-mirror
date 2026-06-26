@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useComputed } from "@preact/signals-react";
 import { getEmails } from "../../../services/api/emails.api";
+import { listDrafts } from "../../../services/api/drafts.api";
 import { authSignal } from "../../../state";
 import { CONNECTABLE_PROVIDERS } from "../../../constants/providers";
 import { UNREAD_LABEL } from "../../../constants/labels";
@@ -23,7 +24,21 @@ export function useProviderCounts(): UseProviderCountsResult {
           const totalStarred = response.emails.filter((e) => e.is_starred).length;
           setProviderCounts((prev) => ({
             ...prev,
-            [provider]: { total: response.total, totalUnread, totalStarred },
+            [provider]: { ...prev[provider], total: response.total, totalUnread, totalStarred },
+          }));
+        })
+        .catch(() => {});
+      listDrafts(provider)
+        .then((drafts) => {
+          setProviderCounts((prev) => ({
+            ...prev,
+            [provider]: {
+              total: 0,
+              unread: 0,
+              starred: 0,
+              ...prev[provider],
+              drafts: drafts.length,
+            },
           }));
         })
         .catch(() => {});

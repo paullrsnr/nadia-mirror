@@ -36,6 +36,7 @@ class EmailModel(Base):
     is_archived: Mapped[bool] = mapped_column(default=False, nullable=False)
     pending_archive: Mapped[bool] = mapped_column(default=False, nullable=False)
     is_starred: Mapped[bool] = mapped_column(default=False, nullable=False)
+    folder: Mapped[str] = mapped_column(String, default="inbox", nullable=False)
 
     def __repr__(self) -> str:
         return f"EmailModel(id={self.id!r}, subject={self.subject!r}, provider={self.provider!r})"

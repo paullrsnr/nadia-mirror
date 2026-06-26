@@ -11,6 +11,7 @@ import {
   IconArchive,
   IconTrash,
   IconTag,
+  IconDraft,
 } from "../../ui/icons";
 import { PROVIDER_LABELS } from "../../../constants/providers";
 import { COMING_SOON_LABEL } from "../../../constants/labels";
@@ -122,10 +123,14 @@ function SidebarFolders({
         <span className="sidebar__folder-label">Boîte de réception</span>
         <span className="sidebar__folder-count">{counts?.total ?? 0}</span>
       </button>
-      <span className="sidebar__folder sidebar__folder--disabled" title={COMING_SOON_LABEL}>
+      <button
+        type="button"
+        className={`sidebar__folder${activeFolder === "sent" ? " sidebar__folder--current" : ""}`}
+        onClick={() => onFolderSelect("sent")}
+      >
         <IconSent />
         <span className="sidebar__folder-label">Envoyés</span>
-      </span>
+      </button>
       <button
         type="button"
         className={`sidebar__folder${activeFolder === "favoris" ? " sidebar__folder--current" : ""}`}
@@ -137,7 +142,16 @@ function SidebarFolders({
           <span className="sidebar__folder-count">{counts.totalStarred}</span>
         )}
       </button>
-      <span className="sidebar__folder sidebar__folder--disabled" title={COMING_SOON_LABEL}>
+      <button
+        type="button"
+        className={`sidebar__folder${activeFolder === "drafts" ? " sidebar__folder--current" : ""}`}
+        onClick={() => onFolderSelect("drafts")}
+      >
+        <IconDraft />
+        <span className="sidebar__folder-label">Brouillons</span>
+        {!!counts?.drafts && <span className="sidebar__folder-count">{counts.drafts}</span>}
+      </button>
+      <span className="sidebar__folder sidebar__folder--disabled" title="Bientôt disponible">
         <IconArchive />
         <span className="sidebar__folder-label">Archivés</span>
       </span>

@@ -3,5 +3,6 @@ from backend.adapters.bddProvider.sqlLite.models.categoryModel import CategoryMo
 from backend.adapters.bddProvider.sqlLite.models.emailModel import EmailModel
 from backend.adapters.bddProvider.sqlLite.models.settingModel import SettingModel
 from backend.adapters.bddProvider.sqlLite.models.syncMetadataModel import SyncMetadataModel
+from backend.adapters.bddProvider.sqlLite.models.draftEmailModel import DraftEmailModel
 
-__all__ = ["Base", "CategoryModel", "EmailModel", "SettingModel", "SyncMetadataModel"]
+__all__ = ["Base", "CategoryModel", "EmailModel", "SettingModel", "SyncMetadataModel", "DraftEmailModel"]

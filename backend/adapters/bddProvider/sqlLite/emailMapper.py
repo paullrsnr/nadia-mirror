@@ -26,6 +26,7 @@ def to_domain(model: EmailModel) -> Email:
         is_archived=model.is_archived or False,
         pending_archive=model.pending_archive or False,
         is_starred=model.is_starred or False,
+        folder=model.folder or "inbox",
     )
 
 
@@ -57,6 +58,7 @@ def to_model(email: Email, provider: str) -> EmailModel:
         is_archived=email.is_archived,
         pending_archive=email.pending_archive,
         is_starred=email.is_starred,
+        folder=email.folder,
     )
 
 

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Optional
 
-from backend.core.models.email import Email
+from backend.core.models.email import Email, DraftEmail
 from backend.core.models.email.category import Category
 
 
@@ -23,10 +23,12 @@ class EmailStorage(ABC):
         max_results: int = 50,
         offset: int = 0,
         provider_filter: str | None = None,
+        folder: str | None = "inbox",
     ) -> tuple[list[Email], int]:
         """Retourne (emails paginés, total) depuis le stockage local.
 
         provider_filter=None → toutes les boîtes.
+        folder=None → tous les dossiers (inbox + sent).
         """
 
     @abstractmethod
@@ -80,4 +82,20 @@ class EmailStorage(ABC):
     @abstractmethod
     def mark_email_read(self, email_id: str) -> None:
         """Retire le label UNREAD d'un email en local. Lève NotFoundError si introuvable."""
+
+    @abstractmethod
+    def save_draft(self, draft: DraftEmail) -> DraftEmail:
+        """Crée ou met à jour un brouillon local (upsert par id)."""
+
+    @abstractmethod
+    def find_draft_by_id(self, draft_id: str) -> Optional[DraftEmail]:
+        """Retourne un brouillon par son identifiant, ou None s'il n'existe pas."""
+
+    @abstractmethod
+    def delete_draft(self, draft_id: str) -> None:
+        """Supprime un brouillon local. Idempotent si déjà absent."""
+
+    @abstractmethod
+    def find_drafts(self, provider: str | None = None) -> list[DraftEmail]:
+        """Retourne les brouillons locaux, les plus récemment modifiés en premier."""
 

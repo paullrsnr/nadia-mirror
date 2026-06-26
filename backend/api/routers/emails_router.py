@@ -17,9 +17,10 @@ def list_emails(
     provider: str | None = Query(default=None, description="Provider (gmail, outlook, all)."),
     max_results: int = Query(default=50, ge=1, le=500),
     page: int = Query(default=1, ge=1),
+    folder: str = Query(default="inbox", description="Dossier (inbox, sent)."),
     mailbox: MailboxService = Depends(get_mailbox_service),
 ):
-    return mailbox.get_stored_emails(provider=provider, max_results=max_results, page=page)
+    return mailbox.get_stored_emails(provider=provider, max_results=max_results, page=page, folder=folder)
 
 
 @router.post("/archive/{email_id}", response_model=ArchiveEmailResponse)

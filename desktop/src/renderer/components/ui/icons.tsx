@@ -20,6 +20,25 @@ import {
   faEllipsis,
   faPaperclip,
   faDownload,
+  faExpand,
+  faCompress,
+  faFilePen,
+  faBold,
+  faItalic,
+  faUnderline,
+  faPalette,
+  faAlignLeft,
+  faAlignCenter,
+  faAlignRight,
+  faAlignJustify,
+  faListUl,
+  faListOl,
+  faIndent,
+  faOutdent,
+  faArrowRotateLeft,
+  faArrowRotateRight,
+  faLink,
+  faHighlighter,
 } from "@fortawesome/pro-light-svg-icons";
 import { faStar as faStarSolid } from "@fortawesome/pro-solid-svg-icons";
 
@@ -68,3 +87,42 @@ export const IconSend = (props: IconProps) => <FontAwesomeIcon icon={faPaperPlan
 export const IconAttachment = (props: IconProps) => <FontAwesomeIcon icon={faPaperclip} {...props} />;
 
 export const IconDownload = (props: IconProps) => <FontAwesomeIcon icon={faDownload} {...props} />;
+
+export const IconExpand = (props: IconProps) => <FontAwesomeIcon icon={faExpand} {...props} />;
+
+export const IconCompress = (props: IconProps) => <FontAwesomeIcon icon={faCompress} {...props} />;
+
+export const IconDraft = (props: IconProps) => <FontAwesomeIcon icon={faFilePen} {...props} />;
+
+export const IconBold = (props: IconProps) => <FontAwesomeIcon icon={faBold} {...props} />;
+
+export const IconItalic = (props: IconProps) => <FontAwesomeIcon icon={faItalic} {...props} />;
+
+export const IconUnderline = (props: IconProps) => <FontAwesomeIcon icon={faUnderline} {...props} />;
+
+export const IconPalette = (props: IconProps) => <FontAwesomeIcon icon={faPalette} {...props} />;
+
+export const IconHighlighter = (props: IconProps) => <FontAwesomeIcon icon={faHighlighter} {...props} />;
+
+export const IconAlignLeft = (props: IconProps) => <FontAwesomeIcon icon={faAlignLeft} {...props} />;
+
+export const IconAlignCenter = (props: IconProps) => <FontAwesomeIcon icon={faAlignCenter} {...props} />;
+
+export const IconAlignRight = (props: IconProps) => <FontAwesomeIcon icon={faAlignRight} {...props} />;
+
+export const IconAlignJustify = (props: IconProps) => <FontAwesomeIcon icon={faAlignJustify} {...props} />;
+
+export const IconListUl = (props: IconProps) => <FontAwesomeIcon icon={faListUl} {...props} />;
+
+export const IconListOl = (props: IconProps) => <FontAwesomeIcon icon={faListOl} {...props} />;
+
+export const IconIndent = (props: IconProps) => <FontAwesomeIcon icon={faIndent} {...props} />;
+
+export const IconOutdent = (props: IconProps) => <FontAwesomeIcon icon={faOutdent} {...props} />;
+
+export const IconUndo = (props: IconProps) => <FontAwesomeIcon icon={faArrowRotateLeft} {...props} />;
+
+export const IconRedo = (props: IconProps) => <FontAwesomeIcon icon={faArrowRotateRight} {...props} />;
+
+export const IconLink = (props: IconProps) => <FontAwesomeIcon icon={faLink} {...props} />;
+

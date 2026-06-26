@@ -15,6 +15,12 @@ export type {
   ProviderCount,
   UseProviderCountsResult,
   InboxFolder,
+  DraftPayload,
+  DraftEmail,
+  UseComposeDraftResult,
+  UseDraftsResult,
+  ComposeMode,
+  ComposeState,
 } from "./email";
 
 export type {
@@ -40,7 +46,5 @@ export type {
 } from "./llm";
 
 export type { ButtonVariant, ButtonSize, ButtonProps, BadgeProps, StarButtonProps } from "./ui";
-
-export type { SidebarProps, ToolbarProps } from "./layout";
-
 export type { ThemePreference, ResolvedTheme, UseThemeResult } from "./theme";
+export type { SidebarProps, ToolbarProps, ComposeActionMode, ComposeActionButtonProps } from "./layout";

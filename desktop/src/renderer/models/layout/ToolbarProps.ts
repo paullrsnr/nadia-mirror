@@ -5,4 +5,7 @@ export interface ToolbarProps {
   onSearchChange: (value: string) => void;
   themePreference: ThemePreference;
   onCycleTheme: () => void;
+  theme: "light" | "dark";
+  onToggleTheme: () => void;
+  onComposeClick: () => void;
 }

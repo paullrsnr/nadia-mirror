@@ -39,23 +39,27 @@ export default function EmailList({
   return (
     <div className="email-list scrollbar-hidden">
       <div className="email-list__header">
-        <h3 className="email-list__title">{folder === "favoris" ? "Favoris" : "Boîte de réception"}</h3>
+        <h3 className="email-list__title">
+          {folder === "favoris" ? "Favoris" : folder === "sent" ? "Envoyés" : "Boîte de réception"}
+        </h3>
         <span className="email-list__unread">{unreadCount} non lus</span>
       </div>
 
-      <div className="email-list__toolbar">
-        <div className="email-list__actions">
-          <Button size="sm" onClick={() => onSync(false)} disabled={syncing}>
-            {syncing ? "Synchronisation..." : "Synchroniser"}
-          </Button>
-          <Button size="sm" variant="secondary" onClick={() => onSync(true)} disabled={syncing}>
-            {syncing ? "Synchronisation..." : "Sync. complète (30j)"}
-          </Button>
-          <Button size="sm" variant="secondary" onClick={onClassifyAll} disabled={classifying || syncing}>
-            {classifying ? "Classification..." : "Classifier (IA)"}
-          </Button>
+      {folder !== "sent" && (
+        <div className="email-list__toolbar">
+          <div className="email-list__actions">
+            <Button size="sm" onClick={() => onSync(false)} disabled={syncing}>
+              {syncing ? "Synchronisation..." : "Synchroniser"}
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => onSync(true)} disabled={syncing}>
+              {syncing ? "Synchronisation..." : "Sync. complète (30j)"}
+            </Button>
+            <Button size="sm" variant="secondary" onClick={onClassifyAll} disabled={classifying || syncing}>
+              {classifying ? "Classification..." : "Classifier (IA)"}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       {folder === "inbox" && pendingArchive.length > 0 && (
         <div className="email-list__pending">

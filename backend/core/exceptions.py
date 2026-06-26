@@ -11,3 +11,7 @@ class ProviderError(Exception):
 
 class NotFoundError(Exception):
     """Ressource introuvable."""
+
+
+class ValidationError(Exception):
+    """Entrée utilisateur invalide."""

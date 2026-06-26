@@ -5,9 +5,14 @@ export function getAttachmentDownloadUrl(emailId: string, attachmentId: string):
   return `${API_BASE_URL}/emails/${emailId}/attachments/${attachmentId}`;
 }
 
-export async function getEmails(maxResults = 50, provider?: MailProvider): Promise<EmailListResponse> {
+export async function getEmails(
+  maxResults = 50,
+  provider?: MailProvider,
+  folder?: "inbox" | "sent",
+): Promise<EmailListResponse> {
   const params: Record<string, string> = { max_results: maxResults.toString() };
   if (provider) params.provider = provider;
+  if (folder) params.folder = folder;
   return apiGet<EmailListResponse>("/emails", params);
 }
 
