@@ -21,7 +21,7 @@ class GmailAdapter:
             )
         self.gmail_api = build_gmail_service(gmail_credentials)
 
-    def fetch_emails_gmail(
+    def fetch_emails(
             self,
             max_results: int = 50,
             query: Optional[EmailListQuery] = None,
@@ -66,7 +66,7 @@ class GmailAdapter:
                 f"Erreur lors de la récupération des emails: {error_message}"
             ) from e
 
-    def get_attachment_gmail(self, email_id: str, attachment_id: str) -> bytes:
+    def get_attachment(self, email_id: str, attachment_id: str) -> bytes:
         # pylint: disable=no-member
         result = (
             self.gmail_api.users()
@@ -79,7 +79,7 @@ class GmailAdapter:
         padded = data + "=" * (-len(data) % 4)
         return base64.urlsafe_b64decode(padded)
 
-    def archive_email_gmail(self, email_id: str) -> bool:
+    def archive_email(self, email_id: str) -> bool:
         try:
             # pylint: disable=no-member
             self.gmail_api.users().messages().modify(
@@ -91,7 +91,7 @@ class GmailAdapter:
         except (OSError, ValueError, KeyError, TypeError):
             return False
 
-    def mark_as_read_gmail(self, email_id: str) -> bool:
+    def mark_as_read(self, email_id: str) -> bool:
         try:
             # pylint: disable=no-member
             self.gmail_api.users().messages().modify(
@@ -126,19 +126,3 @@ class GmailAdapter:
         if query.after_date:
             parts.append(f"after:{query.after_date:%Y/%m/%d}")
         return " ".join(parts)
-
-
-def fetch_emails_gmail(max_results: int = 50, query: Optional[EmailListQuery] = None) -> EmailPage:
-    return GmailAdapter().fetch_emails_gmail(max_results=max_results, query=query)
-
-
-def archive_email_gmail(email_id: str) -> bool:
-    return GmailAdapter().archive_email_gmail(email_id)
-
-
-def get_attachment_gmail(email_id: str, attachment_id: str) -> bytes:
-    return GmailAdapter().get_attachment_gmail(email_id, attachment_id)
-
-
-def mark_as_read_gmail(email_id: str) -> bool:
-    return GmailAdapter().mark_as_read_gmail(email_id)

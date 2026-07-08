@@ -45,11 +45,10 @@
 .overflow-y-auto { overflow-y: auto; }
 .overflow-hidden  { overflow: hidden; }
 
-/* —— Scrollbars masquées (le scroll reste fonctionnel) —— */
-* {
+.scrollbar-hidden {
   scrollbar-width: none;
 }
-*::-webkit-scrollbar {
+.scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
 

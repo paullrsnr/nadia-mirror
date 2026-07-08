@@ -13,12 +13,9 @@ import { useProviderCounts } from "./hooks/useProviderCounts";
 import { useTheme } from "../../hooks/useTheme";
 import { useAuth } from "../../hooks/useAuth";
 import { starEmail, markEmailRead } from "../../services/api/emails.api";
-import type { Email, MailProvider, ConnectableProvider, InboxFolder } from "../../models";
-
-const PROVIDER_LABELS: Record<ConnectableProvider, string> = {
-  gmail: "Gmail",
-  outlook: "Outlook",
-};
+import { PROVIDER_LABELS } from "../../constants/providers";
+import { UNREAD_LABEL } from "../../constants/labels";
+import type { Email, MailProvider, InboxFolder } from "../../models";
 
 export default function InboxPage() {
   const [provider, setProvider] = useState<MailProvider>("all");
@@ -26,7 +23,8 @@ export default function InboxPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchValue, setSearchValue] = useState("");
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
-  const { theme, toggle } = useTheme();
+  const [markReadError, setMarkReadError] = useState<string | null>(null);
+  const { themePreference, cycleTheme } = useTheme();
   const {
     authByProvider,
     loading: authLoading,
@@ -109,13 +107,19 @@ export default function InboxPage() {
       loadThread(email);
       handleSuggestReply(email);
 
-      if (email.labels.includes("UNREAD")) {
-        const readProvider = provider === "all" ? (email.provider ?? "gmail") : provider;
-        setEmailRead(email.id);
-        if (readProvider !== "all") {
+      if (email.labels.includes(UNREAD_LABEL)) {
+        const readProvider = provider === "all" ? email.provider : provider;
+        setMarkReadError(null);
+        setEmailRead(email.id, true);
+        if (readProvider) {
           markEmailRead(email.id, readProvider as MailProvider)
             .then(refreshProviderCounts)
-            .catch(() => {});
+            .catch(() => {
+              setEmailRead(email.id, false);
+              setMarkReadError("Erreur lors du marquage comme lu");
+            });
+        } else {
+          console.error(`Email ${email.id} sans provider connu — marquage "lu" non synchronisé avec le serveur`);
         }
       }
     },
@@ -144,7 +148,7 @@ export default function InboxPage() {
     [setEmailStarred, refreshProviderCounts],
   );
 
-  const error = emailsError ?? syncError ?? actionError;
+  const error = emailsError ?? syncError ?? actionError ?? markReadError;
 
   if (!isAuthenticated) {
     return (
@@ -176,8 +180,8 @@ export default function InboxPage() {
       <Toolbar
         searchValue={searchValue}
         onSearchChange={setSearchValue}
-        theme={theme}
-        onToggleTheme={toggle}
+        themePreference={themePreference}
+        onCycleTheme={cycleTheme}
       />
       <div className="inbox-layout">
         <Sidebar

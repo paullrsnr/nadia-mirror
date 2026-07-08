@@ -1,4 +1,6 @@
+import json
 import logging
+import re
 from pathlib import Path
 
 from backend.core.models.llm import LLMStatusResponse, InstalledModelResponse, CatalogModelResponse, SummarizeRequest, SummarizeResponse, SummarizeThreadRequest, ClassifyEmailRequest
@@ -163,16 +165,25 @@ class LlmService:
                     content=f"De : {from_address}\nObjet : {subject}\n\n{snippet[:400]}",
                 ),
             ]
-            raw = self._adapter.get_short_answer(messages).strip().lower()
+            raw = self._adapter.get_json_answer(messages)
         except Exception as exc:
             raise ValueError(f"Erreur lors du scoring d'importance : {exc}") from exc
 
-        first_word = raw.split()[0].strip(" .,!;:\"'()") if raw else ""
-        if first_word.startswith("oui"):
-            return True
-        if first_word.startswith("non"):
-            return False
-        return "oui" in raw and "non" not in raw
+        return self._parse_importance(raw)
+
+    @staticmethod
+    def _parse_importance(raw: str) -> bool:
+        match = re.search(r"\{.*\}", raw, re.DOTALL)
+        if not match:
+            raise ValueError(f"Réponse d'importance non JSON : {raw!r}")
+        try:
+            data = json.loads(match.group(0))
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Réponse d'importance JSON invalide : {raw!r}") from exc
+        value = data.get("important")
+        if not isinstance(value, bool):
+            raise ValueError(f"Champ 'important' absent ou non booléen : {raw!r}")
+        return value
 
     def draft_reply(self, subject: str, body: str, from_address: str) -> str:
         if not self._adapter.is_loaded():

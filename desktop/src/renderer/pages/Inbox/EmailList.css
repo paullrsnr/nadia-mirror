@@ -25,7 +25,10 @@
   color: var(--color-content);
 }
 
-.email-list__unread { font-size: var(--font-size-sm); color: var(--color-content-muted); }
+.email-list__unread { 
+  font-size: var(--font-size-sm); 
+  color: var(--color-content-muted); 
+}
 
 .email-list__toolbar {
   padding: var(--space-sm) var(--space-page);

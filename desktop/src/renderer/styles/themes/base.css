@@ -29,6 +29,7 @@
   --font-size-md:         16px;
   --font-size-lg:         18px;
   --font-size-xl:         20px;
+  --font-size-display:    48px;
   --font-size-base:       var(--font-size-sm);
   --line-height-base:     20px;
   --letter-spacing-tight: -0.15px;

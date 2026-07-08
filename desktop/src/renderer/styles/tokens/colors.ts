@@ -1,4 +1,4 @@
-import type { Category } from "../../models/email/Category";
+import type { Category, CategoryChipColors, CategoryChipOverrides } from "../../models/email";
 
 export const colors = {
   /* Surfaces */
@@ -62,14 +62,7 @@ export const colors = {
   errorContent:   "var(--color-error-content)",
 } as const;
 
-/**
- * Le Figma ne définit que 3 paires de chips (urgent/important/promo) alors que
- * les catégories backend en comptent 7. On ne réutilise que des tokens issus du
- * Figma : les 3 paires officielles sont assignées par proximité sémantique, et
- * les 4 catégories restantes composent avec les tokens marque/theme déjà définis
- * (pas de couleur inventée hors Figma).
- */
-export const categoryChip: Record<Category["name"], { bg: string; txt: string }> = {
+export const DEFAULT_CATEGORY_CHIP_COLORS: Record<Category["name"], CategoryChipColors> = {
   finance:      { bg: "var(--color-chip-important-bg)", txt: "var(--color-chip-important-txt)" },
   shopping:     { bg: "var(--color-chip-promo-bg)", txt: "var(--color-chip-promo-txt)" },
   marketing:    { bg: "var(--color-chip-urgent-bg)", txt: "var(--color-chip-urgent-txt)" },
@@ -78,3 +71,10 @@ export const categoryChip: Record<Category["name"], { bg: string; txt: string }>
   notification: { bg: "var(--color-base-muted)", txt: "var(--color-content-muted)" },
   autre:        { bg: "var(--color-base-muted)", txt: "var(--color-content-muted)" },
 };
+
+export function getCategoryChipColor(
+  category: Category["name"],
+  userOverrides?: CategoryChipOverrides,
+): CategoryChipColors {
+  return userOverrides?.[category] ?? DEFAULT_CATEGORY_CHIP_COLORS[category];
+}

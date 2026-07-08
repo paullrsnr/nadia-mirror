@@ -1,3 +1,5 @@
+from fastapi.responses import Response
+
 from backend.core.providers import (
     CONNECTABLE_PROVIDERS,
 )
@@ -73,3 +75,11 @@ class EmailsService:
             email.provider.value, email_id, attachment_id
         )
         return AttachmentContent(filename=meta.filename, mime_type=meta.mime_type, content=content)
+
+    def build_attachment_response(self, email_id: str, attachment_id: str) -> Response:
+        attachment = self.get_attachment(email_id, attachment_id)
+        return Response(
+            content=attachment.content,
+            media_type=attachment.mime_type or "application/octet-stream",
+            headers={"Content-Disposition": f'attachment; filename="{attachment.filename}"'},
+        )

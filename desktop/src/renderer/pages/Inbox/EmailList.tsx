@@ -3,6 +3,7 @@ import EmailCard from "../../components/domain/EmailCard";
 import Button from "../../components/ui/Button";
 import ErrorMessage from "../../components/ui/ErrorMessage";
 import type { EmailListProps } from "../../models/email";
+import { UNREAD_LABEL } from "../../constants/labels";
 
 export default function EmailList({
   emails,
@@ -33,10 +34,10 @@ export default function EmailList({
     return haystack.includes(search);
   });
 
-  const unreadCount = filtered.filter((e) => e.labels.includes("UNREAD")).length;
+  const unreadCount = filtered.filter((e) => e.labels.includes(UNREAD_LABEL)).length;
 
   return (
-    <div className="email-list">
+    <div className="email-list scrollbar-hidden">
       <div className="email-list__header">
         <h3 className="email-list__title">{folder === "favoris" ? "Favoris" : "Boîte de réception"}</h3>
         <span className="email-list__unread">{unreadCount} non lus</span>
@@ -85,7 +86,7 @@ export default function EmailList({
         </div>
       )}
 
-      <div className="email-list__items">
+      <div className="email-list__items scrollbar-hidden">
         {loading ? (
           <div className="email-list__empty">Chargement...</div>
         ) : filtered.length === 0 ? (

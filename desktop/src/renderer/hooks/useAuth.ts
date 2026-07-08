@@ -1,12 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useComputed } from "@preact/signals-react";
-import {
-  getAllAuthStatuses,
-  getAuthStatus,
-  getAuthUrl,
-  logout,
-  CONNECTABLE_PROVIDERS,
-} from "../services/api/auth.api";
+import { getAllAuthStatuses, getAuthStatus, getAuthUrl, logout } from "../services/api/auth.api";
+import { CONNECTABLE_PROVIDERS } from "../constants/providers";
 import { authSignal } from "../state";
 import type { ConnectableProvider, ApiError, UseAuthResult } from "../models";
 

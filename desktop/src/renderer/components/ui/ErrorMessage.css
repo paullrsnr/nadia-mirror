@@ -1,7 +1,0 @@
-.error-message {
-  padding: var(--space-card);
-  background-color: var(--color-error-border);
-  color: var(--color-error-content);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-}

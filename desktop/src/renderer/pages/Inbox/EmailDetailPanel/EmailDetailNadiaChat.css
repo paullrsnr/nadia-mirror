@@ -1,0 +1,90 @@
+.email-detail-nadia-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.email-detail-nadia-chat__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-page);
+}
+
+.email-detail-nadia-chat__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-card);
+  background: linear-gradient(to right, var(--color-marque-primary), var(--color-marque-tertiary));
+  color: var(--color-content-inverted);
+}
+.email-detail-nadia-chat__icon svg { 
+  width: 32px; 
+  height: 32px; 
+}
+
+.email-detail-nadia-chat__title {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-content);
+}
+
+.email-detail-nadia-chat__desc {
+  margin: 0;
+  max-width: 448px;
+  color: var(--color-content-muted);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+.email-detail-nadia-chat__input-row {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-card) var(--space-page);
+  border-top: 1px solid var(--color-border);
+}
+
+.email-detail-nadia-chat__input {
+  flex: 1;
+  height: 42px;
+  padding: 0 var(--space-page);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-soft);
+  background-color: var(--color-base-muted);
+  color: var(--color-content);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+}
+.email-detail-nadia-chat__input::placeholder { 
+  color: var(--color-content-muted); 
+}
+
+.email-detail-nadia-chat__send {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-md);
+  background: linear-gradient(to right, var(--color-marque-primary), var(--color-marque-tertiary));
+  color: var(--color-content-inverted);
+  cursor: pointer;
+}
+.email-detail-nadia-chat__send:disabled { 
+  opacity: 0.5; 
+  cursor: not-allowed; 
+}

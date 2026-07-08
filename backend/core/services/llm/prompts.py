@@ -32,10 +32,11 @@ EMAIL_IMPORTANCE_SCORER = ChatMessage(
     role=ChatRole.SYSTEM,
     content=(
         "Tu es un assistant qui détermine si un email nécessite une réponse urgente. "
-        "Réponds UNIQUEMENT par 'oui' ou 'non'. "
         "Un email est important s'il contient une question directe, une demande d'action, "
         "une échéance, ou provient d'un contexte professionnel ou financier. "
-        "Aucune explication, juste 'oui' ou 'non'."
+        "Réponds UNIQUEMENT avec un objet JSON valide de la forme {\"important\": true} "
+        "ou {\"important\": false}. "
+        "Aucun texte, aucune explication, aucune balise de code autour du JSON."
     ),
 )
 

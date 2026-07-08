@@ -83,3 +83,14 @@ class LlamaCppAdapter(LlamaPort):
                 raise RuntimeError("Aucun modèle chargé")
             result = self._model.create_chat_completion(messages=[m.to_dict() for m in messages], max_tokens=512)
             return result["choices"][0]["message"]["content"]
+
+    def get_json_answer(self, messages: list[ChatMessage]) -> str:
+        with self._lock:
+            if not self.is_loaded():
+                raise RuntimeError("Aucun modèle chargé")
+            result = self._model.create_chat_completion(
+                messages=[m.to_dict() for m in messages],
+                max_tokens=512,
+                response_format={"type": "json_object"},
+            )
+            return result["choices"][0]["message"]["content"]

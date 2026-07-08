@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import Response
 
 from backend.api.deps import get_mailbox_service, get_emails_service, get_storage, get_classification_service, get_reply_service
 from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
@@ -108,9 +107,4 @@ def download_attachment(
     attachment_id: str,
     service: EmailsService = Depends(get_emails_service),
 ):
-    attachment = service.get_attachment(email_id, attachment_id)
-    return Response(
-        content=attachment.content,
-        media_type=attachment.mime_type or "application/octet-stream",
-        headers={"Content-Disposition": f'attachment; filename="{attachment.filename}"'},
-    )
+    return service.build_attachment_response(email_id, attachment_id)

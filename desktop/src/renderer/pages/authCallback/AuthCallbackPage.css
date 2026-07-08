@@ -15,5 +15,9 @@
   box-shadow: var(--shadow-card);
 }
 
-.auth-callback__title--success { color: var(--color-success); }
-.auth-callback__title--error   { color: var(--color-error-content); }
+.auth-callback__title--success { 
+  color: var(--color-success); 
+}
+.auth-callback__title--error   { 
+  color: var(--color-error-content); 
+}

@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "declaration-property-value-disallowed-list": {
+      "/^(font-size|line-height|letter-spacing|border-radius|margin(-top|-right|-bottom|-left)?|padding(-top|-right|-bottom|-left)?|gap|row-gap|column-gap)$/": [
+        "/^-?\\d+(\\.\\d+)?px$/"
+      ]
+    }
+  },
+  "overrides": [
+    {
+      "files": ["src/renderer/styles/themes/base.css"],
+      "rules": {
+        "declaration-property-value-disallowed-list": null
+      }
+    }
+  ]
+}

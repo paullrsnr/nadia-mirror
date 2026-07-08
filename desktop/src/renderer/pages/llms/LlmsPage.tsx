@@ -52,7 +52,7 @@ export default function LlmsPage() {
     return (
       <div className="models-page-shell">
         <PageHeader title="Modèles IA" />
-        <div className="models-download-screen">
+        <div className="models-download-screen scrollbar-hidden">
           <div
             className="models-download-spinner"
             style={{ width: 80, height: 80, borderWidth: 4 }}
@@ -87,7 +87,7 @@ export default function LlmsPage() {
     return (
       <div className="models-page-shell">
         <PageHeader title="Modèles IA" />
-        <div className="models-no-models">
+        <div className="models-no-models scrollbar-hidden">
           <div className="models-welcome">
             <div className="models-welcome__emoji">🤖</div>
             <h1 className="models-welcome__title">Bienvenue dans Nadia IA</h1>
@@ -127,7 +127,7 @@ export default function LlmsPage() {
   return (
     <div className="models-page-shell">
       <PageHeader title="Modèles IA" />
-      <div className="models-page">
+      <div className="models-page scrollbar-hidden">
       {error && <ErrorMessage message={error} className="models-catalog-heading" />}
 
       <div className="models-active-section">

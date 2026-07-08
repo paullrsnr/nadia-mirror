@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useComputed } from "@preact/signals-react";
 import { getEmails } from "../../../services/api/emails.api";
 import { authSignal } from "../../../state";
+import { CONNECTABLE_PROVIDERS } from "../../../constants/providers";
+import { UNREAD_LABEL } from "../../../constants/labels";
 import type { ConnectableProvider, ProviderCount, UseProviderCountsResult } from "../../../models";
-
-const PROVIDERS: ConnectableProvider[] = ["gmail", "outlook"];
 
 export function useProviderCounts(): UseProviderCountsResult {
   const authByProvider = useComputed(() => authSignal.value).value;
@@ -12,14 +12,14 @@ export function useProviderCounts(): UseProviderCountsResult {
     Partial<Record<ConnectableProvider, ProviderCount>>
   >({});
 
-  const connectedProviders = PROVIDERS.filter((p) => authByProvider[p]?.is_authenticated);
+  const connectedProviders = CONNECTABLE_PROVIDERS.filter((p) => authByProvider[p]?.is_authenticated);
   const connectedKey = connectedProviders.join(",");
 
   const refreshProviderCounts = useCallback(() => {
     connectedProviders.forEach((provider) => {
       getEmails(50, provider)
         .then((response) => {
-          const unread = response.emails.filter((e) => e.labels.includes("UNREAD")).length;
+          const unread = response.emails.filter((e) => e.labels.includes(UNREAD_LABEL)).length;
           const starred = response.emails.filter((e) => e.is_starred).length;
           setProviderCounts((prev) => ({
             ...prev,

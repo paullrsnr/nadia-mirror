@@ -30,3 +30,7 @@ class LlmPort(ABC):
     @abstractmethod
     def get_short_answer(self, messages: list[ChatMessage]) -> str:
         ...
+
+    @abstractmethod
+    def get_json_answer(self, messages: list[ChatMessage]) -> str:
+        ...

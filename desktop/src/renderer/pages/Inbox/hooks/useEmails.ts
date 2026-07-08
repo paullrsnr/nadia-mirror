@@ -4,6 +4,7 @@ import { getEmails, getCategories } from "../../../services/api/emails.api";
 import { getAllAuthStatuses } from "../../../services/api/auth.api";
 import { getPendingArchive } from "../../../services/api/autoArchive.api";
 import { authSignal } from "../../../state";
+import { UNREAD_LABEL } from "../../../constants/labels";
 import type { Email, Category, MailProvider, UseEmailsResult } from "../../../models";
 
 export function useEmails(provider: MailProvider): UseEmailsResult {
@@ -74,9 +75,17 @@ export function useEmails(provider: MailProvider): UseEmailsResult {
     setEmails((prev) => prev.map((e) => (e.id === emailId ? { ...e, is_starred: starred } : e)));
   }, []);
 
-  const setEmailRead = useCallback((emailId: string) => {
+  const setEmailRead = useCallback((emailId: string, read: boolean) => {
     setEmails((prev) =>
-      prev.map((e) => (e.id === emailId ? { ...e, labels: e.labels.filter((l) => l !== "UNREAD") } : e)),
+      prev.map((e) => {
+        if (e.id !== emailId) return e;
+        const labels = read
+          ? e.labels.filter((l) => l !== UNREAD_LABEL)
+          : e.labels.includes(UNREAD_LABEL)
+            ? e.labels
+            : [...e.labels, UNREAD_LABEL];
+        return { ...e, labels };
+      }),
     );
   }, []);
 

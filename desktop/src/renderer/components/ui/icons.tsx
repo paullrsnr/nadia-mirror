@@ -4,6 +4,7 @@ import {
   faPenToSquare,
   faSun,
   faMoon,
+  faDesktop,
   faGear,
   faInbox,
   faPaperPlane,
@@ -31,6 +32,8 @@ export const IconCompose = (props: IconProps) => <FontAwesomeIcon icon={faPenToS
 export const IconSun = (props: IconProps) => <FontAwesomeIcon icon={faSun} {...props} />;
 
 export const IconMoon = (props: IconProps) => <FontAwesomeIcon icon={faMoon} {...props} />;
+
+export const IconThemeSystem = (props: IconProps) => <FontAwesomeIcon icon={faDesktop} {...props} />;
 
 export const IconGear = (props: IconProps) => <FontAwesomeIcon icon={faGear} {...props} />;
 

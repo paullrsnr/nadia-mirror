@@ -8,12 +8,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import { IconSparkles } from "../../components/ui/icons";
 import { getAutoArchiveRules, saveAutoArchiveRules } from "../../services/api/autoArchive.api";
 import { useAuth } from "../../hooks/useAuth";
-import type { ConnectableProvider } from "../../models/auth";
-
-const PROVIDER_LABELS: Record<ConnectableProvider, string> = {
-  gmail: "Gmail",
-  outlook: "Outlook",
-};
+import { PROVIDER_LABELS } from "../../constants/providers";
 
 export default function SettingsPage() {
   const { authByProvider, loading, error, providers, connect, disconnect } = useAuth();
@@ -35,7 +30,7 @@ export default function SettingsPage() {
   return (
     <div className="settings-page-shell">
       <PageHeader title="Paramètres" />
-      <div className="settings-page">
+      <div className="settings-page scrollbar-hidden">
       {error && <ErrorMessage message={error} className="settings-section__save" />}
 
       <Link to="/models" className="settings-models-link">
