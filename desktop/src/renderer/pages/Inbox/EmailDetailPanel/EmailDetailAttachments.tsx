@@ -2,12 +2,7 @@ import "./EmailDetailAttachments.css";
 import { IconAttachment, IconDownload } from "../../../components/ui/icons";
 import { getAttachmentDownloadUrl } from "../../../services/api/emails.api";
 import type { EmailDetailAttachmentsProps } from "../../../models/email";
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} o`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
-}
+import { formatFileSize } from "../../../helpers";
 
 export default function EmailDetailAttachments({ emailId, attachments }: EmailDetailAttachmentsProps) {
   if (attachments.length === 0) return null;
