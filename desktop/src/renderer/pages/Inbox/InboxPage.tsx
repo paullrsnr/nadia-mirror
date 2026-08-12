@@ -35,8 +35,6 @@ export default function InboxPage() {
   } = useAuth();
   const { providerCounts, refreshProviderCounts } = useProviderCounts();
 
-  // Sélectionne automatiquement le premier compte connecté (la Sidebar n'a pas
-  // de vue "toutes les boîtes" — elle reflète exactement les comptes Figma).
   useEffect(() => {
     if (provider !== "all") return;
     const firstConnected = connectableProviders.find((p) => authByProvider[p]?.is_authenticated);
@@ -58,7 +56,6 @@ export default function InboxPage() {
     setEmailRead,
   } = useEmails(provider);
 
-  // Synchronise l'email sélectionné quand la liste se recharge (ex: après classify)
   useEffect(() => {
     setSelectedEmail((prev) => {
       if (!prev) return prev;

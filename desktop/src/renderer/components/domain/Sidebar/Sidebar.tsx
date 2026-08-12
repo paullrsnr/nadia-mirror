@@ -60,8 +60,8 @@ export default function Sidebar({
                   <span className="sidebar__account-name">{PROVIDER_LABELS[provider]}</span>
                   <span className="sidebar__account-email">{authByProvider[provider]?.email}</span>
                 </span>
-                {!!counts?.unread && (
-                  <span className="sidebar__account-badge">{counts.unread}</span>
+                {!!counts?.totalUnread && (
+                  <span className="sidebar__account-badge">{counts.totalUnread}</span>
                 )}
               </button>
               {isActive && (
@@ -133,7 +133,9 @@ function SidebarFolders({
       >
         <IconStar />
         <span className="sidebar__folder-label">Favoris</span>
-        {!!counts?.starred && <span className="sidebar__folder-count">{counts.starred}</span>}
+        {!!counts?.totalStarred && (
+          <span className="sidebar__folder-count">{counts.totalStarred}</span>
+        )}
       </button>
       <span className="sidebar__folder sidebar__folder--disabled" title={COMING_SOON_LABEL}>
         <IconArchive />

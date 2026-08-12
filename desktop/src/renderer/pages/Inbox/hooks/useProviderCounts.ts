@@ -19,11 +19,11 @@ export function useProviderCounts(): UseProviderCountsResult {
     connectedProviders.forEach((provider) => {
       getEmails(50, provider)
         .then((response) => {
-          const unread = response.emails.filter((e) => e.labels.includes(UNREAD_LABEL)).length;
-          const starred = response.emails.filter((e) => e.is_starred).length;
+          const totalUnread = response.emails.filter((e) => e.labels.includes(UNREAD_LABEL)).length;
+          const totalStarred = response.emails.filter((e) => e.is_starred).length;
           setProviderCounts((prev) => ({
             ...prev,
-            [provider]: { total: response.total, unread, starred },
+            [provider]: { total: response.total, totalUnread, totalStarred },
           }));
         })
         .catch(() => {});

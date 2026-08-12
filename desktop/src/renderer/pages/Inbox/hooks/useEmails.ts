@@ -4,7 +4,8 @@ import { getEmails, getCategories } from "../../../services/api/emails.api";
 import { getAllAuthStatuses } from "../../../services/api/auth.api";
 import { getPendingArchive } from "../../../services/api/autoArchive.api";
 import { authSignal } from "../../../state";
-import { UNREAD_LABEL } from "../../../constants/labels";
+import { CONNECTABLE_PROVIDERS } from "../../../constants/providers";
+import { applyReadLabel } from "../../../helpers";
 import type { Email, Category, MailProvider, UseEmailsResult } from "../../../models";
 
 export function useEmails(provider: MailProvider): UseEmailsResult {
@@ -16,9 +17,8 @@ export function useEmails(provider: MailProvider): UseEmailsResult {
 
   const isAuthenticated = useComputed(() => {
     const statuses = authSignal.value;
-    return provider === "all"
-      ? statuses.gmail?.is_authenticated === true || statuses.outlook?.is_authenticated === true
-      : statuses[provider]?.is_authenticated === true;
+    const targets = provider === "all" ? CONNECTABLE_PROVIDERS : [provider];
+    return targets.some((p) => statuses[p]?.is_authenticated ?? false);
   }).value;
 
   const loadEmails = useCallback(async () => {
@@ -77,15 +77,7 @@ export function useEmails(provider: MailProvider): UseEmailsResult {
 
   const setEmailRead = useCallback((emailId: string, read: boolean) => {
     setEmails((prev) =>
-      prev.map((e) => {
-        if (e.id !== emailId) return e;
-        const labels = read
-          ? e.labels.filter((l) => l !== UNREAD_LABEL)
-          : e.labels.includes(UNREAD_LABEL)
-            ? e.labels
-            : [...e.labels, UNREAD_LABEL];
-        return { ...e, labels };
-      }),
+      prev.map((e) => (e.id === emailId ? { ...e, labels: applyReadLabel(e.labels, read) } : e)),
     );
   }, []);
 
