@@ -4,16 +4,20 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: var(--color-background-overlay);
+  background: var(--color-base-muted);
 }
 
 .auth-callback__card {
   text-align: center;
   padding: var(--space-lg);
-  background: var(--color-background);
+  background: var(--color-base);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
 }
 
-.auth-callback__title--success { color: var(--color-success); }
-.auth-callback__title--error   { color: var(--color-error); }
+.auth-callback__title--success { 
+  color: var(--color-success); 
+}
+.auth-callback__title--error   { 
+  color: var(--color-error-content); 
+}

@@ -1,45 +1,65 @@
+/*
+ * Valeurs confirmées par l'utilisateur depuis le panneau de variables Figma
+ * ("Identité visuelle", groupes theme/marque/app).
+ */
 :root {
-  /* Couleurs de surface */
-  --color-background:          #ffffff;
-  --color-background-muted:    #f9f9f9;
-  --color-background-unread:   #f0f7ff;
-  --color-background-hover:    #f5f5f5;
-  --color-background-overlay:  #f5f5f5;
-  --color-background-selected: #f0fff0;
-  --color-background-nav-active: #e8f0fe;
+  /* Surfaces */
+  --color-base:         #ffffff;
+  --color-base-soft:    #f9fafb;
+  --color-base-muted:   #f3f4f6;
+  --color-base-strong:  #e5e7eb;
+  --color-selected:     #eff6ff;
+  --color-unread:       #eff6ffb2;
+  --color-hover:        #deecff;
 
   /* Bordures */
-  --color-border:        #eeeeee;
-  --color-border-strong: #dddddd;
-  --color-border-button: #cccccc;
+  --color-border:        #e5e7eb;
+  --color-border-soft:   #f3f4f6;
+  --color-border-strong: #d1d5db;
 
   /* Texte */
-  --color-text-primary:   #333333;
-  --color-text-secondary: #666666;
-  --color-text-muted:     #888888;
+  --color-content:          #111827;
+  --color-content-soft:     #374151;
+  --color-content-muted:    #6b7280;
+  --color-content-inverted: #ffffff;
 
-  /* Statuts */
-  --color-success:     #4CAF50;
-  --color-error:       #f44336;
-  --color-error-light: #ffebee;
+  /* Marque */
+  --color-marque-primary:                #a855f7;
+  --color-marque-primary-hover:          #9333ea;
+  --color-marque-secondary:              #3b82f6;
+  --color-marque-secondary-hover:        #2563eb;
+  --color-marque-tertiary:               #ec4899;
+  --color-marque-primary-surface-border: #e9d5ff;
+  --color-marque-secondary-surface:      #eff6ffb2;
 
-  /* Actions */
-  --color-button-primary:   #007bff;
-  --color-button-secondary: #ffffff;
+  /* App — badges & chips */
+  --color-badge-bg:            #3b82f6;
+  --color-badge-txt:           #ffffff;
+  --color-star-active:         #facc15;
+  --color-star-inactive:       #f9fafb;
+  --color-star-hover:          #facc15;
+  --color-chip-urgent-bg:      #fee2e2;
+  --color-chip-urgent-txt:     #b91c1c;
+  --color-chip-important-bg:  #fef3c7;
+  --color-chip-important-txt: #92400e;
+  --color-chip-promo-bg:       #ede9fe;
+  --color-chip-promo-txt:      #7c3aed;
 
-  /* Badges de catégorie */
-  --color-category-travail-bg:      #dbeafe;
-  --color-category-travail-text:    #1d4ed8;
-  --color-category-personnel-bg:    #dcfce7;
-  --color-category-personnel-text:  #15803d;
-  --color-category-finance-bg:      #fef9c3;
-  --color-category-finance-text:    #a16207;
-  --color-category-shopping-bg:     #f3e8ff;
-  --color-category-shopping-text:   #7e22ce;
-  --color-category-marketing-bg:    #ffe4e6;
-  --color-category-marketing-text:  #be123c;
-  --color-category-notification-bg:   #f1f5f9;
-  --color-category-notification-text: #475569;
-  --color-category-autre-bg:        #f1f5f9;
-  --color-category-autre-text:      #64748b;
+  /* États fonctionnels (app/success, app/info, app/warning, app/error — Figma) */
+  --color-success:        #22c55e;
+  --color-success-hover:  #16a34a;
+  --color-success-border: #86efac;
+  --color-success-content: #166534;
+  --color-info:            #3b82f6;
+  --color-info-hover:      #2563eb;
+  --color-info-border:     #93c5fd;
+  --color-info-content:    #1d4ed8;
+  --color-warning:         #f59e0b;
+  --color-warning-hover:   #d97706;
+  --color-warning-border:  #fcd34d;
+  --color-warning-content: #92400e;
+  --color-error:           #ef4444;
+  --color-error-hover:     #dc2626;
+  --color-error-border:    #fca5a5;
+  --color-error-content:   #b91c1c;
 }

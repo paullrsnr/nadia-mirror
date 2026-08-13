@@ -20,4 +20,5 @@ export interface Email {
   draft_reply?: string;
   is_archived?: boolean;
   pending_archive?: boolean;
+  is_starred?: boolean;
 }

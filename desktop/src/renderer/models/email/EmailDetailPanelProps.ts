@@ -12,4 +12,5 @@ export interface EmailDetailPanelProps {
   onSummarize: (email: Email) => void;
   onSummarizeThread: (email: Email) => void;
   onSuggestReply: (email: Email) => void;
+  onToggleStar: (email: Email) => void;
 }

@@ -35,6 +35,7 @@ class EmailModel(Base):
     draft_reply: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     is_archived: Mapped[bool] = mapped_column(default=False, nullable=False)
     pending_archive: Mapped[bool] = mapped_column(default=False, nullable=False)
+    is_starred: Mapped[bool] = mapped_column(default=False, nullable=False)
 
     def __repr__(self) -> str:
         return f"EmailModel(id={self.id!r}, subject={self.subject!r}, provider={self.provider!r})"

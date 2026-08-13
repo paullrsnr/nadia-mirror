@@ -1,2 +1,45 @@
-.inbox-layout          { display: flex; height: calc(100vh - 41px); }
-.inbox-unauthenticated { padding: var(--space-page); text-align: center; }
+.inbox-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.inbox-layout { 
+  display: flex; 
+  flex: 1; 
+  overflow: hidden; 
+}
+
+.inbox-unauthenticated {
+  height: 100vh;
+  padding: var(--space-page);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-base);
+  color: var(--color-content);
+  font-family: var(--font-family);
+}
+
+.inbox-unauthenticated__title { 
+  font-size: var(--font-size-xl); 
+  margin: 0 0 var(--space-sm); 
+}
+
+.inbox-unauthenticated__desc {
+  color: var(--color-content-muted);
+  margin: 0 0 var(--space-page);
+}
+
+.inbox-unauthenticated__cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-card);
+  width: 100%;
+  max-width: 420px;
+}
+
+.inbox-unauthenticated__cards .auth-card { 
+  margin-top: 0; 
+}

@@ -1,5 +1,6 @@
 import logging
 import os
+import threading
 from pathlib import Path
 from typing import Optional
 
@@ -21,6 +22,7 @@ class LlamaCppAdapter(LlamaPort):
         self._resources_dir = resources_dir or Path(llm_settings.MODELS_DIR)
         self._model: Optional[Llama] = None
         self._model_path: Optional[Path] = None
+        self._lock = threading.RLock()
 
     def is_available(self) -> bool:
         return Llama is not None
@@ -30,42 +32,44 @@ class LlamaCppAdapter(LlamaPort):
             logger.error("llama-cpp-python n'est pas installé")
             return False
 
-        if self._model is not None and self._model_path == model_path:
-            logger.info("Modèle déjà chargé")
-            return True
-        if self._model is not None:
-            self.unload_model()
+        with self._lock:
+            if self._model is not None and self._model_path == model_path:
+                logger.info("Modèle déjà chargé")
+                return True
+            if self._model is not None:
+                self.unload_model()
 
-        try:
-            logger.info("Chargement du modèle depuis %s...", model_path)
-            n_threads = llm_settings.DEFAULT_N_THREADS
-            if llm_settings.AUTO_THREADS:
-                try:
-                    n_threads = os.cpu_count() or 4
-                except Exception:
-                    pass
+            try:
+                logger.info("Chargement du modèle depuis %s...", model_path)
+                n_threads = llm_settings.DEFAULT_N_THREADS
+                if llm_settings.AUTO_THREADS:
+                    try:
+                        n_threads = os.cpu_count() or 4
+                    except Exception:
+                        pass
 
-            self._model = Llama(
-                model_path=str(model_path),
-                n_ctx=llm_settings.DEFAULT_N_CTX,
-                n_threads=n_threads,
-                verbose=False,
-            )
-            self._model_path = model_path
-            logger.info("Modèle chargé avec succès")
-            return True
-        except Exception as e:
-            logger.error("Erreur lors du chargement du modèle: %s", e, exc_info=True)
-            self._model = None
-            self._model_path = None
-            return False
+                self._model = Llama(
+                    model_path=str(model_path),
+                    n_ctx=llm_settings.DEFAULT_N_CTX,
+                    n_threads=n_threads,
+                    verbose=False,
+                )
+                self._model_path = model_path
+                logger.info("Modèle chargé avec succès")
+                return True
+            except Exception as e:
+                logger.error("Erreur lors du chargement du modèle: %s", e, exc_info=True)
+                self._model = None
+                self._model_path = None
+                return False
 
     def unload_model(self) -> None:
-        if self._model is not None:
-            del self._model
-            self._model = None
-            self._model_path = None
-            logger.info("Modèle déchargé")
+        with self._lock:
+            if self._model is not None:
+                del self._model
+                self._model = None
+                self._model_path = None
+                logger.info("Modèle déchargé")
 
     def is_loaded(self) -> bool:
         return self._model is not None
@@ -74,7 +78,19 @@ class LlamaCppAdapter(LlamaPort):
         return self._model_path
 
     def get_short_answer(self, messages: list[ChatMessage]) -> str:
-        if not self.is_loaded():
-            raise RuntimeError("Aucun modèle chargé")
-        result = self._model.create_chat_completion(messages=[m.to_dict() for m in messages], max_tokens=512)
-        return result["choices"][0]["message"]["content"]
+        with self._lock:
+            if not self.is_loaded():
+                raise RuntimeError("Aucun modèle chargé")
+            result = self._model.create_chat_completion(messages=[m.to_dict() for m in messages], max_tokens=512)
+            return result["choices"][0]["message"]["content"]
+
+    def get_json_answer(self, messages: list[ChatMessage]) -> str:
+        with self._lock:
+            if not self.is_loaded():
+                raise RuntimeError("Aucun modèle chargé")
+            result = self._model.create_chat_completion(
+                messages=[m.to_dict() for m in messages],
+                max_tokens=512,
+                response_format={"type": "json_object"},
+            )
+            return result["choices"][0]["message"]["content"]

@@ -2,6 +2,7 @@
 desktop/node_modules
 desktop/dist
 desktop/package-lock.json
+desktop/.npmrc
 
 # backend
 backend/__pycache__/

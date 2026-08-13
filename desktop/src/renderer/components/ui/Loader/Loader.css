@@ -1,0 +1,28 @@
+.loader-spinner {
+  display: inline-block;
+  border-radius: 50%;
+  border-style: solid;
+  border-color: var(--color-border);
+  border-top-color: var(--color-marque-secondary);
+  animation: spin 1s linear infinite;
+}
+
+.loader-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.loader-fullpage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: var(--space-card);
+}
+
+.loader__label { 
+  color: var(--color-content-muted); 
+  margin: 0; 
+}

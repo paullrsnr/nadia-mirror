@@ -12,6 +12,9 @@ export type {
   UseEmailsResult,
   UseEmailActionsResult,
   UseSyncResult,
+  ProviderCount,
+  UseProviderCountsResult,
+  InboxFolder,
 } from "./email";
 
 export type {
@@ -36,4 +39,8 @@ export type {
   UseModelDownloadOptions,
 } from "./llm";
 
-export type { ButtonVariant, ButtonSize, ButtonProps, BadgeProps } from "./ui";
+export type { ButtonVariant, ButtonSize, ButtonProps, BadgeProps, StarButtonProps } from "./ui";
+
+export type { SidebarProps, ToolbarProps } from "./layout";
+
+export type { ThemePreference, ResolvedTheme, UseThemeResult } from "./theme";
