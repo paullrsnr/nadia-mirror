@@ -1,0 +1,124 @@
+.root {
+  padding: var(--space-card) var(--space-page);
+  border-bottom: 1px solid var(--color-border-soft);
+  cursor: pointer;
+  background-color: var(--color-base);
+  font-weight: var(--font-weight-normal);
+}
+
+.root:hover { 
+  background-color: var(--color-hover); 
+}
+
+.root--unread { 
+  background-color: var(--color-unread); 
+  font-weight: var(--font-weight-bold); 
+}
+.root--unread:hover { 
+  background-color: var(--color-hover); 
+}
+
+.root--selected { 
+  background-color: var(--color-selected); 
+}
+.root--selected:hover { 
+  background-color: var(--color-selected); 
+}
+
+.row { 
+  display: flex; 
+  align-items: flex-start; 
+  gap: var(--space-sm); 
+}
+
+.main { 
+  flex: 1; 
+  min-width: 0; 
+  display: flex; 
+  flex-direction: column; 
+  gap: var(--space-xs); 
+}
+
+.meta { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  gap: var(--space-sm); 
+}
+
+.from {
+  color: var(--color-content);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+}
+
+.date { 
+  font-size: var(--font-size-xs); 
+  color: var(--color-content-muted); 
+  flex-shrink: 0; 
+}
+
+.subject { 
+  color: var(--color-content); 
+  font-size: var(--font-size-sm); 
+  display: flex; 
+  align-items: center; 
+  gap: var(--space-xs); 
+}
+.attachment-indicator { 
+  color: var(--color-content-muted); 
+  font-size: var(--font-size-xs); 
+  flex-shrink: 0; 
+}
+
+.snippet { 
+  color: var(--color-content-muted); 
+  font-size: var(--font-size-sm); 
+}
+
+.footer { 
+  display: flex; 
+  align-items: center; 
+  gap: var(--space-sm); 
+  margin-top: var(--space-xs); 
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 1px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-transform: capitalize;
+  background-color: var(--category-badge-bg);
+  color: var(--category-badge-color);
+}
+
+.category-badge--travail {
+  --category-badge-bg: var(--category-color-travail-bg, var(--color-marque-secondary-surface));
+  --category-badge-color: var(--category-color-travail-text, var(--color-marque-secondary));
+}
+.category-badge--personnel {
+  --category-badge-bg: var(--category-color-personnel-bg, var(--color-marque-primary-surface-border));
+  --category-badge-color: var(--category-color-personnel-text, var(--color-marque-primary));
+}
+.category-badge--finance {
+  --category-badge-bg: var(--category-color-finance-bg, var(--color-chip-important-bg));
+  --category-badge-color: var(--category-color-finance-text, var(--color-chip-important-txt));
+}
+.category-badge--shopping {
+  --category-badge-bg: var(--category-color-shopping-bg, var(--color-chip-promo-bg));
+  --category-badge-color: var(--category-color-shopping-text, var(--color-chip-promo-txt));
+}
+.category-badge--marketing {
+  --category-badge-bg: var(--category-color-marketing-bg, var(--color-chip-urgent-bg));
+  --category-badge-color: var(--category-color-marketing-text, var(--color-chip-urgent-txt));
+}
+.category-badge--notification {
+  --category-badge-bg: var(--category-color-notification-bg, var(--color-base-muted));
+  --category-badge-color: var(--category-color-notification-text, var(--color-content-muted));
+}
+.category-badge--autre {
+  --category-badge-bg: var(--category-color-autre-bg, var(--color-base-muted));
+  --category-badge-color: var(--category-color-autre-text, var(--color-content-muted));
+}

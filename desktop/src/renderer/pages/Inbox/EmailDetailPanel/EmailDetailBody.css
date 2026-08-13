@@ -1,0 +1,11 @@
+.email-detail-body {
+  margin: var(--space-page);
+  white-space: pre-wrap;
+  color: var(--color-content);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-base);
+}
+
+.email-detail-body--html {
+  white-space: normal;
+}

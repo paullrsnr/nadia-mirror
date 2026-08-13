@@ -1,0 +1,21 @@
+.email-detail {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-base);
+}
+
+.email-detail--empty { 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.email-detail__empty-text { 
+  color: var(--color-content-muted); 
+}
+
+.email-detail__content { 
+  flex: 1; 
+  overflow-y: auto; 
+}

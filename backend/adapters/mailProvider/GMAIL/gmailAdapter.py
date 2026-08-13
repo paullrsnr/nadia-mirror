@@ -1,3 +1,4 @@
+import base64
 from typing import Optional
 
 from backend.core.exceptions import AuthError
@@ -20,7 +21,7 @@ class GmailAdapter:
             )
         self.gmail_api = build_gmail_service(gmail_credentials)
 
-    def fetch_emails_gmail(
+    def fetch_emails(
             self,
             max_results: int = 50,
             query: Optional[EmailListQuery] = None,
@@ -65,13 +66,38 @@ class GmailAdapter:
                 f"Erreur lors de la récupération des emails: {error_message}"
             ) from e
 
-    def archive_email_gmail(self, email_id: str) -> bool:
+    def get_attachment(self, email_id: str, attachment_id: str) -> bytes:
+        # pylint: disable=no-member
+        result = (
+            self.gmail_api.users()
+            .messages()
+            .attachments()
+            .get(userId="me", messageId=email_id, id=attachment_id)
+            .execute()
+        )
+        data = result.get("data", "")
+        padded = data + "=" * (-len(data) % 4)
+        return base64.urlsafe_b64decode(padded)
+
+    def archive_email(self, email_id: str) -> bool:
         try:
             # pylint: disable=no-member
             self.gmail_api.users().messages().modify(
                 userId="me",
                 id=email_id,
                 body={"removeLabelIds": ["INBOX"]},
+            ).execute()
+            return True
+        except (OSError, ValueError, KeyError, TypeError):
+            return False
+
+    def mark_as_read(self, email_id: str) -> bool:
+        try:
+            # pylint: disable=no-member
+            self.gmail_api.users().messages().modify(
+                userId="me",
+                id=email_id,
+                body={"removeLabelIds": ["UNREAD"]},
             ).execute()
             return True
         except (OSError, ValueError, KeyError, TypeError):
@@ -100,11 +126,3 @@ class GmailAdapter:
         if query.after_date:
             parts.append(f"after:{query.after_date:%Y/%m/%d}")
         return " ".join(parts)
-
-
-def fetch_emails_gmail(max_results: int = 50, query: Optional[EmailListQuery] = None) -> EmailPage:
-    return GmailAdapter().fetch_emails_gmail(max_results=max_results, query=query)
-
-
-def archive_email_gmail(email_id: str) -> bool:
-    return GmailAdapter().archive_email_gmail(email_id)

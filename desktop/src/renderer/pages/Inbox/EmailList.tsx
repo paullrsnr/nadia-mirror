@@ -3,81 +3,61 @@ import EmailCard from "../../components/domain/EmailCard";
 import Button from "../../components/ui/Button";
 import ErrorMessage from "../../components/ui/ErrorMessage";
 import type { EmailListProps } from "../../models/email";
-import type { MailProvider } from "../../models/auth";
+import { UNREAD_LABEL } from "../../constants/labels";
 
 export default function EmailList({
   emails,
   pendingArchive,
-  categories,
   loading,
   syncing,
   classifying,
   error,
-  provider,
+  folder,
   categoryFilter,
-  onProviderChange,
-  onCategoryFilterChange,
+  searchValue,
+  selectedEmailId,
   onSync,
   onClassifyAll,
   onEmailClick,
   onArchive,
+  onToggleStar,
   onConfirmArchive,
   onRejectArchive,
 }: EmailListProps) {
-  const filtered = emails.filter(
-    (e) => categoryFilter === "all" || e.category === categoryFilter,
-  );
+  const search = searchValue.trim().toLowerCase();
+
+  const filtered = emails.filter((e) => {
+    if (folder === "favoris" && !e.is_starred) return false;
+    if (categoryFilter !== "all" && e.category !== categoryFilter) return false;
+    if (!search) return true;
+    const haystack = `${e.subject} ${e.snippet ?? ""} ${e.from_address.name ?? ""} ${e.from_address.email}`.toLowerCase();
+    return haystack.includes(search);
+  });
+
+  const unreadCount = filtered.filter((e) => e.labels.includes(UNREAD_LABEL)).length;
 
   return (
-    <div className="email-list">
+    <div className="email-list scrollbar-hidden">
+      <div className="email-list__header">
+        <h3 className="email-list__title">{folder === "favoris" ? "Favoris" : "Boîte de réception"}</h3>
+        <span className="email-list__unread">{unreadCount} non lus</span>
+      </div>
+
       <div className="email-list__toolbar">
-        <h1 className="email-list__toolbar-title">Nadia</h1>
-
-        <div className="email-list__filter-row">
-          <label>
-            Boîte mail :
-            <select
-              value={provider}
-              onChange={(e) => onProviderChange(e.target.value as MailProvider)}
-            >
-              <option value="all">Toutes les boîtes</option>
-              <option value="gmail">Gmail</option>
-              <option value="outlook">Outlook</option>
-            </select>
-          </label>
-        </div>
-
         <div className="email-list__actions">
-          <Button onClick={() => onSync(false)} disabled={syncing}>
+          <Button size="sm" onClick={() => onSync(false)} disabled={syncing}>
             {syncing ? "Synchronisation..." : "Synchroniser"}
           </Button>
-          <Button variant="secondary" onClick={() => onSync(true)} disabled={syncing}>
+          <Button size="sm" variant="secondary" onClick={() => onSync(true)} disabled={syncing}>
             {syncing ? "Synchronisation..." : "Sync. complète (30j)"}
           </Button>
-          <Button variant="secondary" onClick={onClassifyAll} disabled={classifying || syncing}>
+          <Button size="sm" variant="secondary" onClick={onClassifyAll} disabled={classifying || syncing}>
             {classifying ? "Classification..." : "Classifier (IA)"}
           </Button>
         </div>
-
-        <div className="email-list__category-filter">
-          <label>
-            Catégorie :
-            <select
-              value={categoryFilter}
-              onChange={(e) => onCategoryFilterChange(e.target.value)}
-            >
-              <option value="all">Toutes</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.name}>
-                  {c.name.charAt(0).toUpperCase() + c.name.slice(1)}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
       </div>
 
-      {pendingArchive.length > 0 && (
+      {folder === "inbox" && pendingArchive.length > 0 && (
         <div className="email-list__pending">
           <div className="email-list__pending-header">
             L'IA suggère d'archiver {pendingArchive.length} email
@@ -106,20 +86,24 @@ export default function EmailList({
         </div>
       )}
 
-      {loading ? (
-        <div className="email-list__empty">Chargement...</div>
-      ) : filtered.length === 0 ? (
-        <div className="email-list__empty">Aucun email</div>
-      ) : (
-        filtered.map((email) => (
-          <EmailCard
-            key={email.id}
-            email={email}
-            onClick={() => onEmailClick(email)}
-            onArchive={() => onArchive(email)}
-          />
-        ))
-      )}
+      <div className="email-list__items scrollbar-hidden">
+        {loading ? (
+          <div className="email-list__empty">Chargement...</div>
+        ) : filtered.length === 0 ? (
+          <div className="email-list__empty">Aucun email</div>
+        ) : (
+          filtered.map((email) => (
+            <EmailCard
+              key={email.id}
+              email={email}
+              isSelected={email.id === selectedEmailId}
+              onClick={() => onEmailClick(email)}
+              onArchive={() => onArchive(email)}
+              onToggleStar={() => onToggleStar(email)}
+            />
+          ))
+        )}
+      </div>
 
       {error && <ErrorMessage message={error} className="email-list__error" />}
     </div>

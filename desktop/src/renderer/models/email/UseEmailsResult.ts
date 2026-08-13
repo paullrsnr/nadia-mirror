@@ -11,4 +11,6 @@ export interface UseEmailsResult {
   loadAll: () => Promise<void>;
   removeEmail: (emailId: string) => void;
   removePendingArchive: (emailId: string) => void;
+  setEmailStarred: (emailId: string, starred: boolean) => void;
+  setEmailRead: (emailId: string, read: boolean) => void;
 }

@@ -26,12 +26,12 @@
 .self-start { align-self: flex-start; }
 
 /* —— Typographie —— */
-.text-primary   { color: var(--color-text-primary);   font-weight: var(--font-weight-bold); }
-.text-secondary { color: var(--color-text-secondary); font-size: var(--font-size-base); }
-.text-muted     { color: var(--color-text-muted);     font-size: var(--font-size-sm); }
-.text-muted--xs { color: var(--color-text-muted);     font-size: var(--font-size-xs); }
+.text-primary   { color: var(--color-content);   font-weight: var(--font-weight-bold); }
+.text-secondary { color: var(--color-content-soft); font-size: var(--font-size-base); }
+.text-muted     { color: var(--color-content-muted);     font-size: var(--font-size-sm); }
+.text-muted--xs { color: var(--color-content-muted);     font-size: var(--font-size-xs); }
 .text-success   { color: var(--color-success); }
-.text-error     { color: var(--color-error); }
+.text-error     { color: var(--color-error-content); }
 .text-center    { text-align: center; }
 .font-bold      { font-weight: var(--font-weight-bold); }
 .font-normal    { font-weight: var(--font-weight-normal); }
@@ -45,6 +45,13 @@
 .overflow-y-auto { overflow-y: auto; }
 .overflow-hidden  { overflow: hidden; }
 
+.scrollbar-hidden {
+  scrollbar-width: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
 /* —— Dimensions —— */
 .w-full   { width: 100%; }
 .h-screen { height: 100vh; }
@@ -53,10 +60,10 @@
 .btn-secondary {
   padding: 4px 8px;
   font-size: var(--font-size-xs);
-  border: 1px solid var(--color-border-button);
+  border: 1px solid var(--color-border-soft);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  background-color: var(--color-button-secondary);
+  background-color: var(--color-base-muted);
 }
 
 .model-download-btn {
@@ -66,10 +73,10 @@
   margin-bottom: var(--space-md);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background-color: var(--color-background);
+  background-color: var(--color-base);
   box-shadow: var(--shadow-card);
   cursor: pointer;
   text-align: left;
 }
-.model-download-btn:hover:not(:disabled) { border-color: var(--color-button-primary); }
+.model-download-btn:hover:not(:disabled) { border-color: var(--color-marque-secondary); }
 .model-download-btn:disabled             { cursor: default; }

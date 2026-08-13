@@ -1,23 +1,24 @@
 import type { Email } from "./Email";
-import type { Category } from "./Category";
+import type { InboxFolder } from "./InboxFolder";
 import type { MailProvider } from "../auth/MailProvider";
 
 export interface EmailListProps {
   emails: Email[];
   pendingArchive: Email[];
-  categories: Category[];
   loading: boolean;
   syncing: boolean;
   classifying: boolean;
   error: string | null;
   provider: MailProvider;
+  folder: InboxFolder;
   categoryFilter: string;
-  onProviderChange: (p: MailProvider) => void;
-  onCategoryFilterChange: (cat: string) => void;
+  searchValue: string;
+  selectedEmailId: string | null;
   onSync: (full: boolean) => void;
   onClassifyAll: () => void;
   onEmailClick: (email: Email) => void;
   onArchive: (email: Email) => void;
+  onToggleStar: (email: Email) => void;
   onConfirmArchive: (email: Email) => void;
   onRejectArchive: (email: Email) => void;
 }

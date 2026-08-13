@@ -1,13 +1,21 @@
+import asyncio
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.api.routers import auth_router, emails_router, llm_router
 from backend.api.routers import auto_archive_router
+from backend.api.deps import get_llm_service
 from backend.config.settings import api_settings
 from backend.core.exceptions import AuthError, NotFoundError, ProviderError
 
 app = FastAPI(title="Nadia API")
+
+
+@app.on_event("startup")
+async def auto_load_llm_model():
+    asyncio.create_task(asyncio.to_thread(get_llm_service().auto_load_last_model))
 
 
 @app.exception_handler(ProviderError)

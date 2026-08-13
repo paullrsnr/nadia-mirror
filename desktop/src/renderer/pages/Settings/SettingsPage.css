@@ -1,36 +1,70 @@
-.settings-page { padding: var(--space-page); }
+.settings-page-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--color-base);
+}
+
+.settings-page { 
+  padding: var(--space-page); 
+  overflow-y: auto; 
+  color: var(--color-content); 
+}
+
+.settings-models-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: fit-content;
+  margin-bottom: var(--space-page);
+  padding: var(--space-sm) var(--space-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  color: var(--color-content);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+}
+.settings-models-link:hover { 
+  background-color: var(--color-base-muted); 
+}
 
 .settings-section {
   margin-top: var(--space-page);
   padding: var(--space-page);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
 
-.settings-section__title    { margin: 0 0 var(--space-sm); }
+.settings-section__title { 
+  margin: 0 0 var(--space-sm); 
+  color: var(--color-content); 
+}
 
 .settings-section__desc {
   margin: 0 0 var(--space-sm);
-  color: var(--color-text-secondary);
-  font-size: 13px;
+  color: var(--color-content-soft);
+  font-size: var(--font-size-sm);
 }
 
 .settings-section__examples {
   margin: 0 0 var(--space-sm);
-  color: var(--color-text-muted);
-  font-size: 12px;
+  color: var(--color-content-muted);
+  font-size: var(--font-size-xs);
 }
 
 .settings-section__textarea {
   width: 100%;
   padding: var(--space-sm);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border-strong);
-  background-color: var(--color-background-muted);
-  color: var(--color-text-primary);
-  font-size: 13px;
+  border: 1px solid var(--color-border-soft);
+  background-color: var(--color-base-muted);
+  color: var(--color-content);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
   resize: vertical;
   box-sizing: border-box;
 }
 
-.settings-section__save { margin-top: var(--space-sm); }
+.settings-section__save { 
+  margin-top: var(--space-sm); 
+}

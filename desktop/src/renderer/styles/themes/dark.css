@@ -1,45 +1,61 @@
 [data-theme="dark"] {
-  /* Couleurs de surface */
-  --color-background:          #1a1a1a;
-  --color-background-muted:    #242424;
-  --color-background-unread:   #1a2a3a;
-  --color-background-hover:    #2a2a2a;
-  --color-background-overlay:  #2a2a2a;
-  --color-background-selected: #1a2e1a;
-  --color-background-nav-active: #1a2d4a;
+  /* Surfaces (theme/*) */
+  --color-base:         #111827;
+  --color-base-soft:    #111827;
+  --color-base-muted:   #1f2937;
+  --color-base-strong:  #374151;
+  --color-selected:     #1c398e4d;
+  --color-unread:       #1c398e33;
+  --color-hover:        #2e5cec4d;
 
-  /* Bordures */
-  --color-border:        #333333;
-  --color-border-strong: #444444;
-  --color-border-button: #555555;
+  /* Bordures (theme/*) */
+  --color-border:        #374151;
+  --color-border-soft:   #1f2937;
+  --color-border-strong: #4b5563;
 
-  /* Texte */
-  --color-text-primary:   #e8e8e8;
-  --color-text-secondary: #aaaaaa;
-  --color-text-muted:     #777777;
+  /* Texte (theme/*) */
+  --color-content:          #f3f4f6;
+  --color-content-soft:     #d1d5db;
+  --color-content-muted:    #9ca3af;
+  --color-content-inverted: #111827;
 
-  /* Statuts */
-  --color-success:     #4CAF50;
-  --color-error:       #f44336;
-  --color-error-light: #3a1a1a;
+  /* Marque */
+  --color-marque-primary:               #c084fc;
+  --color-marque-primary-hover:         #a855f7;
+  --color-marque-secondary:             #60a5fa;
+  --color-marque-secondary-hover:       #3b82f6;
+  --color-marque-tertiary:              #ec4899;
+  --color-marque-primary-surface-border: #6e11b0;
+  --color-marque-secondary-surface:      #1c398e33;
 
-  /* Actions */
-  --color-button-primary:   #4a9eff;
-  --color-button-secondary: #242424;
+  /* App — badges & chips */
+  --color-badge-bg:           #60a5fa;
+  --color-badge-txt:          #f3f4f6;
+  --color-star-active:        #eab308;
+  --color-star-inactive:      #111827;
+  --color-star-hover:         #eab308;
+  --color-chip-urgent-bg:     #703340;
+  --color-chip-urgent-txt:    #fda4af;
+  --color-chip-important-bg: #45321a;
+  --color-chip-important-txt: #fde68a;
+  --color-chip-promo-bg:      #35235a;
+  --color-chip-promo-txt:     #d8b4fe;
 
-  /* Badges de catégorie */
-  --color-category-travail-bg:      #1e3a5f;
-  --color-category-travail-text:    #93c5fd;
-  --color-category-personnel-bg:    #14532d;
-  --color-category-personnel-text:  #86efac;
-  --color-category-finance-bg:      #422006;
-  --color-category-finance-text:    #fde68a;
-  --color-category-shopping-bg:     #3b0764;
-  --color-category-shopping-text:   #d8b4fe;
-  --color-category-marketing-bg:    #4c0519;
-  --color-category-marketing-text:  #fda4af;
-  --color-category-notification-bg:   #1e293b;
-  --color-category-notification-text: #94a3b8;
-  --color-category-autre-bg:        #1e293b;
-  --color-category-autre-text:      #94a3b8;
+  /* États fonctionnels (app/success, app/info, app/warning, app/error — Figma) */
+  --color-success:        #4ade80;
+  --color-success-hover:  #22c55e;
+  --color-success-border: #15803d;
+  --color-success-content: #bbf7d0;
+  --color-info:            #60a5fa;
+  --color-info-hover:      #3b82f6;
+  --color-info-border:     #1d4ed8;
+  --color-info-content:    #bfdbfe;
+  --color-warning:         #fbbf24;
+  --color-warning-hover:   #f59e0b;
+  --color-warning-border:  #d97706;
+  --color-warning-content: #fde68a;
+  --color-error:           #f87171;
+  --color-error-hover:     #ef4444;
+  --color-error-border:    #dc2626;
+  --color-error-content:   #fecaca;
 }

@@ -3,8 +3,6 @@ import type { AuthStatus, AuthUrl, ConnectableProvider, MailProvider, ApiError }
 
 export type { ConnectableProvider, MailProvider, ApiError };
 
-export const CONNECTABLE_PROVIDERS: ConnectableProvider[] = ["gmail", "outlook"];
-
 function resolveProvider(provider?: MailProvider): string {
   return provider && provider !== "all" ? provider : "gmail";
 }

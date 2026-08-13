@@ -27,3 +27,6 @@ class LlmGatewayAdapter(LlmPort):
 
     def get_short_answer(self, messages: list[ChatMessage]) -> str:
         return self._adapter.get_short_answer(messages)
+
+    def get_json_answer(self, messages: list[ChatMessage]) -> str:
+        return self._adapter.get_json_answer(messages)
