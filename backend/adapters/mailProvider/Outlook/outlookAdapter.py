@@ -24,7 +24,7 @@ class OutlookAdapter:
         self._tokens: OutlookTokens = tokens
 
 
-    def fetch_emails(
+    def fetch_emails_outlook(
         self,
         max_results: int = 50,
         query: Optional[EmailListQuery] = None,
@@ -44,7 +44,7 @@ class OutlookAdapter:
         emails = [parse_outlook_message(msg) for msg in data.get("value", [])]
         return EmailPage(emails=emails, next_page_token=self._next_token(data.get("@odata.nextLink")))
 
-    def get_attachment(self, email_id: str, attachment_id: str) -> bytes:
+    def get_attachment_outlook(self, email_id: str, attachment_id: str) -> bytes:
         access_token = self._access_token()
         url = f"{GRAPH_BASE}/me/messages/{email_id}/attachments/{attachment_id}"
         with httpx.Client() as client:
@@ -53,7 +53,7 @@ class OutlookAdapter:
             data = response.json()
         return base64.b64decode(data.get("contentBytes", ""))
 
-    def archive_email(self, email_id: str) -> bool:
+    def archive_email_outlook(self, email_id: str) -> bool:
         access_token = self._access_token()
         url = f"{GRAPH_BASE}/me/messages/{email_id}/move"
         body = {"destinationId": "archive"}

@@ -1,7 +1,7 @@
 import { createHashRouter } from "react-router-dom";
 import App from "./App";
-import InboxPage from "./pages/inbox/InboxPage";
-import SettingsPage from "./pages/settings/SettingsPage";
+import InboxPage from "./pages/Inbox/InboxPage";
+import SettingsPage from "./pages/Settings/SettingsPage";
 import LlmsPage from "./pages/llms/LlmsPage";
 import AuthCallbackPage from "./pages/authCallback/AuthCallbackPage";
 

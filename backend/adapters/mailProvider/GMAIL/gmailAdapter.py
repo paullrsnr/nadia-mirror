@@ -25,7 +25,7 @@ class GmailAdapter:
             )
         self.gmail_api = build_gmail_service(gmail_credentials)
 
-    def fetch_emails(
+    def fetch_emails_gmail(
             self,
             max_results: int = 50,
             query: Optional[EmailListQuery] = None,
@@ -67,7 +67,7 @@ class GmailAdapter:
                 f"Erreur lors de la récupération des emails: {error_message}"
             ) from e
 
-    def get_attachment(self, email_id: str, attachment_id: str) -> bytes:
+    def get_attachment_gmail(self, email_id: str, attachment_id: str) -> bytes:
         # pylint: disable=no-member
         result = (
             self.gmail_api.users()
@@ -80,7 +80,7 @@ class GmailAdapter:
         padded = data + "=" * (-len(data) % 4)
         return base64.urlsafe_b64decode(padded)
 
-    def archive_email(self, email_id: str) -> bool:
+    def archive_email_gmail(self, email_id: str) -> bool:
         try:
             # pylint: disable=no-member
             self.gmail_api.users().messages().modify(

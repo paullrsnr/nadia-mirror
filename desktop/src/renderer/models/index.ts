@@ -21,6 +21,10 @@ export type {
   UseDraftsResult,
   ComposeMode,
   ComposeState,
+  PendingSend,
+  UseSendQueueOptions,
+  UseSendQueueResult,
+  SendToastProps,
 } from "./email";
 
 export type {

@@ -8,26 +8,20 @@ import EmailList from "./EmailList";
 import EmailDetailPanel from "./EmailDetailPanel";
 import ComposeModal from "./ComposeModal";
 import DraftsList from "./DraftsList";
+import SendToast from "./SendToast";
 import { useEmails } from "./hooks/useEmails";
 import { useSync } from "./hooks/useSync";
 import { useEmailActions } from "./hooks/useEmailActions";
 import { useProviderCounts } from "./hooks/useProviderCounts";
 import { useDrafts } from "./hooks/useDrafts";
+import { useSendQueue } from "./hooks/useSendQueue";
 import { useTheme } from "../../hooks/useTheme";
 import { useAuth } from "../../hooks/useAuth";
 import { starEmail, markEmailRead } from "../../services/api/emails.api";
 import { PROVIDER_LABELS } from "../../constants/providers";
 import { UNREAD_LABEL } from "../../constants/labels";
-import { deleteDraft, sendDraft } from "../../services/api/drafts.api";
+import { deleteDraft } from "../../services/api/drafts.api";
 import type { DraftEmail, Email, MailProvider, InboxFolder, ComposeState } from "../../models";
-
-const SEND_DELAY_MS = 2000;
-
-interface PendingSend {
-  draftId: string;
-  subject: string;
-  timeoutId: number;
-}
 
 export default function InboxPage() {
   const [provider, setProvider] = useState<MailProvider>("all");
@@ -36,9 +30,8 @@ export default function InboxPage() {
   const [searchValue, setSearchValue] = useState("");
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [markReadError, setMarkReadError] = useState<string | null>(null);
-  const { themePreference, cycleTheme, theme, toggle } = useTheme();
+  const { themePreference, cycleTheme } = useTheme();
   const [composeState, setComposeState] = useState<ComposeState | null>(null);
-  const [pendingSend, setPendingSend] = useState<PendingSend | null>(null);
   const {
     authByProvider,
     loading: authLoading,
@@ -169,42 +162,29 @@ export default function InboxPage() {
     [removeDraft, loadDrafts, refreshProviderCounts],
   );
 
-  const handleComposeClose = useCallback(() => {
-    setComposeState(null);
+  const refreshCurrentFolder = useCallback(() => {
     refreshProviderCounts();
     if (folder === "drafts") loadDrafts();
     if (folder === "sent") loadEmails();
   }, [folder, loadDrafts, loadEmails, refreshProviderCounts]);
 
+  const { pendingSend, requestSend, cancelSend } = useSendQueue({
+    onSendComplete: refreshCurrentFolder,
+  });
+
+  const handleComposeClose = useCallback(() => {
+    setComposeState(null);
+    refreshCurrentFolder();
+  }, [refreshCurrentFolder]);
+
   const handleSendRequested = useCallback(
     (draftId: string, subject: string) => {
       setComposeState(null);
       if (folder === "drafts") loadDrafts();
-      const timeoutId = window.setTimeout(() => {
-        setPendingSend(null);
-        sendDraft(draftId).finally(() => {
-          refreshProviderCounts();
-          if (folder === "drafts") loadDrafts();
-          if (folder === "sent") loadEmails();
-        });
-      }, SEND_DELAY_MS);
-      setPendingSend({ draftId, subject, timeoutId });
+      requestSend(draftId, subject);
     },
-    [folder, loadDrafts, loadEmails, refreshProviderCounts],
+    [folder, loadDrafts, requestSend],
   );
-
-  const handleCancelSend = useCallback(() => {
-    if (!pendingSend) return;
-    window.clearTimeout(pendingSend.timeoutId);
-    setPendingSend(null);
-  }, [pendingSend]);
-
-  useEffect(() => {
-    return () => {
-      if (pendingSend) window.clearTimeout(pendingSend.timeoutId);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleProviderChange = useCallback((p: MailProvider) => {
     setSelectedEmail(null);
@@ -262,8 +242,6 @@ export default function InboxPage() {
         onSearchChange={setSearchValue}
         themePreference={themePreference}
         onCycleTheme={cycleTheme}
-        theme={theme}
-        onToggleTheme={toggle}
         onComposeClick={handleComposeClick}
       />
       <div className="inbox-layout">
@@ -345,16 +323,7 @@ export default function InboxPage() {
           onSendRequested={handleSendRequested}
         />
       )}
-      {pendingSend && (
-        <div className="send-toast">
-          <span className="send-toast__text">
-            Envoi en cours{pendingSend.subject ? ` : ${pendingSend.subject}` : ""}...
-          </span>
-          <button type="button" className="send-toast__cancel" onClick={handleCancelSend}>
-            Annuler
-          </button>
-        </div>
-      )}
+      {pendingSend && <SendToast subject={pendingSend.subject} onCancel={cancelSend} />}
     </div>
   );
 }

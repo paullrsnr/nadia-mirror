@@ -26,3 +26,7 @@ export type { DraftEmail } from "./DraftEmail";
 export type { UseComposeDraftResult } from "./UseComposeDraftResult";
 export type { UseDraftsResult } from "./UseDraftsResult";
 export type { ComposeMode, ComposeState } from "./ComposeState";
+export type { PendingSend } from "./PendingSend";
+export type { UseSendQueueOptions } from "./UseSendQueueOptions";
+export type { UseSendQueueResult } from "./UseSendQueueResult";
+export type { SendToastProps } from "./SendToastProps";
