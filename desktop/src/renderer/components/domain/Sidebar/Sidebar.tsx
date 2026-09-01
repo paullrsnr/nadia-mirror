@@ -151,7 +151,7 @@ function SidebarFolders({
         <span className="sidebar__folder-label">Brouillons</span>
         {!!counts?.drafts && <span className="sidebar__folder-count">{counts.drafts}</span>}
       </button>
-      <span className="sidebar__folder sidebar__folder--disabled" title="Bientôt disponible">
+      <span className="sidebar__folder sidebar__folder--disabled" title={COMING_SOON_LABEL}>
         <IconArchive />
         <span className="sidebar__folder-label">Archivés</span>
       </span>

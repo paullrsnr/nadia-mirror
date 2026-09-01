@@ -1,9 +1,7 @@
 import type { Email } from "./Email";
-import type { InboxFolder } from "./InboxFolder";
 
 export interface EmailDetailPanelProps {
   email: Email | null;
-  folder: InboxFolder;
   summary: string | null;
   draft: string | null;
   threadCount: number;

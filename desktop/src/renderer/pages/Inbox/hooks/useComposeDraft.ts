@@ -4,21 +4,13 @@ import type {
   ComposeMode,
   DraftEmail,
   Email,
+  EmailAddress,
   EmailAttachment,
-  MailProvider,
+  UseComposeDraftOptions,
   UseComposeDraftResult,
 } from "../../../models";
 
-interface UseComposeDraftOptions {
-  provider: MailProvider;
-  mode: ComposeMode;
-  replyTo?: Email;
-  existingDraft?: DraftEmail;
-  onSent: (draftId: string, subject: string) => void;
-  onClosed: () => void;
-}
-
-function joinAddresses(addresses: { email: string }[]): string {
+function joinAddresses(addresses: EmailAddress[]): string {
   return addresses.map((a) => a.email).join(", ");
 }
 
@@ -72,7 +64,6 @@ export function useComposeDraft({
   replyTo,
   existingDraft,
   onSent,
-  onClosed,
 }: UseComposeDraftOptions): UseComposeDraftResult {
   const draftId = useRef(existingDraft?.id ?? crypto.randomUUID());
   const touched = useRef(false);
@@ -140,12 +131,7 @@ export function useComposeDraft({
   }
 
   function execFormat(command: string, value?: string) {
-    bodyRef.current?.focus();
-    const selection = document.getSelection();
-    if (selection && savedRange.current) {
-      selection.removeAllRanges();
-      selection.addRange(savedRange.current);
-    }
+    restoreSelection();
     document.execCommand(command, false, value);
     handleBodyInput();
   }
@@ -226,10 +212,6 @@ export function useComposeDraft({
     }
   }
 
-  function handleClose() {
-    onClosed();
-  }
-
   return {
     to,
     cc,
@@ -258,7 +240,6 @@ export function useComposeDraft({
     toggleHighlight,
     resetHighlight,
     handleSend,
-    handleClose,
   };
 }
 

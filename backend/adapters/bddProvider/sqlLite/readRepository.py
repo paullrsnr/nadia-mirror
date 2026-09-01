@@ -3,23 +3,24 @@ from typing import Optional
 
 from sqlalchemy import select, func
 
-from backend.core.models.email import Provider, Email
+from backend.core.models.email import Provider, Email, DraftEmail
 from backend.core.models.email.category import Category
 from backend.core.models.idName import IdName
 from backend.adapters.bddProvider.sqlLite.models import (
     CategoryModel,
+    DraftEmailModel,
     EmailModel,
     SettingModel,
     SyncMetadataModel,
 )
 from backend.adapters.bddProvider.sqlLite.session import create_session
-from backend.adapters.bddProvider.sqlLite import emailMapper
+from backend.adapters.bddProvider.sqlLite import draftEmailMapper, emailMapper
 
 _SYNC_ROW_ID = 1
 
 
 class SqliteReadRepository:
-    """Côté lecture : requêtes emails, catégories, settings et métadonnées de sync."""
+    """Côté lecture : requêtes emails, brouillons, catégories, settings et métadonnées de sync."""
 
     def __init__(self) -> None:
         self._category_ids = {c.name: c.id for c in self._load_category_ids()}
@@ -41,6 +42,7 @@ class SqliteReadRepository:
         max_results: int = 50,
         offset: int = 0,
         provider_filter: str | None = None,
+        folder: str | None = "inbox",
     ) -> tuple[list[Email], int]:
         session = create_session()
         try:
@@ -51,6 +53,10 @@ class SqliteReadRepository:
                 pf = provider_filter.lower()
                 query = query.where(EmailModel.provider == pf)
                 count_query = count_query.where(EmailModel.provider == pf)
+
+            if folder is not None:
+                query = query.where(EmailModel.folder == folder)
+                count_query = count_query.where(EmailModel.folder == folder)
 
             total = session.execute(count_query).scalar() or 0
             query = query.order_by(EmailModel.date.desc()).limit(max_results).offset(offset)
@@ -102,6 +108,25 @@ class SqliteReadRepository:
                 .order_by(EmailModel.date.desc())
             )
             return [emailMapper.to_domain(m) for m in session.execute(query).scalars().all()]
+        finally:
+            session.close()
+
+
+    def find_draft_by_id(self, draft_id: str) -> Optional[DraftEmail]:
+        session = create_session()
+        try:
+            model = session.get(DraftEmailModel, draft_id)
+            return draftEmailMapper.to_domain(model) if model else None
+        finally:
+            session.close()
+
+    def find_drafts(self, provider: str | None = None) -> list[DraftEmail]:
+        session = create_session()
+        try:
+            query = select(DraftEmailModel).order_by(DraftEmailModel.updated_at.desc())
+            if provider:
+                query = query.where(DraftEmailModel.provider == provider)
+            return [draftEmailMapper.to_domain(m) for m in session.execute(query).scalars().all()]
         finally:
             session.close()
 

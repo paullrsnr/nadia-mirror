@@ -21,17 +21,7 @@ def save_draft(
     payload: SaveDraftRequest,
     service: DraftService = Depends(get_draft_service),
 ):
-    return service.save_draft(
-        draft_id=draft_id,
-        provider=payload.provider,
-        to=payload.to,
-        cc=payload.cc,
-        bcc=payload.bcc,
-        subject=payload.subject,
-        body_text=payload.body_text,
-        body_html=payload.body_html,
-        in_reply_to_email_id=payload.in_reply_to_email_id,
-    )
+    return service.save_draft(draft_id, payload)
 
 
 @router.post("/{draft_id}/send", response_model=SendResult)

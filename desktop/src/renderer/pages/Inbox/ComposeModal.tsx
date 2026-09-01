@@ -6,24 +6,10 @@ import ComposeActionButton from "../../components/domain/ComposeActionButton";
 import { IconExpand, IconCompress, IconAttachment, IconLink } from "../../components/ui/icons";
 import { useComposeDraft } from "./hooks/useComposeDraft";
 import ComposeToolbar from "./ComposeToolbar";
-import type { ComposeMode, DraftEmail, Email, MailProvider } from "../../models";
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} o`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
-}
+import type { ComposeMode, ComposeModalProps } from "../../models";
+import { formatFileSize } from "../../helpers";
 
 const SCROLL_INDICATOR_TIMEOUT_MS = 800;
-
-interface ComposeModalProps {
-  provider: MailProvider;
-  mode: ComposeMode;
-  replyTo?: Email;
-  existingDraft?: DraftEmail;
-  onClose: () => void;
-  onSendRequested: (draftId: string, subject: string) => void;
-}
 
 const MODE_TITLES: Record<ComposeMode, string> = {
   new: "Nouveau message",
@@ -66,14 +52,12 @@ export default function ComposeModal({ provider, mode, replyTo, existingDraft, o
     toggleHighlight,
     resetHighlight,
     handleSend,
-    handleClose,
   } = useComposeDraft({
     provider,
     mode,
     replyTo,
     existingDraft,
     onSent: onSendRequested,
-    onClosed: onClose,
   });
 
   useEffect(() => {
@@ -100,7 +84,7 @@ export default function ComposeModal({ provider, mode, replyTo, existingDraft, o
 
   return (
     <>
-      <div className="compose-modal__backdrop" onClick={handleClose} />
+      <div className="compose-modal__backdrop" onClick={onClose} />
       <div className={`compose-modal${expanded ? " compose-modal--expanded" : ""}`}>
         <div className="compose-modal__header">
           <h2 className="compose-modal__title">{MODE_TITLES[mode]}</h2>
@@ -114,7 +98,7 @@ export default function ComposeModal({ provider, mode, replyTo, existingDraft, o
             >
               {expanded ? <IconCompress /> : <IconExpand />}
             </button>
-            <button type="button" className="compose-modal__close" onClick={handleClose} aria-label="Fermer">
+            <button type="button" className="compose-modal__close" onClick={onClose} aria-label="Fermer">
               ×
             </button>
           </div>

@@ -3,16 +3,21 @@ from datetime import datetime
 
 from sqlalchemy import select
 
-from backend.core.models.email import Email
+from backend.core.models.email import Email, DraftEmail
 from backend.core.exceptions import NotFoundError
-from backend.adapters.bddProvider.sqlLite.models import EmailModel, SettingModel, SyncMetadataModel
+from backend.adapters.bddProvider.sqlLite.models import (
+    DraftEmailModel,
+    EmailModel,
+    SettingModel,
+    SyncMetadataModel,
+)
 from backend.adapters.bddProvider.sqlLite.readRepository import SqliteReadRepository, _SYNC_ROW_ID
 from backend.adapters.bddProvider.sqlLite.session import create_session
-from backend.adapters.bddProvider.sqlLite import emailMapper
+from backend.adapters.bddProvider.sqlLite import draftEmailMapper, emailMapper
 
 
 class SqliteWriteRepository:
-    """Côté écriture : upserts et mutations sur emails, settings et métadonnées de sync."""
+    """Côté écriture : upserts et mutations sur emails, brouillons, settings et métadonnées de sync."""
 
     def __init__(self, reads: SqliteReadRepository) -> None:
         self._reads = reads
@@ -161,6 +166,32 @@ class SqliteWriteRepository:
                 labels.remove("UNREAD")
                 model.labels = json.dumps(labels)
             session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+
+    def save_draft(self, draft: DraftEmail) -> DraftEmail:
+        session = create_session()
+        try:
+            session.merge(draftEmailMapper.to_model(draft))
+            session.commit()
+            return draft
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def delete_draft(self, draft_id: str) -> None:
+        session = create_session()
+        try:
+            model = session.get(DraftEmailModel, draft_id)
+            if model is not None:
+                session.delete(model)
+                session.commit()
         except Exception:
             session.rollback()
             raise

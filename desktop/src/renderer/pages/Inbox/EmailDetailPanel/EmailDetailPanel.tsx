@@ -20,6 +20,8 @@ export default function EmailDetailPanel({
   onSummarizeThread,
   onSuggestReply,
   onToggleStar,
+  onReply,
+  onForward,
 }: EmailDetailPanelProps) {
   const [nadiaOpen, setNadiaOpen] = useState(false);
 
@@ -50,6 +52,8 @@ export default function EmailDetailPanel({
         onSummarizeThread={onSummarizeThread}
         onSuggestReply={onSuggestReply}
         onToggleStar={onToggleStar}
+        onReply={onReply}
+        onForward={onForward}
       />
 
       {nadiaOpen ? (

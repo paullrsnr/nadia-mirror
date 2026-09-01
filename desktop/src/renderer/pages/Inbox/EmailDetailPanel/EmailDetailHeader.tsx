@@ -25,6 +25,8 @@ export default function EmailDetailHeader({
   onSummarizeThread,
   onSuggestReply,
   onToggleStar,
+  onReply,
+  onForward,
 }: EmailDetailHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -51,10 +53,20 @@ export default function EmailDetailHeader({
           >
             <IconStar filled={email.is_starred} />
           </button>
-          <button type="button" className="email-detail-header__icon-btn" title="Répondre">
+          <button
+            type="button"
+            className="email-detail-header__icon-btn"
+            title="Répondre"
+            onClick={() => onReply(email)}
+          >
             <IconReply />
           </button>
-          <button type="button" className="email-detail-header__icon-btn" title="Transférer">
+          <button
+            type="button"
+            className="email-detail-header__icon-btn"
+            title="Transférer"
+            onClick={() => onForward(email)}
+          >
             <IconForward />
           </button>
           <button type="button" className="email-detail-header__icon-btn" title="Archiver">

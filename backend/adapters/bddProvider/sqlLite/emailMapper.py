@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 
 from backend.core.models.email import Email, EmailAddress, EmailAttachment, Provider
+from backend.adapters.bddProvider.sqlLite import addressMapper
 from backend.adapters.bddProvider.sqlLite.models.emailModel import EmailModel
 
 
@@ -11,9 +12,9 @@ def to_domain(model: EmailModel) -> Email:
         thread_id=model.thread_id,
         subject=model.subject or "",
         from_address=EmailAddress(email=model.from_email or "", name=model.from_name),
-        to_addresses=_parse_addresses(model.to_addresses),
-        cc_addresses=_parse_addresses(model.cc_addresses),
-        bcc_addresses=_parse_addresses(model.bcc_addresses),
+        to_addresses=addressMapper.from_json(model.to_addresses),
+        cc_addresses=addressMapper.from_json(model.cc_addresses),
+        bcc_addresses=addressMapper.from_json(model.bcc_addresses),
         date=datetime.fromisoformat(model.date) if model.date else datetime.now(),
         body_text=model.body_text or "",
         body_html=model.body_html,
@@ -38,9 +39,9 @@ def to_model(email: Email, provider: str) -> EmailModel:
         subject=email.subject,
         from_name=email.from_address.name,
         from_email=email.from_address.email,
-        to_addresses=json.dumps([{"name": a.name, "email": a.email} for a in email.to_addresses]),
-        cc_addresses=json.dumps([{"name": a.name, "email": a.email} for a in email.cc_addresses]),
-        bcc_addresses=json.dumps([{"name": a.name, "email": a.email} for a in email.bcc_addresses]),
+        to_addresses=addressMapper.to_json(email.to_addresses),
+        cc_addresses=addressMapper.to_json(email.cc_addresses),
+        bcc_addresses=addressMapper.to_json(email.bcc_addresses),
         date=email.date.isoformat(),
         body_text=email.body_text,
         body_html=email.body_html,
@@ -60,12 +61,6 @@ def to_model(email: Email, provider: str) -> EmailModel:
         is_starred=email.is_starred,
         folder=email.folder,
     )
-
-
-def _parse_addresses(data: str | None) -> list[EmailAddress]:
-    if not data or data == "null":
-        return []
-    return [EmailAddress(email=a["email"], name=a.get("name")) for a in json.loads(data)]
 
 
 def _parse_attachments(data: str | None) -> list[EmailAttachment]:

@@ -20,6 +20,7 @@ def upgrade() -> None:
         sa.Column("bcc_addresses", sa.Text(), nullable=True),
         sa.Column("subject", sa.Text(), nullable=True),
         sa.Column("body_text", sa.Text(), nullable=True),
+        sa.Column("body_html", sa.Text(), nullable=True),
         sa.Column("in_reply_to_email_id", sa.String(), nullable=True),
         sa.Column("updated_at", sa.String(), nullable=False),
         sa.PrimaryKeyConstraint("id"),

@@ -21,6 +21,7 @@ import { starEmail, markEmailRead } from "../../services/api/emails.api";
 import { PROVIDER_LABELS } from "../../constants/providers";
 import { UNREAD_LABEL } from "../../constants/labels";
 import { deleteDraft } from "../../services/api/drafts.api";
+import { resolveComposeProvider } from "../../helpers";
 import type { DraftEmail, Email, MailProvider, InboxFolder, ComposeState } from "../../models";
 
 export default function InboxPage() {
@@ -137,19 +138,19 @@ export default function InboxPage() {
   );
 
   const handleComposeClick = useCallback(() => {
-    setComposeState({ open: true, mode: "new" });
+    setComposeState({ mode: "new" });
   }, []);
 
   const handleReply = useCallback((email: Email) => {
-    setComposeState({ open: true, mode: "reply", replyTo: email });
+    setComposeState({ mode: "reply", replyTo: email });
   }, []);
 
   const handleForward = useCallback((email: Email) => {
-    setComposeState({ open: true, mode: "forward", replyTo: email });
+    setComposeState({ mode: "forward", replyTo: email });
   }, []);
 
   const handleOpenDraft = useCallback((draft: DraftEmail) => {
-    setComposeState({ open: true, mode: "draft", draft });
+    setComposeState({ mode: "draft", draft });
   }, []);
 
   const handleDeleteDraft = useCallback(
@@ -288,7 +289,6 @@ export default function InboxPage() {
         {folder !== "drafts" && (
           <EmailDetailPanel
             email={selectedEmail}
-            folder={folder}
             summary={summary}
             draft={draft}
             threadCount={threadCount}
@@ -305,17 +305,9 @@ export default function InboxPage() {
           />
         )}
       </div>
-      {composeState?.open && (
+      {composeState && (
         <ComposeModal
-          provider={
-            composeState.draft
-              ? (composeState.draft.provider as MailProvider)
-              : composeState.replyTo
-                ? ((composeState.replyTo.provider ?? "gmail") as MailProvider)
-                : provider === "all"
-                  ? "gmail"
-                  : provider
-          }
+          provider={resolveComposeProvider(composeState, provider)}
           mode={composeState.mode}
           replyTo={composeState.replyTo}
           existingDraft={composeState.draft}

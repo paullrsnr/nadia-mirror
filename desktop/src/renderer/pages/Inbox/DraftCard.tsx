@@ -1,12 +1,6 @@
 import "./DraftCard.css";
 import { IconTrash } from "../../components/ui/icons";
-import type { DraftEmail } from "../../models";
-
-interface DraftCardProps {
-  draft: DraftEmail;
-  onClick: () => void;
-  onDelete: () => void;
-}
+import type { DraftCardProps } from "../../models";
 
 export default function DraftCard({ draft, onClick, onDelete }: DraftCardProps) {
   const to = draft.to_addresses.map((a) => a.name || a.email).join(", ");

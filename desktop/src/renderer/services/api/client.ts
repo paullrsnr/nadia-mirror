@@ -5,46 +5,33 @@ async function parseErrorMessage(response: Response): Promise<string> {
   return (data as { detail?: string }).detail ?? `Erreur HTTP ${response.status}`;
 }
 
-export async function apiGet<T>(path: string, params?: Record<string, string>): Promise<T> {
-  const url = params
-    ? `${API_BASE_URL}${path}?${new URLSearchParams(params)}`
-    : `${API_BASE_URL}${path}`;
-  const response = await fetch(url);
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, init);
   if (!response.ok) {
     throw new Error(await parseErrorMessage(response));
   }
   return response.json() as Promise<T>;
 }
 
+export async function apiGet<T>(path: string, params?: Record<string, string>): Promise<T> {
+  const query = params ? `?${new URLSearchParams(params)}` : "";
+  return request<T>(`${path}${query}`);
+}
+
 export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  return request<T>(path, {
     method: "POST",
     headers: body !== undefined ? { "Content-Type": "application/json" } : undefined,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (!response.ok) {
-    throw new Error(await parseErrorMessage(response));
-  }
-  return response.json() as Promise<T>;
 }
 
 export async function apiPostForm<T>(path: string, formData: FormData): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: "POST",
-    body: formData,
-  });
-  if (!response.ok) {
-    throw new Error(await parseErrorMessage(response));
-  }
-  return response.json() as Promise<T>;
+  return request<T>(path, { method: "POST", body: formData });
 }
 
 export async function apiDelete<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, { method: "DELETE" });
-  if (!response.ok) {
-    throw new Error(await parseErrorMessage(response));
-  }
-  return response.json() as Promise<T>;
+  return request<T>(path, { method: "DELETE" });
 }
 
 /** POST qui retourne un ReadableStream (téléchargement SSE). */

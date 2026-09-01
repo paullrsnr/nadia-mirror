@@ -29,5 +29,4 @@ export interface UseComposeDraftResult {
   toggleHighlight: (color: string) => void;
   resetHighlight: () => void;
   handleSend: () => Promise<void>;
-  handleClose: () => void;
 }

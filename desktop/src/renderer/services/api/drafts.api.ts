@@ -1,5 +1,5 @@
 import { apiGet, apiPost, apiPostForm, apiDelete } from "./client";
-import type { DraftEmail, DraftPayload, EmailAttachment, MailProvider } from "../../models";
+import type { DraftEmail, DraftPayload, EmailAttachment, MailProvider, SendResult } from "../../models";
 
 export async function listDrafts(provider?: MailProvider): Promise<DraftEmail[]> {
   const params: Record<string, string> = {};
@@ -7,11 +7,11 @@ export async function listDrafts(provider?: MailProvider): Promise<DraftEmail[]>
   return apiGet<DraftEmail[]>("/drafts", params);
 }
 
-export async function saveDraft(draftId: string, payload: DraftPayload): Promise<unknown> {
+export async function saveDraft(draftId: string, payload: DraftPayload): Promise<DraftEmail> {
   return apiPost(`/drafts/${draftId}`, payload);
 }
 
-export async function sendDraft(draftId: string): Promise<{ status: string; draft_id: string }> {
+export async function sendDraft(draftId: string): Promise<SendResult> {
   return apiPost(`/drafts/${draftId}/send`);
 }
 

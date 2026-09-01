@@ -3,7 +3,7 @@ import EmailCard from "../../components/domain/EmailCard";
 import Button from "../../components/ui/Button";
 import ErrorMessage from "../../components/ui/ErrorMessage";
 import type { EmailListProps } from "../../models/email";
-import { UNREAD_LABEL } from "../../constants/labels";
+import { FOLDER_TITLES, UNREAD_LABEL } from "../../constants/labels";
 
 export default function EmailList({
   emails,
@@ -39,9 +39,7 @@ export default function EmailList({
   return (
     <div className="email-list scrollbar-hidden">
       <div className="email-list__header">
-        <h3 className="email-list__title">
-          {folder === "favoris" ? "Favoris" : folder === "sent" ? "Envoyés" : "Boîte de réception"}
-        </h3>
+        <h3 className="email-list__title">{FOLDER_TITLES[folder]}</h3>
         <span className="email-list__unread">{unreadCount} non lus</span>
       </div>
 

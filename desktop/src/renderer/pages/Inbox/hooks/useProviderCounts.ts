@@ -34,8 +34,8 @@ export function useProviderCounts(): UseProviderCountsResult {
             ...prev,
             [provider]: {
               total: 0,
-              unread: 0,
-              starred: 0,
+              totalUnread: 0,
+              totalStarred: 0,
               ...prev[provider],
               drafts: drafts.length,
             },

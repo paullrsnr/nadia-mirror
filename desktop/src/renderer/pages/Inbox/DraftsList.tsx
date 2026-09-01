@@ -1,21 +1,14 @@
 import "./EmailList.css";
 import DraftCard from "./DraftCard";
 import ErrorMessage from "../../components/ui/ErrorMessage";
-import type { DraftEmail } from "../../models";
-
-interface DraftsListProps {
-  drafts: DraftEmail[];
-  loading: boolean;
-  error: string | null;
-  onDraftClick: (draft: DraftEmail) => void;
-  onDraftDelete: (draft: DraftEmail) => void;
-}
+import type { DraftsListProps } from "../../models";
+import { FOLDER_TITLES } from "../../constants/labels";
 
 export default function DraftsList({ drafts, loading, error, onDraftClick, onDraftDelete }: DraftsListProps) {
   return (
     <div className="email-list">
       <div className="email-list__header">
-        <h3 className="email-list__title">Brouillons</h3>
+        <h3 className="email-list__title">{FOLDER_TITLES.drafts}</h3>
       </div>
 
       <div className="email-list__items">

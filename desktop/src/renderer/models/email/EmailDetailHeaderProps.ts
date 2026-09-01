@@ -13,4 +13,6 @@ export interface EmailDetailHeaderProps {
   onSummarizeThread: (email: Email) => void;
   onSuggestReply: (email: Email) => void;
   onToggleStar: (email: Email) => void;
+  onReply: (email: Email) => void;
+  onForward: (email: Email) => void;
 }

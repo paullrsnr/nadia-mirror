@@ -1,5 +1,5 @@
 import { apiGet, apiPost, API_BASE_URL } from "./client";
-import type { Email, EmailListResponse, SyncResponse, Category, MailProvider } from "../../models";
+import type { Email, EmailListResponse, SyncResponse, Category, EmailFolder, MailProvider } from "../../models";
 
 export function getAttachmentDownloadUrl(emailId: string, attachmentId: string): string {
   return `${API_BASE_URL}/emails/${emailId}/attachments/${attachmentId}`;
@@ -8,7 +8,7 @@ export function getAttachmentDownloadUrl(emailId: string, attachmentId: string):
 export async function getEmails(
   maxResults = 50,
   provider?: MailProvider,
-  folder?: "inbox" | "sent",
+  folder?: EmailFolder,
 ): Promise<EmailListResponse> {
   const params: Record<string, string> = { max_results: maxResults.toString() };
   if (provider) params.provider = provider;

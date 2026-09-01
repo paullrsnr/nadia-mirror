@@ -4,25 +4,19 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from sqlalchemy import select, func
-
-from backend.core.models.email import Provider, Email, DraftEmail
+from backend.core.models.email import Email, DraftEmail
 from backend.core.models.email.category import Category
 from backend.config.settings import storage_settings
 from backend.ports.emailStorage import EmailStorage
 from backend.ports.settingsStorage import SettingsStorage
-from backend.adapters.bddProvider.sqlLite.session import init_engine
 from backend.adapters.bddProvider.sqlLite.readRepository import SqliteReadRepository
 from backend.adapters.bddProvider.sqlLite.writeRepository import SqliteWriteRepository
-from backend.adapters.bddProvider.sqlLite.models import (
-    CategoryModel, EmailModel, SettingModel, SyncMetadataModel, DraftEmailModel,
-)
-from backend.adapters.bddProvider.sqlLite.session import init_engine, create_session
-from backend.adapters.bddProvider.sqlLite import emailMapper, draftEmailMapper
+from backend.adapters.bddProvider.sqlLite.session import init_engine
 
 logger = logging.getLogger(__name__)
 
 
+# pylint: disable=too-many-public-methods
 class SqliteStorageAdapter(EmailStorage, SettingsStorage):
     """Façade qui compose le repository de lecture et celui d'écriture."""
 
@@ -45,26 +39,7 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
         provider_filter: str | None = None,
         folder: str | None = "inbox",
     ) -> tuple[list[Email], int]:
-        session = create_session()
-        try:
-            query = select(EmailModel).where(EmailModel.is_archived == False)  # noqa: E712
-            count_query = select(func.count(EmailModel.id)).where(EmailModel.is_archived == False)  # noqa: E712, pylint: disable=not-callable
-
-            if provider_filter and provider_filter.lower() not in ("", Provider.ALL.value):
-                pf = provider_filter.lower()
-                query = query.where(EmailModel.provider == pf)
-                count_query = count_query.where(EmailModel.provider == pf)
-
-            if folder is not None:
-                query = query.where(EmailModel.folder == folder)
-                count_query = count_query.where(EmailModel.folder == folder)
-
-            total = session.execute(count_query).scalar() or 0
-            query = query.order_by(EmailModel.date.desc()).limit(max_results).offset(offset)
-            emails = [emailMapper.to_domain(m) for m in session.execute(query).scalars().all()]
-            return emails, total
-        finally:
-            session.close()
+        return self._reads.find_emails(max_results, offset, provider_filter, folder)
 
     def find_email_by_id(self, email_id: str) -> Optional[Email]:
         return self._reads.find_email_by_id(email_id)
@@ -76,63 +51,21 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
         return self._reads.find_emails_by_thread_id(thread_id)
 
     def find_pending_archive_emails(self) -> list[Email]:
-        session = create_session()
-        try:
-            query = (
-                select(EmailModel)
-                .where(EmailModel.pending_archive == True)  # noqa: E712
-                .where(EmailModel.is_archived == False)  # noqa: E712
-                .order_by(EmailModel.date.desc())
-            )
-            return [emailMapper.to_domain(m) for m in session.execute(query).scalars().all()]
-        finally:
-            session.close()
+        return self._reads.find_pending_archive_emails()
 
     # ------------------------------------------------------------------ drafts
 
     def save_draft(self, draft: DraftEmail) -> DraftEmail:
-        session = create_session()
-        try:
-            model = draftEmailMapper.to_model(draft)
-            session.merge(model)
-            session.commit()
-            return draft
-        except Exception:
-            session.rollback()
-            raise
-        finally:
-            session.close()
+        return self._writes.save_draft(draft)
 
     def find_draft_by_id(self, draft_id: str) -> Optional[DraftEmail]:
-        session = create_session()
-        try:
-            model = session.get(DraftEmailModel, draft_id)
-            return draftEmailMapper.to_domain(model) if model else None
-        finally:
-            session.close()
+        return self._reads.find_draft_by_id(draft_id)
 
     def delete_draft(self, draft_id: str) -> None:
-        session = create_session()
-        try:
-            model = session.get(DraftEmailModel, draft_id)
-            if model is not None:
-                session.delete(model)
-                session.commit()
-        except Exception:
-            session.rollback()
-            raise
-        finally:
-            session.close()
+        self._writes.delete_draft(draft_id)
 
     def find_drafts(self, provider: str | None = None) -> list[DraftEmail]:
-        session = create_session()
-        try:
-            query = select(DraftEmailModel).order_by(DraftEmailModel.updated_at.desc())
-            if provider:
-                query = query.where(DraftEmailModel.provider == provider)
-            return [draftEmailMapper.to_domain(m) for m in session.execute(query).scalars().all()]
-        finally:
-            session.close()
+        return self._reads.find_drafts(provider)
 
     # --------------------------------------------------------------- sync meta
 

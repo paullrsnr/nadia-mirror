@@ -1,5 +1,7 @@
 import "./ComposeToolbar.css";
-import { useState } from "react";
+import { Fragment } from "react";
+import { preventBlur } from "../../helpers";
+import ColorMenu from "./ColorMenu";
 import {
   IconBold,
   IconItalic,
@@ -17,28 +19,22 @@ import {
   IconUndo,
   IconRedo,
 } from "../../components/ui/icons";
+import type { ComposeFormatAction, ComposeToolbarProps, LabeledOption } from "../../models";
 
-interface ComposeToolbarProps {
-  execFormat: (command: string, value?: string) => void;
-  resetTextColor: () => void;
-  toggleHighlight: (color: string) => void;
-  resetHighlight: () => void;
-}
-
-const FONT_OPTIONS = [
+const FONT_OPTIONS: LabeledOption[] = [
   { label: "Sans Serif", value: "Arial" },
   { label: "Serif", value: "Georgia" },
   { label: "Monospace", value: "Courier New" },
 ];
 
-const SIZE_OPTIONS = [
+const SIZE_OPTIONS: LabeledOption[] = [
   { label: "Petite", value: "2" },
   { label: "Normale", value: "3" },
   { label: "Grande", value: "5" },
   { label: "Très grande", value: "7" },
 ];
 
-const TEXT_COLORS = [
+const TEXT_COLORS: LabeledOption[] = [
   { label: "Noir", value: "#1a1a1a" },
   { label: "Rouge", value: "#e53935" },
   { label: "Bleu", value: "#1e88e5" },
@@ -46,20 +42,37 @@ const TEXT_COLORS = [
   { label: "Jaune", value: "#fbc02d" },
 ];
 
-const HIGHLIGHT_COLORS = [
+const HIGHLIGHT_COLORS: LabeledOption[] = [
   { label: "Jaune", value: "#fff200" },
   { label: "Rose", value: "#ff4fa3" },
   { label: "Bleu", value: "#29b6f6" },
 ];
 
-function preventBlur(e: React.MouseEvent) {
-  e.preventDefault();
-}
+const FORMAT_GROUPS: ComposeFormatAction[][] = [
+  [
+    { command: "bold", title: "Gras", icon: IconBold },
+    { command: "italic", title: "Italique", icon: IconItalic },
+    { command: "underline", title: "Souligné", icon: IconUnderline },
+  ],
+  [
+    { command: "justifyLeft", title: "Aligner à gauche", icon: IconAlignLeft },
+    { command: "justifyCenter", title: "Centrer", icon: IconAlignCenter },
+    { command: "justifyRight", title: "Aligner à droite", icon: IconAlignRight },
+    { command: "justifyFull", title: "Justifier", icon: IconAlignJustify },
+  ],
+  [
+    { command: "insertUnorderedList", title: "Liste à puces", icon: IconListUl },
+    { command: "insertOrderedList", title: "Liste numérotée", icon: IconListOl },
+    { command: "indent", title: "Augmenter le retrait", icon: IconIndent },
+    { command: "outdent", title: "Diminuer le retrait", icon: IconOutdent },
+  ],
+  [
+    { command: "undo", title: "Annuler", icon: IconUndo },
+    { command: "redo", title: "Rétablir", icon: IconRedo },
+  ],
+];
 
 export default function ComposeToolbar({ execFormat, resetTextColor, toggleHighlight, resetHighlight }: ComposeToolbarProps) {
-  const [colorMenuOpen, setColorMenuOpen] = useState(false);
-  const [highlightMenuOpen, setHighlightMenuOpen] = useState(false);
-
   return (
     <div className="compose-toolbar">
       <select
@@ -88,183 +101,43 @@ export default function ComposeToolbar({ execFormat, resetTextColor, toggleHighl
         ))}
       </select>
 
-      <span className="compose-toolbar__separator" />
-
-      <button type="button" className="compose-toolbar__btn" onMouseDown={preventBlur} onClick={() => execFormat("bold")} title="Gras">
-        <IconBold />
-      </button>
-      <button type="button" className="compose-toolbar__btn" onMouseDown={preventBlur} onClick={() => execFormat("italic")} title="Italique">
-        <IconItalic />
-      </button>
-      <button
-        type="button"
-        className="compose-toolbar__btn"
-        onMouseDown={preventBlur}
-        onClick={() => execFormat("underline")}
-        title="Souligné"
-      >
-        <IconUnderline />
-      </button>
-      <div className="compose-toolbar__color-wrap">
-        <button
-          type="button"
-          className="compose-toolbar__btn"
-          onMouseDown={preventBlur}
-          onClick={() => setColorMenuOpen((o) => !o)}
-          title="Couleur du texte"
-        >
-          <IconPalette />
-        </button>
-        {colorMenuOpen && (
-          <>
-            <div className="compose-toolbar__color-backdrop" onClick={() => setColorMenuOpen(false)} />
-            <div className="compose-toolbar__color-menu">
-              <button
-                type="button"
-                className="compose-toolbar__color-swatch compose-toolbar__color-swatch--default"
-                title="Couleur par défaut"
-                onMouseDown={preventBlur}
-                onClick={() => {
-                  resetTextColor();
-                  setColorMenuOpen(false);
-                }}
+      {FORMAT_GROUPS.map((group, index) => (
+        <Fragment key={group[0].command}>
+          <span className="compose-toolbar__separator" />
+          {group.map(({ command, title, icon: Icon }) => (
+            <button
+              key={command}
+              type="button"
+              className="compose-toolbar__btn"
+              onMouseDown={preventBlur}
+              onClick={() => execFormat(command)}
+              title={title}
+            >
+              <Icon />
+            </button>
+          ))}
+          {index === 0 && (
+            <>
+              <ColorMenu
+                title="Couleur du texte"
+                icon={IconPalette}
+                colors={TEXT_COLORS}
+                defaultTitle="Couleur par défaut"
+                onReset={resetTextColor}
+                onSelect={(color) => execFormat("foreColor", color)}
               />
-              {TEXT_COLORS.map((color) => (
-                <button
-                  key={color.value}
-                  type="button"
-                  className="compose-toolbar__color-swatch"
-                  style={{ backgroundColor: color.value }}
-                  title={color.label}
-                  onMouseDown={preventBlur}
-                  onClick={() => {
-                    execFormat("foreColor", color.value);
-                    setColorMenuOpen(false);
-                  }}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="compose-toolbar__color-wrap">
-        <button
-          type="button"
-          className="compose-toolbar__btn"
-          onMouseDown={preventBlur}
-          onClick={() => setHighlightMenuOpen((o) => !o)}
-          title="Surligner"
-        >
-          <IconHighlighter />
-        </button>
-        {highlightMenuOpen && (
-          <>
-            <div className="compose-toolbar__color-backdrop" onClick={() => setHighlightMenuOpen(false)} />
-            <div className="compose-toolbar__color-menu">
-              <button
-                type="button"
-                className="compose-toolbar__color-swatch compose-toolbar__color-swatch--default"
-                title="Aucun surlignage"
-                onMouseDown={preventBlur}
-                onClick={() => {
-                  resetHighlight();
-                  setHighlightMenuOpen(false);
-                }}
+              <ColorMenu
+                title="Surligner"
+                icon={IconHighlighter}
+                colors={HIGHLIGHT_COLORS}
+                defaultTitle="Aucun surlignage"
+                onReset={resetHighlight}
+                onSelect={toggleHighlight}
               />
-              {HIGHLIGHT_COLORS.map((color) => (
-                <button
-                  key={color.value}
-                  type="button"
-                  className="compose-toolbar__color-swatch"
-                  style={{ backgroundColor: color.value }}
-                  title={color.label}
-                  onMouseDown={preventBlur}
-                  onClick={() => {
-                    toggleHighlight(color.value);
-                    setHighlightMenuOpen(false);
-                  }}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      <span className="compose-toolbar__separator" />
-
-      <button
-        type="button"
-        className="compose-toolbar__btn"
-        onMouseDown={preventBlur}
-        onClick={() => execFormat("justifyLeft")}
-        title="Aligner à gauche"
-      >
-        <IconAlignLeft />
-      </button>
-      <button
-        type="button"
-        className="compose-toolbar__btn"
-        onMouseDown={preventBlur}
-        onClick={() => execFormat("justifyCenter")}
-        title="Centrer"
-      >
-        <IconAlignCenter />
-      </button>
-      <button
-        type="button"
-        className="compose-toolbar__btn"
-        onMouseDown={preventBlur}
-        onClick={() => execFormat("justifyRight")}
-        title="Aligner à droite"
-      >
-        <IconAlignRight />
-      </button>
-      <button
-        type="button"
-        className="compose-toolbar__btn"
-        onMouseDown={preventBlur}
-        onClick={() => execFormat("justifyFull")}
-        title="Justifier"
-      >
-        <IconAlignJustify />
-      </button>
-
-      <span className="compose-toolbar__separator" />
-
-      <button
-        type="button"
-        className="compose-toolbar__btn"
-        onMouseDown={preventBlur}
-        onClick={() => execFormat("insertUnorderedList")}
-        title="Liste à puces"
-      >
-        <IconListUl />
-      </button>
-      <button
-        type="button"
-        className="compose-toolbar__btn"
-        onMouseDown={preventBlur}
-        onClick={() => execFormat("insertOrderedList")}
-        title="Liste numérotée"
-      >
-        <IconListOl />
-      </button>
-      <button type="button" className="compose-toolbar__btn" onMouseDown={preventBlur} onClick={() => execFormat("indent")} title="Augmenter le retrait">
-        <IconIndent />
-      </button>
-      <button type="button" className="compose-toolbar__btn" onMouseDown={preventBlur} onClick={() => execFormat("outdent")} title="Diminuer le retrait">
-        <IconOutdent />
-      </button>
-
-      <span className="compose-toolbar__separator" />
-
-      <button type="button" className="compose-toolbar__btn" onMouseDown={preventBlur} onClick={() => execFormat("undo")} title="Annuler">
-        <IconUndo />
-      </button>
-      <button type="button" className="compose-toolbar__btn" onMouseDown={preventBlur} onClick={() => execFormat("redo")} title="Rétablir">
-        <IconRedo />
-      </button>
+            </>
+          )}
+        </Fragment>
+      ))}
     </div>
   );
 }

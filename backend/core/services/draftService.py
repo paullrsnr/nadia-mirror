@@ -4,7 +4,14 @@ from datetime import datetime
 
 from backend.core.providers import CONNECTABLE_PROVIDERS
 from backend.core.exceptions import NotFoundError, ProviderError, ValidationError
-from backend.core.models.email import DraftEmail, EmailAddress, EmailAttachment, EmailListQuery, SendResult
+from backend.core.models.email import (
+    DraftEmail,
+    EmailAddress,
+    EmailAttachment,
+    EmailListQuery,
+    SaveDraftRequest,
+    SendResult,
+)
 from backend.ports.emailProviderGateway import EmailProviderGateway
 from backend.ports.emailStorage import EmailStorage
 from backend.ports.attachmentStorage import AttachmentStorage
@@ -29,29 +36,18 @@ class DraftService:
         self._storage = storage
         self._attachment_storage = attachment_storage
 
-    def save_draft(
-        self,
-        draft_id: str,
-        provider: str,
-        to: list[str],
-        cc: list[str],
-        bcc: list[str],
-        subject: str,
-        body_text: str,
-        in_reply_to_email_id: str | None,
-        body_html: str | None = None,
-    ) -> DraftEmail:
+    def save_draft(self, draft_id: str, request: SaveDraftRequest) -> DraftEmail:
         draft = DraftEmail(
             id=draft_id,
-            provider=provider,
-            to_addresses=[EmailAddress(email=a) for a in to],
-            cc_addresses=[EmailAddress(email=a) for a in cc],
-            bcc_addresses=[EmailAddress(email=a) for a in bcc],
-            subject=subject,
-            body_text=body_text,
-            body_html=body_html or None,
+            provider=request.provider,
+            to_addresses=[EmailAddress(email=a) for a in request.to],
+            cc_addresses=[EmailAddress(email=a) for a in request.cc],
+            bcc_addresses=[EmailAddress(email=a) for a in request.bcc],
+            subject=request.subject,
+            body_text=request.body_text,
+            body_html=request.body_html or None,
             updated_at=datetime.now(),
-            in_reply_to_email_id=in_reply_to_email_id,
+            in_reply_to_email_id=request.in_reply_to_email_id,
         )
         return self._storage.save_draft(draft)
 

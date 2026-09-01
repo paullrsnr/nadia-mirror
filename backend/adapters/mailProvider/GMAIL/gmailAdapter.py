@@ -143,16 +143,6 @@ class GmailAdapter:
         except (OSError, ValueError, KeyError, TypeError):
             return False
 
-    def _get_and_parse_to_email(self, email_id: str) -> Email:
-        # pylint: disable=no-member
-        message = (
-            self.gmail_api.users()
-            .messages()
-            .get(userId="me", id=email_id, format="full")
-            .execute()
-        )
-        return parse_gmail_message(message)
-
     def _batch_get_emails(self, message_ids: list[str]) -> list[Email]:
         if not message_ids:
             return []

@@ -21,7 +21,7 @@
   color: var(--color-content-muted);
   cursor: pointer;
 }
-.draft-card__delete:hover { color: var(--color-danger, #d33); }
+.draft-card__delete:hover { color: var(--color-error); }
 
 .draft-card__meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); }
 
