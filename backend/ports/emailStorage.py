@@ -23,12 +23,11 @@ class EmailStorage(ABC):
         max_results: int = 50,
         offset: int = 0,
         provider_filter: str | None = None,
-        folder: str | None = "inbox",
+        folder: str = "inbox",
     ) -> tuple[list[Email], int]:
         """Retourne (emails paginés, total) depuis le stockage local.
 
         provider_filter=None → toutes les boîtes.
-        folder=None → tous les dossiers (inbox + sent).
         """
 
     @abstractmethod

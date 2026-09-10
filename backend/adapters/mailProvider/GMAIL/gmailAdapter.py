@@ -47,7 +47,10 @@ class GmailAdapter:
             messages = results.get("messages", [])
             next_page_token = results.get("nextPageToken")
 
-            emails = self._batch_get_emails([msg["id"] for msg in messages])
+            emails = []
+            for msg in messages:
+                email_obj = self._get_and_parse_to_email(msg["id"])
+                emails.append(email_obj)
 
             return EmailPage(emails=emails, next_page_token=next_page_token)
         except (OSError, ValueError, KeyError, TypeError) as e:
@@ -143,31 +146,15 @@ class GmailAdapter:
         except (OSError, ValueError, KeyError, TypeError):
             return False
 
-    def _batch_get_emails(self, message_ids: list[str]) -> list[Email]:
-        if not message_ids:
-            return []
-
-        parsed: dict[str, Email] = {}
-        errors: list[Exception] = []
-
-        def _callback(request_id, response, exception):
-            if exception is not None:
-                errors.append(exception)
-                return
-            parsed[request_id] = parse_gmail_message(response)
-
+    def _get_and_parse_to_email(self, email_id: str) -> Email:
         # pylint: disable=no-member
-        batch = self.gmail_api.new_batch_http_request(callback=_callback)
-        for message_id in message_ids:
-            batch.add(
-                self.gmail_api.users().messages().get(userId="me", id=message_id, format="full"),
-                request_id=message_id,
-            )
-        batch.execute()
-
-        if errors:
-            raise errors[0]
-        return [parsed[message_id] for message_id in message_ids if message_id in parsed]
+        message = (
+            self.gmail_api.users()
+            .messages()
+            .get(userId="me", id=email_id, format="full")
+            .execute()
+        )
+        return parse_gmail_message(message)
 
     def _map_core_query_to_gmail(self, query: Optional[EmailListQuery]) -> str:
         if not query:

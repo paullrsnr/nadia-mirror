@@ -11,7 +11,6 @@ from backend.ports.emailStorage import EmailStorage
 from backend.ports.settingsStorage import SettingsStorage
 from backend.adapters.bddProvider.sqlLite.readRepository import SqliteReadRepository
 from backend.adapters.bddProvider.sqlLite.writeRepository import SqliteWriteRepository
-from backend.adapters.bddProvider.sqlLite.session import init_engine
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +36,7 @@ class SqliteStorageAdapter(EmailStorage, SettingsStorage):
         max_results: int = 50,
         offset: int = 0,
         provider_filter: str | None = None,
-        folder: str | None = "inbox",
+        folder: str = "inbox",
     ) -> tuple[list[Email], int]:
         return self._reads.find_emails(max_results, offset, provider_filter, folder)
 

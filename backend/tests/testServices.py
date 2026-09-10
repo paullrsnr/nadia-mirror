@@ -1,6 +1,6 @@
 """Tests unitaires pour les services du core."""
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from datetime import datetime
 
 from backend.core.models.email import Provider
@@ -9,6 +9,7 @@ from backend.core.models.email import Email, EmailAddress, EmailPage
 from backend.ports.emailStorage import EmailStorage
 from backend.ports.credentialGateway import CredentialGateway
 from backend.ports.emailProviderGateway import EmailProviderGateway
+from backend.core.services.enrichmentService import EnrichmentService
 
 
 def _build_service(
@@ -20,6 +21,7 @@ def _build_service(
         storage=storage or MagicMock(spec=EmailStorage),
         email_provider_gateway=email_provider_gateway or MagicMock(),
         credential_gateway=credential_gateway or MagicMock(spec=CredentialGateway),
+        enrichment_service=MagicMock(spec=EnrichmentService),
     )
 
 
@@ -36,6 +38,26 @@ def _make_email(email_id: str = "123") -> Email:
     )
 
 
+class _ImmediateThread:  # pylint: disable=too-few-public-methods
+    """Remplace threading.Thread pour lancer la sync tout de suite, sans thread."""
+
+    def __init__(self, target, args=(), daemon=None):  # pylint: disable=unused-argument
+        self._target = target
+        self._args = args
+
+    def start(self):
+        """Exécute directement la fonction cible."""
+        self._target(*self._args)
+
+
+def _run_sync(service: MailboxService, **kwargs):
+    """Lance sync_emails et retourne le résultat final lu via get_sync_status."""
+    with patch("backend.core.mailboxService.threading.Thread", _ImmediateThread):
+        launch = service.sync_emails(**kwargs)
+    assert launch.status == "started"
+    return service.get_sync_status().last_result
+
+
 class TestMailboxServiceSync(unittest.TestCase):
     """Tests pour la synchronisation des emails."""
 
@@ -43,7 +65,7 @@ class TestMailboxServiceSync(unittest.TestCase):
         """La synchronisation réussit et retourne synced=1, saved=1."""
         storage = MagicMock(spec=EmailStorage)
         storage.get_last_sync_time.return_value = None
-        storage.upsert_email.return_value = True
+        storage.upsert_emails_batch.return_value = ["123"]
 
         page = EmailPage(emails=[_make_email()], next_page_token=None)
         email_provider_gateway = MagicMock(spec=EmailProviderGateway)
@@ -53,7 +75,7 @@ class TestMailboxServiceSync(unittest.TestCase):
         credential_gateway.load.return_value = {"access_token": "fake"}
 
         service = _build_service(storage, email_provider_gateway, credential_gateway)
-        result = service.sync_emails(provider=Provider.GMAIL.value, max_results=10)
+        result = _run_sync(service, provider=Provider.GMAIL.value, max_results=10)
 
         self.assertEqual(result.status, "success")
         self.assertEqual(result.synced, 1)
@@ -70,7 +92,7 @@ class TestMailboxServiceSync(unittest.TestCase):
         credential_gateway.load.return_value = {"access_token": "fake"}
 
         service = _build_service(storage, credential_gateway=credential_gateway)
-        result = service.sync_emails(provider=Provider.GMAIL.value)
+        result = _run_sync(service, provider=Provider.GMAIL.value)
 
         self.assertEqual(result.status, "skipped")
 
@@ -86,7 +108,7 @@ class TestMailboxServiceSync(unittest.TestCase):
         credential_gateway.load.return_value = {"access_token": "fake"}
 
         service = _build_service(storage, email_provider_gateway, credential_gateway)
-        result = service.sync_emails(provider=Provider.GMAIL.value)
+        result = _run_sync(service, provider=Provider.GMAIL.value)
 
         self.assertEqual(result.status, "error")
         self.assertIn("Non authentifié", result.message)
@@ -105,7 +127,9 @@ class TestMailboxServiceGetStored(unittest.TestCase):
 
         self.assertEqual(result.total, 1)
         self.assertEqual(len(result.emails), 1)
-        storage.find_emails.assert_called_once_with(max_results=10, offset=0, provider_filter="gmail")
+        storage.find_emails.assert_called_once_with(
+            max_results=10, offset=0, provider_filter="gmail", folder="inbox"
+        )
 
     def test_get_stored_emails_all_provider(self):
         """get_stored_emails avec provider=all ne filtre pas par provider."""
@@ -115,7 +139,9 @@ class TestMailboxServiceGetStored(unittest.TestCase):
         service = _build_service(storage)
         service.get_stored_emails(provider="all", max_results=50, page=1)
 
-        storage.find_emails.assert_called_once_with(max_results=50, offset=0, provider_filter=None)
+        storage.find_emails.assert_called_once_with(
+            max_results=50, offset=0, provider_filter=None, folder="inbox"
+        )
 
 
 if __name__ == "__main__":

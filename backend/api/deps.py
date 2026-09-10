@@ -71,6 +71,7 @@ _draft_service = DraftService(
     credential_gateway=_credential_gateway,
     storage=_storage_adapter,
     attachment_storage=_attachment_storage,
+    mailbox_service=_mailbox_service,
 )
 
 

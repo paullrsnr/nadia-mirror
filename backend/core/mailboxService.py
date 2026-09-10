@@ -190,7 +190,7 @@ class MailboxService:
             if new_emails:
                 self._enrich_new_emails(new_emails[:_LLM_ENRICH_CAP])
 
-            self._sync_sent_emails(provider_tag, tag, after)
+            self.sync_sent_emails(provider_tag, after)
 
             if not skip_cooldown:
                 self._storage.update_last_sync_time()
@@ -228,17 +228,17 @@ class MailboxService:
             )
         return page_result
 
-    def _sync_sent_emails(self, provider_tag: str, tag: str, after) -> None:
+    def sync_sent_emails(self, provider: str, after=None, max_results: int = 50) -> None:
         try:
             sent = self._email_provider_gateway.fetch_emails(
-                provider=provider_tag,
-                max_results=50,
+                provider=provider,
+                max_results=max_results,
                 query=EmailListQuery(unread_only=False, after_date=after, sent_only=True),
             )
             sent_emails = [dataclasses.replace(e, folder="sent") for e in sent.emails]
-            self._storage.upsert_emails_batch(sent_emails, provider=tag)
+            self._storage.upsert_emails_batch(sent_emails, provider=provider.lower())
         except Exception as exc:  # pylint: disable=broad-except
-            logger.warning("Sync emails envoyés échoué pour %s : %s", provider_tag, exc)
+            logger.warning("Sync emails envoyés échoué pour %s : %s", provider, exc)
 
     def _compute_after_date(self, full_sync: bool = False):
         if not full_sync:

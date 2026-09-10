@@ -143,17 +143,17 @@ class TestSqliteStorageAdapter(unittest.TestCase):
 
     def test_storage_init_creates_database(self):
         """Test que l'initialisation crée la base de données."""
-        from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
+        from backend.tests.dbHelper import create_test_storage
 
-        storage = SqliteStorageAdapter(data_dir=self.temp_path)
+        storage = create_test_storage(self.temp_path)
 
         self.assertTrue(storage.db_path.exists())
 
     def test_save_and_get_sync_time(self):
         """Test sauvegarde et récupération du temps de sync."""
-        from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
+        from backend.tests.dbHelper import create_test_storage
 
-        storage = SqliteStorageAdapter(data_dir=self.temp_path)
+        storage = create_test_storage(self.temp_path)
 
         # Pas de sync au départ (sync_metadata vide)
         self.assertIsNone(storage.get_last_sync_time())
@@ -168,9 +168,9 @@ class TestSqliteStorageAdapter(unittest.TestCase):
 
     def test_upsert_email(self):
         """Test sauvegarde d'un email."""
-        from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
+        from backend.tests.dbHelper import create_test_storage
 
-        storage = SqliteStorageAdapter(data_dir=self.temp_path)
+        storage = create_test_storage(self.temp_path)
 
         email = Email(
             id="test_123",

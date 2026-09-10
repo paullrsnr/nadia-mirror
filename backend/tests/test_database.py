@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from backend.adapters.bddProvider.sqlLite.models import EmailModel, SyncMetadataModel
 from backend.adapters.bddProvider.sqlLite.session import dispose_engine, create_session
-from backend.adapters.bddProvider.sqlLite import SqliteStorageAdapter
+from backend.tests.dbHelper import create_test_storage
 from backend.core.models.email import Email, EmailAddress, Provider
 
 
@@ -66,7 +66,7 @@ class TestSqliteStorageAdapter(unittest.TestCase):
         """Initialise une base de données temporaire pour chaque test."""
         self.temp_dir = tempfile.mkdtemp()
         self.temp_path = Path(self.temp_dir)
-        self.storage = SqliteStorageAdapter(data_dir=self.temp_path)
+        self.storage = create_test_storage(self.temp_path)
 
     def tearDown(self):
         """Nettoie la base de données temporaire."""

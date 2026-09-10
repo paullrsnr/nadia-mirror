@@ -1,14 +1,12 @@
-import dataclasses
-import logging
 from datetime import datetime
 
+from backend.core.mailboxService import MailboxService
 from backend.core.providers import CONNECTABLE_PROVIDERS
 from backend.core.exceptions import NotFoundError, ProviderError, ValidationError
 from backend.core.models.email import (
     DraftEmail,
     EmailAddress,
     EmailAttachment,
-    EmailListQuery,
     SaveDraftRequest,
     SendResult,
 )
@@ -18,9 +16,8 @@ from backend.ports.attachmentStorage import AttachmentStorage
 from backend.ports.credentialGateway import CredentialGateway
 from backend.utils.textCleaner import normalize_string
 
-logger = logging.getLogger(__name__)
-
 MAX_ATTACHMENT_SIZE_BYTES = 25 * 1024 * 1024
+SENT_REFRESH_MAX_RESULTS = 5
 
 
 class DraftService:
@@ -30,16 +27,22 @@ class DraftService:
         credential_gateway: CredentialGateway,
         storage: EmailStorage,
         attachment_storage: AttachmentStorage,
+        mailbox_service: MailboxService,
     ) -> None:
         self._email_provider_gateway = email_provider_gateway
         self._credentials = credential_gateway
         self._storage = storage
         self._attachment_storage = attachment_storage
+        self._mailbox = mailbox_service
 
     def save_draft(self, draft_id: str, request: SaveDraftRequest) -> DraftEmail:
+        provider = normalize_string(request.provider)
+        if provider not in CONNECTABLE_PROVIDERS:
+            raise ProviderError(f"Provider inconnu : {request.provider!r}")
+
         draft = DraftEmail(
             id=draft_id,
-            provider=request.provider,
+            provider=provider,
             to_addresses=[EmailAddress(email=a) for a in request.to],
             cc_addresses=[EmailAddress(email=a) for a in request.cc],
             bcc_addresses=[EmailAddress(email=a) for a in request.bcc],
@@ -74,11 +77,7 @@ class DraftService:
         if draft is None:
             raise NotFoundError(f"Brouillon introuvable : {draft_id}")
 
-        normalized = normalize_string(draft.provider)
-        if normalized not in CONNECTABLE_PROVIDERS:
-            raise ProviderError(f"Provider inconnu : {draft.provider!r}")
-
-        credentials = self._credentials.load(normalized)
+        credentials = self._credentials.load(draft.provider)
         if not credentials:
             return SendResult(status="error", draft_id=draft_id)
 
@@ -87,7 +86,7 @@ class DraftService:
             for attachment in self._attachment_storage.list_attachments(draft_id)
         ]
 
-        success = self._email_provider_gateway.send_email(normalized, draft, attachments)
+        success = self._email_provider_gateway.send_email(draft.provider, draft, attachments)
         if success:
             self._storage.delete_draft(draft_id)
             self._attachment_storage.delete_draft_attachments(draft_id)
@@ -95,17 +94,8 @@ class DraftService:
         return SendResult(
             status="success" if success else "error",
             draft_id=draft_id,
-            provider=normalized if success else None,
+            provider=draft.provider if success else None,
         )
 
     def refresh_sent_folder(self, provider: str) -> None:
-        try:
-            sent = self._email_provider_gateway.fetch_emails(
-                provider=provider,
-                max_results=5,
-                query=EmailListQuery(unread_only=False, sent_only=True),
-            )
-            sent_emails = [dataclasses.replace(e, folder="sent") for e in sent.emails]
-            self._storage.upsert_emails_batch(sent_emails, provider=provider)
-        except Exception as exc:  # pylint: disable=broad-except
-            logger.warning("Rafraîchissement du dossier envoyés échoué pour %s : %s", provider, exc)
+        self._mailbox.sync_sent_emails(provider, max_results=SENT_REFRESH_MAX_RESULTS)

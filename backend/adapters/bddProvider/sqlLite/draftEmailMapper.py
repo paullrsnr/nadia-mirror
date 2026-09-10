@@ -15,7 +15,7 @@ def to_domain(model: DraftEmailModel) -> DraftEmail:
         subject=model.subject or "",
         body_text=model.body_text or "",
         body_html=model.body_html,
-        updated_at=datetime.fromisoformat(model.updated_at) if model.updated_at else datetime.now(),
+        updated_at=datetime.fromisoformat(model.updated_at),
         in_reply_to_email_id=model.in_reply_to_email_id,
     )
 

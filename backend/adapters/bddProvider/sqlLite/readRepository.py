@@ -42,21 +42,20 @@ class SqliteReadRepository:
         max_results: int = 50,
         offset: int = 0,
         provider_filter: str | None = None,
-        folder: str | None = "inbox",
+        folder: str = "inbox",
     ) -> tuple[list[Email], int]:
         session = create_session()
         try:
             query = select(EmailModel).where(EmailModel.is_archived == False)  # noqa: E712
             count_query = select(func.count(EmailModel.id)).where(EmailModel.is_archived == False)  # noqa: E712, pylint: disable=not-callable
 
+            query = query.where(EmailModel.folder == folder)
+            count_query = count_query.where(EmailModel.folder == folder)
+
             if provider_filter and provider_filter.lower() not in ("", Provider.ALL.value):
                 pf = provider_filter.lower()
                 query = query.where(EmailModel.provider == pf)
                 count_query = count_query.where(EmailModel.provider == pf)
-
-            if folder is not None:
-                query = query.where(EmailModel.folder == folder)
-                count_query = count_query.where(EmailModel.folder == folder)
 
             total = session.execute(count_query).scalar() or 0
             query = query.order_by(EmailModel.date.desc()).limit(max_results).offset(offset)
