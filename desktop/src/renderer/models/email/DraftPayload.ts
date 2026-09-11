@@ -1,7 +1,7 @@
-import type { MailProvider } from "../auth/MailProvider";
+import type { ConnectableProvider } from "../auth/ConnectableProvider";
 
 export interface DraftPayload {
-  provider: MailProvider;
+  provider: ConnectableProvider;
   to: string[];
   cc: string[];
   bcc: string[];

@@ -1,10 +1,10 @@
-import type { MailProvider } from "../auth/MailProvider";
+import type { ConnectableProvider } from "../auth/ConnectableProvider";
 import type { ComposeMode } from "./ComposeState";
 import type { DraftEmail } from "./DraftEmail";
 import type { Email } from "./Email";
 
 export interface UseComposeDraftOptions {
-  provider: MailProvider;
+  provider: ConnectableProvider;
   mode: ComposeMode;
   replyTo?: Email;
   existingDraft?: DraftEmail;

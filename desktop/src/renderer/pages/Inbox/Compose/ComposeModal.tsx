@@ -1,22 +1,16 @@
 import "./ComposeModal.css";
 import { useEffect, useRef, useState } from "react";
-import Button from "../../components/ui/Button";
-import ErrorMessage from "../../components/ui/ErrorMessage";
-import ComposeActionButton from "../../components/domain/ComposeActionButton";
-import { IconExpand, IconCompress, IconAttachment, IconLink } from "../../components/ui/icons";
-import { useComposeDraft } from "./hooks/useComposeDraft";
+import Button from "../../../components/ui/Button";
+import ErrorMessage from "../../../components/ui/ErrorMessage";
+import ComposeActionButton from "../../../components/domain/ComposeActionButton";
+import { IconExpand, IconCompress, IconAttachment, IconLink } from "../../../components/ui/icons";
+import { useComposeDraft } from "../hooks/useComposeDraft";
 import ComposeToolbar from "./ComposeToolbar";
-import type { ComposeMode, ComposeModalProps } from "../../models";
-import { formatFileSize } from "../../helpers";
+import type { ComposeModalProps } from "../../../models";
+import { formatFileSize } from "../../../helpers";
+import { COMPOSE_MODE_TITLES } from "../../../constants/labels";
 
 const SCROLL_INDICATOR_TIMEOUT_MS = 800;
-
-const MODE_TITLES: Record<ComposeMode, string> = {
-  new: "Nouveau message",
-  reply: "Répondre",
-  forward: "Transférer",
-  draft: "Brouillon",
-};
 
 export default function ComposeModal({ provider, mode, replyTo, existingDraft, onClose, onSendRequested }: ComposeModalProps) {
   const [expanded, setExpanded] = useState(false);
@@ -87,7 +81,7 @@ export default function ComposeModal({ provider, mode, replyTo, existingDraft, o
       <div className="compose-modal__backdrop" onClick={onClose} />
       <div className={`compose-modal${expanded ? " compose-modal--expanded" : ""}`}>
         <div className="compose-modal__header">
-          <h2 className="compose-modal__title">{MODE_TITLES[mode]}</h2>
+          <h2 className="compose-modal__title">{COMPOSE_MODE_TITLES[mode]}</h2>
           <div className="compose-modal__header-actions">
             <button
               type="button"

@@ -8,14 +8,7 @@ import {
 } from "../../../services/api/emails.api";
 import { summarizeEmail, summarizeThread } from "../../../services/api/llm.api";
 import { confirmArchive, rejectArchive } from "../../../services/api/autoArchive.api";
-import type { Email, MailProvider, UseEmailActionsResult } from "../../../models";
-
-interface UseEmailActionsOptions {
-  provider: MailProvider;
-  onEmailRemove: (emailId: string) => void;
-  onPendingArchiveRemove: (emailId: string) => void;
-  onEmailsReload: () => void;
-}
+import type { Email, MailProvider, UseEmailActionsOptions, UseEmailActionsResult } from "../../../models";
 
 export function useEmailActions({
   provider,

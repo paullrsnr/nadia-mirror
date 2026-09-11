@@ -1,13 +1,18 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Query, UploadFile
 
-from backend.core.models.email import DraftEmail, EmailAttachment, SaveDraftRequest, SendResult
+from backend.api.schemas import (
+    DraftAttachmentResponse,
+    DraftResponse,
+    SaveDraftBody,
+    SendDraftResponse,
+)
 from backend.core.services.draftService import DraftService
 from backend.api.deps import get_draft_service
 
 router = APIRouter(prefix="/drafts")
 
 
-@router.get("/", response_model=list[DraftEmail])
+@router.get("/", response_model=list[DraftResponse])
 def list_drafts(
     provider: str | None = Query(default=None, description="Provider (gmail, outlook)."),
     service: DraftService = Depends(get_draft_service),
@@ -15,16 +20,16 @@ def list_drafts(
     return service.list_drafts(provider)
 
 
-@router.post("/{draft_id}", response_model=DraftEmail)
+@router.post("/{draft_id}", response_model=DraftResponse)
 def save_draft(
     draft_id: str,
-    payload: SaveDraftRequest,
+    payload: SaveDraftBody,
     service: DraftService = Depends(get_draft_service),
 ):
     return service.save_draft(draft_id, payload)
 
 
-@router.post("/{draft_id}/send", response_model=SendResult)
+@router.post("/{draft_id}/send", response_model=SendDraftResponse)
 def send_draft(
     draft_id: str,
     background_tasks: BackgroundTasks,
@@ -42,7 +47,7 @@ def delete_draft(draft_id: str, service: DraftService = Depends(get_draft_servic
     return {"status": "success"}
 
 
-@router.post("/{draft_id}/attachments", response_model=EmailAttachment)
+@router.post("/{draft_id}/attachments", response_model=DraftAttachmentResponse)
 async def add_attachment(
     draft_id: str,
     file: UploadFile = File(...),

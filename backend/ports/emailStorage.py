@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Optional
 
-from backend.core.models.email import Email, DraftEmail
+from backend.core.models.email import Email
 from backend.core.models.email.category import Category
 
 
@@ -68,7 +68,8 @@ class EmailStorage(ABC):
 
     @abstractmethod
     def update_pending_archive(self, email_id: str, pending: bool) -> None:
-        """Marque/démarque un email comme en attente d'archivage. Lève NotFoundError si introuvable."""
+        """Marque/démarque un email comme en attente d'archivage.
+        Lève NotFoundError si introuvable."""
 
     @abstractmethod
     def find_pending_archive_emails(self) -> list[Email]:
@@ -81,20 +82,3 @@ class EmailStorage(ABC):
     @abstractmethod
     def mark_email_read(self, email_id: str) -> None:
         """Retire le label UNREAD d'un email en local. Lève NotFoundError si introuvable."""
-
-    @abstractmethod
-    def save_draft(self, draft: DraftEmail) -> DraftEmail:
-        """Crée ou met à jour un brouillon local (upsert par id)."""
-
-    @abstractmethod
-    def find_draft_by_id(self, draft_id: str) -> Optional[DraftEmail]:
-        """Retourne un brouillon par son identifiant, ou None s'il n'existe pas."""
-
-    @abstractmethod
-    def delete_draft(self, draft_id: str) -> None:
-        """Supprime un brouillon local. Idempotent si déjà absent."""
-
-    @abstractmethod
-    def find_drafts(self, provider: str | None = None) -> list[DraftEmail]:
-        """Retourne les brouillons locaux, les plus récemment modifiés en premier."""
-

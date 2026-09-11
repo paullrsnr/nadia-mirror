@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from backend.api.deps import get_draft_service
 from backend.api.main import app
-from backend.core.exceptions import NotFoundError, ProviderError, ValidationError
+from backend.core.exceptions import InvalidInputError, NotFoundError, ProviderError
 from backend.core.models.email import DraftEmail, EmailAddress, EmailAttachment, SendResult
 from backend.core.services.draftService import DraftService
 
@@ -119,8 +119,8 @@ class TestDraftsEndpoints(unittest.TestCase):
         self.draft_service.add_attachment.assert_called_once_with("d1", "a.txt", b"abc")
 
     def test_add_attachment_too_big_returns_400(self):
-        """Un ValidationError levé par le service donne une erreur 400."""
-        self.draft_service.add_attachment.side_effect = ValidationError(
+        """Un InvalidInputError levé par le service donne une erreur 400."""
+        self.draft_service.add_attachment.side_effect = InvalidInputError(
             "Fichier trop volumineux (max 25 Mo)."
         )
 

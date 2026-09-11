@@ -1,4 +1,4 @@
-import type { InboxFolder } from "../models";
+import type { ComposeActionMode, ComposeMode, InboxFolder } from "../models";
 
 export const UNREAD_LABEL = "UNREAD";
 export const COMING_SOON_LABEL = "Bientôt disponible";
@@ -12,4 +12,16 @@ export const FOLDER_TITLES: Record<InboxFolder, string> = {
   favoris: "Favoris",
   sent: "Envoyés",
   drafts: "Brouillons",
+};
+
+export const COMPOSE_MODE_TITLES: Record<ComposeMode, string> = {
+  new: "Nouveau message",
+  reply: "Répondre",
+  forward: "Transférer",
+  draft: "Brouillon",
+};
+
+export const COMPOSE_ACTION_LABELS: Record<ComposeActionMode, string> = {
+  new: "Nouveau message",
+  send: "Envoyer",
 };

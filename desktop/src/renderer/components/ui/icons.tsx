@@ -1,4 +1,4 @@
-import { FontAwesomeIcon, type FontAwesomeIconProps } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMagnifyingGlass,
   faPenToSquare,
@@ -41,8 +41,7 @@ import {
   faHighlighter,
 } from "@fortawesome/pro-light-svg-icons";
 import { faStar as faStarSolid } from "@fortawesome/pro-solid-svg-icons";
-
-type IconProps = Omit<FontAwesomeIconProps, "icon">;
+import type { IconProps } from "../../models";
 
 export const IconSearch = (props: IconProps) => <FontAwesomeIcon icon={faMagnifyingGlass} {...props} />;
 

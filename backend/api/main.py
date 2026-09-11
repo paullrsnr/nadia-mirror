@@ -8,7 +8,7 @@ from backend.api.routers import auth_router, emails_router, llm_router
 from backend.api.routers import auto_archive_router, drafts_router
 from backend.api.deps import get_llm_service
 from backend.config.settings import api_settings
-from backend.core.exceptions import AuthError, NotFoundError, ProviderError, ValidationError
+from backend.core.exceptions import AuthError, InvalidInputError, NotFoundError, ProviderError
 
 app = FastAPI(title="Nadia API")
 
@@ -33,8 +33,8 @@ def not_found_error_handler(_, exc: NotFoundError):
     return JSONResponse(status_code=404, content={"detail": str(exc)})
 
 
-@app.exception_handler(ValidationError)
-def validation_error_handler(_, exc: ValidationError):
+@app.exception_handler(InvalidInputError)
+def invalid_input_error_handler(_, exc: InvalidInputError):
     return JSONResponse(status_code=400, content={"detail": str(exc)})
 
 app.include_router(auth_router.router)

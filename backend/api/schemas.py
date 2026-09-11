@@ -7,6 +7,10 @@ from backend.core.models.email import (
     SyncResult,
     SyncAllResult,
     ProviderSyncResult,
+    DraftEmail,
+    EmailAttachment,
+    SaveDraftRequest,
+    SendResult,
 )
 
 AuthUrlResponse = AuthUrl
@@ -17,3 +21,7 @@ StarEmailResponse = StarResult
 MarkReadResponse = MarkReadResult
 SyncEmailsResponse = SyncResult | SyncAllResult
 SyncEmailsProviderResponse = ProviderSyncResult
+SaveDraftBody = SaveDraftRequest
+DraftResponse = DraftEmail
+SendDraftResponse = SendResult
+DraftAttachmentResponse = EmailAttachment

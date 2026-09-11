@@ -7,8 +7,10 @@ from typing import Optional
 from backend.core.models.email import Email, DraftEmail
 from backend.core.models.email.category import Category
 from backend.config.settings import storage_settings
+from backend.ports.draftStorage import DraftStorage
 from backend.ports.emailStorage import EmailStorage
 from backend.ports.settingsStorage import SettingsStorage
+from backend.adapters.bddProvider.sqlLite.session import init_engine
 from backend.adapters.bddProvider.sqlLite.readRepository import SqliteReadRepository
 from backend.adapters.bddProvider.sqlLite.writeRepository import SqliteWriteRepository
 
@@ -16,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 # pylint: disable=too-many-public-methods
-class SqliteStorageAdapter(EmailStorage, SettingsStorage):
+class SqliteStorageAdapter(EmailStorage, SettingsStorage, DraftStorage):
     """Façade qui compose le repository de lecture et celui d'écriture."""
 
     def __init__(self, data_dir: Path | None = None) -> None:

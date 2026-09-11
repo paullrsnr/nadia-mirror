@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { deleteAttachment, saveDraft, uploadAttachment } from "../../../services/api/drafts.api";
+import { DEFAULT_TEXT_COLOR } from "../../../constants/compose";
 import type {
   ComposeMode,
   DraftEmail,
@@ -161,7 +162,7 @@ export function useComposeDraft({
     const isActive = document.queryCommandValue("backColor") === hexToRgb(color);
     document.execCommand("backColor", false, isActive ? "transparent" : color);
     if (isActive) applyDefaultTextColor();
-    else document.execCommand("foreColor", false, "#1a1a1a");
+    else document.execCommand("foreColor", false, DEFAULT_TEXT_COLOR);
     handleBodyInput();
   }
 

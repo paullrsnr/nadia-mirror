@@ -69,7 +69,7 @@ _auth_service = AuthService(
 _draft_service = DraftService(
     email_provider_gateway=_email_provider_gateway,
     credential_gateway=_credential_gateway,
-    storage=_storage_adapter,
+    draft_storage=_storage_adapter,
     attachment_storage=_attachment_storage,
     mailbox_service=_mailbox_service,
 )

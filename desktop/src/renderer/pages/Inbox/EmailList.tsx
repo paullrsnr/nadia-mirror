@@ -40,7 +40,7 @@ export default function EmailList({
     <div className="email-list scrollbar-hidden">
       <div className="email-list__header">
         <h3 className="email-list__title">{FOLDER_TITLES[folder]}</h3>
-        <span className="email-list__unread">{unreadCount} non lus</span>
+        {folder !== "sent" && <span className="email-list__unread">{unreadCount} non lus</span>}
       </div>
 
       {folder !== "sent" && (

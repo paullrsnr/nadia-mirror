@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import MagicMock
 from datetime import datetime
 
-from backend.core.exceptions import NotFoundError, ProviderError, ValidationError
+from backend.core.exceptions import InvalidInputError, NotFoundError, ProviderError
 from backend.core.models.email import (
     AttachmentContent,
     DraftEmail,
@@ -20,7 +20,7 @@ from backend.core.services.draftService import (
 from backend.ports.attachmentStorage import AttachmentStorage
 from backend.ports.credentialGateway import CredentialGateway
 from backend.ports.emailProviderGateway import EmailProviderGateway
-from backend.ports.emailStorage import EmailStorage
+from backend.ports.draftStorage import DraftStorage
 
 
 def _build_service(
@@ -33,7 +33,7 @@ def _build_service(
     return DraftService(
         email_provider_gateway=email_provider_gateway or MagicMock(spec=EmailProviderGateway),
         credential_gateway=credential_gateway or MagicMock(spec=CredentialGateway),
-        storage=storage or MagicMock(spec=EmailStorage),
+        draft_storage=storage or MagicMock(spec=DraftStorage),
         attachment_storage=attachment_storage or MagicMock(spec=AttachmentStorage),
         mailbox_service=mailbox_service or MagicMock(spec=MailboxService),
     )
@@ -55,7 +55,7 @@ class TestDraftServiceSave(unittest.TestCase):
 
     def test_save_draft_builds_domain_draft(self):
         """save_draft construit un DraftEmail complet à partir de la requête."""
-        storage = MagicMock(spec=EmailStorage)
+        storage = MagicMock(spec=DraftStorage)
         storage.save_draft.side_effect = lambda draft: draft
         service = _build_service(storage=storage)
 
@@ -82,7 +82,7 @@ class TestDraftServiceSave(unittest.TestCase):
 
     def test_save_draft_normalizes_provider(self):
         """Le provider est enregistré sous sa forme normalisée."""
-        storage = MagicMock(spec=EmailStorage)
+        storage = MagicMock(spec=DraftStorage)
         storage.save_draft.side_effect = lambda draft: draft
         service = _build_service(storage=storage)
 
@@ -92,7 +92,7 @@ class TestDraftServiceSave(unittest.TestCase):
 
     def test_save_draft_empty_html_becomes_none(self):
         """Un body_html vide est enregistré à None."""
-        storage = MagicMock(spec=EmailStorage)
+        storage = MagicMock(spec=DraftStorage)
         storage.save_draft.side_effect = lambda draft: draft
         service = _build_service(storage=storage)
 
@@ -102,7 +102,7 @@ class TestDraftServiceSave(unittest.TestCase):
 
     def test_save_draft_unknown_provider_raises(self):
         """Un provider inconnu lève ProviderError et rien n'est enregistré."""
-        storage = MagicMock(spec=EmailStorage)
+        storage = MagicMock(spec=DraftStorage)
         service = _build_service(storage=storage)
 
         with self.assertRaises(ProviderError):
@@ -116,7 +116,7 @@ class TestDraftServiceListAndDelete(unittest.TestCase):
 
     def test_list_drafts_fills_attachments(self):
         """list_drafts ajoute les pièces jointes stockées à chaque brouillon."""
-        storage = MagicMock(spec=EmailStorage)
+        storage = MagicMock(spec=DraftStorage)
         storage.find_drafts.return_value = [_make_draft("d1")]
         attachment = EmailAttachment(
             filename="a.pdf", mime_type="application/pdf", size=3, attachment_id="att1"
@@ -133,7 +133,7 @@ class TestDraftServiceListAndDelete(unittest.TestCase):
 
     def test_delete_draft_removes_draft_and_attachments(self):
         """delete_draft supprime le brouillon et ses pièces jointes."""
-        storage = MagicMock(spec=EmailStorage)
+        storage = MagicMock(spec=DraftStorage)
         attachment_storage = MagicMock(spec=AttachmentStorage)
         service = _build_service(storage=storage, attachment_storage=attachment_storage)
 
@@ -165,11 +165,11 @@ class TestDraftServiceAttachments(unittest.TestCase):
         attachment_storage.save_attachment.assert_called_once()
 
     def test_add_attachment_too_big_raises(self):
-        """Un fichier au-delà de la taille maximale lève ValidationError."""
+        """Un fichier au-delà de la taille maximale lève InvalidInputError."""
         attachment_storage = MagicMock(spec=AttachmentStorage)
         service = _build_service(attachment_storage=attachment_storage)
 
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(InvalidInputError):
             service.add_attachment("d1", "a.bin", b"x" * (MAX_ATTACHMENT_SIZE_BYTES + 1))
 
         attachment_storage.save_attachment.assert_not_called()
@@ -188,7 +188,7 @@ class TestDraftServiceSend(unittest.TestCase):
     """Tests pour l'envoi d'un brouillon."""
 
     def setUp(self):
-        self.storage = MagicMock(spec=EmailStorage)
+        self.storage = MagicMock(spec=DraftStorage)
         self.storage.find_draft_by_id.return_value = _make_draft("d1", "gmail")
         self.gateway = MagicMock(spec=EmailProviderGateway)
         self.gateway.send_email.return_value = True

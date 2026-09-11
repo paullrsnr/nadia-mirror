@@ -1,6 +1,6 @@
 import "./DraftCard.css";
-import { IconTrash } from "../../components/ui/icons";
-import type { DraftCardProps } from "../../models";
+import { IconTrash } from "../../../components/ui/icons";
+import type { DraftCardProps } from "../../../models";
 
 export default function DraftCard({ draft, onClick, onDelete }: DraftCardProps) {
   const to = draft.to_addresses.map((a) => a.name || a.email).join(", ");
@@ -12,7 +12,19 @@ export default function DraftCard({ draft, onClick, onDelete }: DraftCardProps) 
   });
 
   return (
-    <div className="draft-card" onClick={onClick} role="button" tabIndex={0}>
+    <div
+      className="draft-card"
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
       <div className="draft-card__main">
         <div className="draft-card__meta">
           <span className="draft-card__to">{to || "(Aucun destinataire)"}</span>

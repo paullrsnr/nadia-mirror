@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { preventBlur } from "../../helpers";
-import type { ColorMenuProps } from "../../models";
+import { preventBlur } from "../../../helpers";
+import type { ColorMenuProps } from "../../../models";
 
 export default function ColorMenu({ title, icon: Icon, colors, defaultTitle, onReset, onSelect }: ColorMenuProps) {
   const [open, setOpen] = useState(false);

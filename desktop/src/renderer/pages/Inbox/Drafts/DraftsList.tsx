@@ -1,8 +1,8 @@
-import "./EmailList.css";
+import "../EmailList.css";
 import DraftCard from "./DraftCard";
-import ErrorMessage from "../../components/ui/ErrorMessage";
-import type { DraftsListProps } from "../../models";
-import { FOLDER_TITLES } from "../../constants/labels";
+import ErrorMessage from "../../../components/ui/ErrorMessage";
+import type { DraftsListProps } from "../../../models";
+import { FOLDER_TITLES } from "../../../constants/labels";
 
 export default function DraftsList({ drafts, loading, error, onDraftClick, onDraftDelete }: DraftsListProps) {
   return (

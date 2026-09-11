@@ -6,8 +6,8 @@ import AuthProviderCard from "../../components/domain/AuthProviderCard";
 import ErrorMessage from "../../components/ui/ErrorMessage";
 import EmailList from "./EmailList";
 import EmailDetailPanel from "./EmailDetailPanel";
-import ComposeModal from "./ComposeModal";
-import DraftsList from "./DraftsList";
+import ComposeModal from "./Compose";
+import DraftsList from "./Drafts";
 import SendToast from "./SendToast";
 import { useEmails } from "./hooks/useEmails";
 import { useSync } from "./hooks/useSync";
@@ -65,10 +65,6 @@ export default function InboxPage() {
   } = useEmails(provider, folder);
 
   const { drafts, loading: draftsLoading, error: draftsError, loadDrafts, removeDraft } = useDrafts(provider);
-
-  useEffect(() => {
-    if (folder === "drafts") loadDrafts();
-  }, [folder, loadDrafts]);
 
   useEffect(() => {
     setSelectedEmail((prev) => {
@@ -193,10 +189,14 @@ export default function InboxPage() {
     setProvider(p);
   }, []);
 
-  const handleFolderSelect = useCallback((f: InboxFolder) => {
-    setSelectedEmail(null);
-    setFolder(f);
-  }, []);
+  const handleFolderSelect = useCallback(
+    (f: InboxFolder) => {
+      setSelectedEmail(null);
+      setFolder(f);
+      if (f === "drafts") loadDrafts();
+    },
+    [loadDrafts],
+  );
 
   const handleToggleStar = useCallback(
     (email: Email) => {

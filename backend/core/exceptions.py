@@ -13,5 +13,5 @@ class NotFoundError(Exception):
     """Ressource introuvable."""
 
 
-class ValidationError(Exception):
+class InvalidInputError(Exception):
     """Entrée utilisateur invalide."""

@@ -1,9 +1,10 @@
+import type { ConnectableProvider } from "../auth/ConnectableProvider";
 import type { EmailAddress } from "./EmailAddress";
 import type { EmailAttachment } from "./EmailAttachment";
 
 export interface DraftEmail {
   id: string;
-  provider: string;
+  provider: ConnectableProvider;
   to_addresses: EmailAddress[];
   cc_addresses: EmailAddress[];
   bcc_addresses: EmailAddress[];

@@ -1,12 +1,8 @@
 import "./ComposeActionButton.css";
-import Button from "../ui/Button";
-import { IconCompose, IconSend } from "../ui/icons";
-import type { ComposeActionButtonProps } from "../../models";
-
-const LABELS = {
-  new: "Nouveau message",
-  send: "Envoyer",
-} as const;
+import Button from "../../ui/Button";
+import { IconCompose, IconSend } from "../../ui/icons";
+import { COMPOSE_ACTION_LABELS } from "../../../constants/labels";
+import type { ComposeActionButtonProps } from "../../../models";
 
 export default function ComposeActionButton({ mode, onClick, disabled, className }: ComposeActionButtonProps) {
   const Icon = mode === "new" ? IconCompose : IconSend;
@@ -18,7 +14,7 @@ export default function ComposeActionButton({ mode, onClick, disabled, className
       className={`compose-action-btn ${className ?? ""}`.trim()}
     >
       <Icon />
-      {LABELS[mode]}
+      {COMPOSE_ACTION_LABELS[mode]}
     </Button>
   );
 }

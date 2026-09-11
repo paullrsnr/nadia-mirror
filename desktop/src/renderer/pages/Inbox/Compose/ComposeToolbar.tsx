@@ -1,6 +1,6 @@
 import "./ComposeToolbar.css";
 import { Fragment } from "react";
-import { preventBlur } from "../../helpers";
+import { preventBlur } from "../../../helpers";
 import ColorMenu from "./ColorMenu";
 import {
   IconBold,
@@ -18,8 +18,9 @@ import {
   IconOutdent,
   IconUndo,
   IconRedo,
-} from "../../components/ui/icons";
-import type { ComposeFormatAction, ComposeToolbarProps, LabeledOption } from "../../models";
+} from "../../../components/ui/icons";
+import { DEFAULT_TEXT_COLOR } from "../../../constants/compose";
+import type { ComposeFormatAction, ComposeToolbarProps, LabeledOption } from "../../../models";
 
 const FONT_OPTIONS: LabeledOption[] = [
   { label: "Sans Serif", value: "Arial" },
@@ -35,7 +36,7 @@ const SIZE_OPTIONS: LabeledOption[] = [
 ];
 
 const TEXT_COLORS: LabeledOption[] = [
-  { label: "Noir", value: "#1a1a1a" },
+  { label: "Noir", value: DEFAULT_TEXT_COLOR },
   { label: "Rouge", value: "#e53935" },
   { label: "Bleu", value: "#1e88e5" },
   { label: "Vert", value: "#43a047" },

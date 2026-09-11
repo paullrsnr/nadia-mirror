@@ -27,5 +27,10 @@ class EmailProviderGateway(ABC):
         """Marque un email comme lu pour le provider donné."""
 
     @abstractmethod
-    def send_email(self, provider: str, draft: DraftEmail, attachments: list[AttachmentContent]) -> bool:
+    def send_email(
+        self,
+        provider: str,
+        draft: DraftEmail,
+        attachments: list[AttachmentContent],
+    ) -> bool:
         """Envoie un email pour le provider donné."""
